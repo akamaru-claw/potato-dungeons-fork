@@ -47,7 +47,7 @@ html, body {
 .btn-secondary { background: var(--bg-glass); color: var(--text); border: 1px solid var(--border-glass); backdrop-filter: blur(10px); }
 
 .pause-btn {
-  position: fixed; top: max(10px, env(safe-area-inset-top) + 4px); left: max(10px, env(safe-area-inset-left) + 4px); z-index: 100;
+  position: fixed; top: max(70px, env(safe-area-inset-top) + 64px); left: max(10px, env(safe-area-inset-left) + 4px); z-index: 100;
   width: 56px; height: 56px; border-radius: 16px;
   border: 2px solid rgba(255,255,255,0.15);
   background: rgba(15, 14, 23, 0.75); backdrop-filter: blur(12px);
