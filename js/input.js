@@ -9,14 +9,11 @@ const Input = {
     if (!Game.player || !this.isMobile()) return false;
     const rect = this._canvas.getBoundingClientRect();
     const pad = 15, size = 56;
-    const dpr = this._canvas.height / rect.height; // logical / css
-    // Convert screen (logical) to CSS pixels to match renderHUD
-    const cssX = screenX / dpr, cssY = screenY / dpr;
+    // screenX/screenY are already CSS pixels (clientX - rect.left)
     const dashX = pad, dashY = rect.height - pad - size;
-    if (cssX >= dashX && cssX <= dashX + size && cssY >= dashY && cssY <= dashY + size) {
+    if (screenX >= dashX && screenX <= dashX + size && screenY >= dashY && screenY <= dashY + size) {
       if (Game.player.dashCooldown <= 0) {
         Game.player.dash();
-        // Haptic feedback if available
         if (navigator.vibrate) navigator.vibrate(25);
       } else {
         UI.showToast(`Dash: ${(Game.player.dashCooldown).toFixed(1)}s`, 'error');
@@ -157,10 +154,12 @@ const Input = {
     // Check weapon slot taps on first touch
     if (Game.state === 'PLAYING' && Game.player && e.changedTouches.length > 0) {
       const t0 = e.changedTouches[0];
-      const tx = (t0.clientX - rect.left) * (canvas.width / rect.width);
-      const ty = (t0.clientY - rect.top) * (canvas.height / rect.height);
-      // Check dash button tap first
-      if (this._checkDashButtonClick(tx, ty)) return;
+      const cssX = t0.clientX - rect.left, cssY = t0.clientY - rect.top;
+      // Check dash button tap first (uses CSS pixels)
+      if (this._checkDashButtonClick(cssX, cssY)) return;
+      // Weapon slots still use logical canvas coordinates
+      const tx = cssX * (canvas.width / rect.width);
+      const ty = cssY * (canvas.height / rect.height);
       if (this._checkWeaponSlotClick(tx, ty)) return;
     }
 
