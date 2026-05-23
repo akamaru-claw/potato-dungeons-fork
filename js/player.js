@@ -222,11 +222,12 @@ const Player = {
     ctx.fillStyle = 'rgba(0,0,0,0.25)';
     ctx.beginPath(); ctx.ellipse(x, y + s * 0.6, rx * 0.7, ry * 0.2, 0, 0, Math.PI * 2); ctx.fill();
 
-    // Character body
-    ctx.fillStyle = def.body;
-    ctx.strokeStyle = def.outline;
-    ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.ellipse(x, y + bob, rx, ry, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    const drawer = def.draw || '_drawPotato';
+    if (typeof this[drawer] === 'function') {
+      this[drawer](ctx, x, y + bob, rx, ry, s, def);
+    } else {
+      this._drawPotato(ctx, x, y + bob, rx, ry, s, def);
+    }
 
     // Character features
     if (def.horns) {

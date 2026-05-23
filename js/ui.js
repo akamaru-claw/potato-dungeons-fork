@@ -1180,47 +1180,22 @@ const UI = {
     let previewAnimId = null;
 
     const drawCharPreview = (ctx, charKey, cx, cy, size, t) => {
+      // Delegate to Player._drawMenuChar for consistent detailed rendering
+      if (typeof Player !== 'undefined' && Player._drawMenuChar) {
+        const sx = 18;
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.scale(size / sx, size / sx);
+        Player._drawMenuChar(ctx, 0, 0, charKey, null, t);
+        ctx.restore();
+        return;
+      }
+      // Fallback (should never reach here)
       const def = Player._charDefs[charKey] || Player._charDefs.potato_default;
-      const bob = Math.sin(t * 5) * 3;
-      const rx = def.tall ? size * 0.75 : def.wide ? size * 1.25 : def.thin ? size * 0.6 : size;
-      const ry = def.tall ? size * 1.2 : def.wide ? size * 0.85 : def.thin ? size * 1.1 : size;
-
-      // Shadow
-      ctx.fillStyle = 'rgba(0,0,0,0.3)';
-      ctx.beginPath();
-      ctx.ellipse(cx, cy + size * 0.7, rx * 0.8, ry * 0.25, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Body
       ctx.fillStyle = def.body;
       ctx.strokeStyle = def.outline;
       ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.ellipse(cx, cy + bob, rx, ry, 0, 0, Math.PI * 2);
-      ctx.fill(); ctx.stroke();
-
-      // Horns
-      if (def.horns) {
-        ctx.fillStyle = '#440000';
-        ctx.beginPath(); ctx.moveTo(cx - rx*0.75, cy+bob - ry*0.4); ctx.lineTo(cx - rx, cy+bob - ry*1.3); ctx.lineTo(cx - rx*0.25, cy+bob - ry*0.5); ctx.fill();
-        ctx.beginPath(); ctx.moveTo(cx + rx*0.75, cy+bob - ry*0.4); ctx.lineTo(cx + rx, cy+bob - ry*1.3); ctx.lineTo(cx + rx*0.25, cy+bob - ry*0.5); ctx.fill();
-      }
-      if (def.glow) {
-        ctx.save(); ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 20 + Math.sin(t * 3) * 8;
-        ctx.beginPath(); ctx.ellipse(cx, cy+bob, rx+4, ry+4, 0, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(255,215,0,0.35)'; ctx.lineWidth = 3; ctx.stroke(); ctx.restore();
-      }
-      if (def.shadow) {
-        ctx.save(); ctx.globalAlpha = 0.3 + Math.sin(t * 2.5) * 0.1;
-        ctx.beginPath(); ctx.arc(cx, cy+bob, Math.max(rx, ry)+14, 0, Math.PI * 2); ctx.fillStyle = '#6600aa'; ctx.fill(); ctx.restore();
-      }
-      if (def.rainbow) {
-        ctx.save(); ctx.beginPath(); ctx.ellipse(cx, cy+bob, rx+4, ry+4, 0, 0, Math.PI * 2);
-        ctx.strokeStyle = `hsl(${(t * 40) % 360}, 80%, 55%)`; ctx.lineWidth = 3; ctx.stroke(); ctx.restore();
-      }
-      // Eyes
-      ctx.fillStyle = '#222';
-      ctx.beginPath(); ctx.arc(cx - rx*0.3, cy+bob - ry*0.12, 2, 0, Math.PI*2); ctx.arc(cx + rx*0.3, cy+bob - ry*0.12, 2, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(cx, cy, size, size, 0, 0, Math.PI*2); ctx.fill(); ctx.stroke();
     };
 
     const drawSkinEffect = (ctx, skinKey, cx, cy, size, t) => {
