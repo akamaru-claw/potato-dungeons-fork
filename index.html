@@ -8,7 +8,7 @@
   <meta http-equiv="Expires" content="0">
   <title>🥔 Potato Dungeons</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=022">
+  <link rel="stylesheet" href="css/style.css?v=023">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥔</text></svg>">
 </head>
 <body>
@@ -35,7 +35,7 @@
 
   <!-- PAUSE BUTTON -->
   <button id="btn-pause" class="pause-btn" aria-label="Pause">⏸</button>
-  <div id="version-tag" class="version-tag">v0.22</div>
+  <div id="version-tag" class="version-tag">v0.23</div>
 
   <!-- Joystick Visual (Mobile) -->
   <div id="joystick-container" class="joystick-container" style="display:none;">
@@ -48,6 +48,9 @@
 
   <!-- MOBILE DASH BUTTON -->
   <button id="mobile-dash-btn" class="mobile-dash-btn" style="display:none;" aria-label="Dash">⚡</button>
+
+  <!-- Legacy dash indicator (kept so ui.js/pause.js don't crash) -->
+  <div id="hud-dash" class="hud-dash" style="display:none;">
     <div id="hud-dash-ring" class="hud-dash-ring">
       <span id="hud-dash-icon">⚡</span>
     </div>
@@ -374,23 +377,23 @@
   </div>
 
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-  <script src="js/account.js?v=022"></script>
-  <script src="js/config.js?v=022"></script>
-  <script src="js/utils.js?v=022"></script>
-  <script src="js/assets.js?v=022"></script>
-  <script src="js/input.js?v=022"></script>
-  <script src="js/audio.js?v=022"></script>
-  <script src="js/particles.js?v=022"></script>
-  <script src="js/floatingtext.js?v=022"></script>
-  <script src="js/projectiles.js?v=022"></script>
-  <script src="js/weapons.js?v=022"></script>
-  <script src="js/enemies.js?v=022"></script>
-  <script src="js/player.js?v=022"></script>
-  <script src="js/dungeon.js?v=022"></script>
-  <script src="js/rewards.js?v=022"></script>
-  <script src="js/multiplayer.js?v=022"></script>
-  <script src="js/renderer.js?v=022"></script>
-  <script src="js/ui.js?v=022"></script>
-  <script src="js/main.js?v=022"></script>
+  <script src="js/account.js?v=023"></script>
+  <script src="js/config.js?v=023"></script>
+  <script src="js/utils.js?v=023"></script>
+  <script src="js/assets.js?v=023"></script>
+  <script src="js/input.js?v=023"></script>
+  <script src="js/audio.js?v=023"></script>
+  <script src="js/particles.js?v=023"></script>
+  <script src="js/floatingtext.js?v=023"></script>
+  <script src="js/projectiles.js?v=023"></script>
+  <script src="js/weapons.js?v=023"></script>
+  <script src="js/enemies.js?v=023"></script>
+  <script src="js/player.js?v=023"></script>
+  <script src="js/dungeon.js?v=023"></script>
+  <script src="js/rewards.js?v=023"></script>
+  <script src="js/multiplayer.js?v=023"></script>
+  <script src="js/renderer.js?v=023"></script>
+  <script src="js/ui.js?v=023"></script>
+  <script src="js/main.js?v=023"></script>
 </body>
 </html>
