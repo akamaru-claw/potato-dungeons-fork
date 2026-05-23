@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>🥔 Potato Dungeons</title>
+  <link rel="stylesheet" href="css/style.css?v=2j">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥔</text></svg>">
+</head>
+<body>
+  <canvas id="game-canvas"></canvas>
+
+  <!-- HUD -->
+  <div id="hud" class="hud">
+    <div id="hud-hp" class="hud-hp">
+      <div id="hud-hp-bar" class="hud-hp-bar"><div id="hud-hp-fill" class="hud-hp-fill"></div></div>
+      <span id="hud-hp-text" class="hud-hp-text">100/100</span>
+    </div>
+    <div id="hud-xp" class="hud-xp">
+      <div id="hud-xp-fill" class="hud-xp-fill"></div>
+    </div>
+    <div id="hud-stats" class="hud-stats">
+      <span id="hud-floor">🏰 1</span>
+      <span id="hud-gold">💰 0</span>
+      <span id="hud-kills">💀 0</span>
+      <span id="hud-time">⏱️ 0:00</span>
+    </div>
+    <div id="hud-synergies" class="hud-synergies"></div>
+    <div id="hud-relics" class="hud-relics"></div>
+  </div>
+
+  <!-- PAUSE BUTTON -->
+  <button id="btn-pause" class="pause-btn" aria-label="Pause">⏸</button>
+  <div id="version-tag" class="version-tag">v0.35</div>
+
+  <!-- DASH INDICATOR (outside HUD, always positioned) -->
+  <div id="hud-dash" class="hud-dash" style="display:none;">
+    <div id="hud-dash-ring" class="hud-dash-ring">
+      <span id="hud-dash-icon">⚡</span>
+    </div>
+  </div>
+
+  <!-- WEAPON BAR -->
+  <div id="weapon-bar" class="weapon-bar" style="display:none;"></div>
+
+  <!-- MENU SCREEN -->
+  <div id="screen-menu" class="screen active">
+    <div class="menu-container">
+      <canvas id="menu-canvas" class="menu-canvas"></canvas>
+      <h1 class="menu-title">Potato <span class="menu-title-accent">Dungeons</span></h1>
+      <p class="menu-subtitle">Turm-Modus Roguelike</p>
+      <div class="menu-main-buttons">
+        <button id="btn-play" class="btn btn-primary btn-large">⚔️ Einzelspieler</button>
+        <button id="btn-coop" class="btn btn-primary">🤝 Co-Op</button>
+      </div>
+      <div id="char-select" class="char-select"></div>
+      <div id="menu-account" class="menu-account"></div>
+      <div class="menu-secondary-buttons">
+        <button id="btn-shop" class="btn btn-secondary btn-small">🛒 Shop</button>
+        <button id="btn-menu-highscores" class="btn btn-secondary btn-small">🏆 Bestenliste</button>
+        <button id="btn-howtoplay" class="btn btn-secondary btn-small">📖 Anleitung</button>
+      </div>
+      <div class="menu-controls">
+        <span class="key">WASD</span> Move · <span class="key">Maus</span> Zielen · <span class="key">Space</span> Dash · <span class="key">ESC</span> Pause
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME OVER SCREEN -->
+  <div id="screen-gameover" class="screen">
+    <div class="endscreen-container">
+      <h2 class="endscreen-title gameover-text">💀 GEFALLEN</h2>
+      <p class="endscreen-subtitle" id="gameover-floor"></p>
+      <div class="endscreen-stats" id="gameover-stats"></div>
+      <div id="highscore-submit" class="highscore-submit">
+        <input id="input-playername" class="playername-input" type="text" placeholder="Dein Name" maxlength="20" autocomplete="off">
+        <button id="btn-submit-score" class="btn btn-primary btn-small">💾 Speichern</button>
+      </div>
+      <div id="highscore-saved" class="highscore-saved" style="display:none;">
+        ✅ Highscore gespeichert! <span id="highscore-rank"></span>
+      </div>
+      <button id="btn-retry" class="btn btn-primary">🔄 Nochmal</button>
+      <button id="btn-highscores" class="btn btn-secondary btn-small">🏆 Bestenliste</button>
+    </div>
+  </div>
+
+  <!-- HOW TO PLAY SCREEN -->
+  <div id="screen-howtoplay" class="screen">
+    <div class="howto-container">
+      <h2 class="howto-title">📖 Wie spielt man?</h2>
+      <div class="howto-scroll">
+
+        <div class="howto-section">
+          <h3>🎯 Ziel</h3>
+          <p>Überlebe so viele Ebenen wie möglich! Besiege alle Gegner, lauf zur Tür oben und wähle Belohnungen für deinen Run.</p>
+        </div>
+
+        <div class="howto-section">
+          <h3>🎮 Steuerung</h3>
+          <div class="howto-row"><span class="howto-key">WASD</span><span>Bewegen</span></div>
+          <div class="howto-row"><span class="howto-key">Maus</span><span>Zielen (Waffen feuern automatisch)</span></div>
+          <div class="howto-row"><span class="howto-key">Leertaste</span><span>Dash (unverwundbar, schneller Ausweich-Manöver)</span></div>
+          <div class="howto-row"><span class="howto-key">ESC</span><span>Pause</span></div>
+          <div class="howto-row"><span class="howto-key">📱 Touch</span><span>Joystick = Bewegen, Zielen durch Tippen/Auto-Aim</span></div>
+        </div>
+
+        <div class="howto-section">
+          <h3>🏰 Ebenen & Biome</h3>
+          <p>Jede Ebene hat ein zufällig generiertes Zimmer mit Gegnern. Besiege alle → Tür öffnet sich. Alle 10 Ebenen wartet ein Boss!</p>
+          <div class="howto-biomes">
+            <div class="howto-biome"><span>1–9</span> Stein-Dungeon</div>
+            <div class="howto-biome"><span>10–19</span> Höhle</div>
+            <div class="howto-biome"><span>20–29</span> Festung</div>
+            <div class="howto-biome"><span>30–39</span> Nether</div>
+            <div class="howto-biome"><span>40+</span> End</div>
+          </div>
+        </div>
+
+        <div class="howto-section">
+          <h3>🎁 Belohnungen</h3>
+          <p>Nach jeder Ebene wählst du aus Belohnungen:</p>
+          <div class="howto-reward-types">
+            <div class="howto-reward-type">
+              <span>⚔️ Waffen</span>
+              <p>Neu oder Upgrade einer bestehenden Waffe. Max. 6 Waffen gleichzeitig. Waffen feuern automatisch!</p>
+            </div>
+            <div class="howto-reward-type">
+              <span>📊 Stats</span>
+              <p>+HP, +Speed, +Damage, +Dodge, +Crit, +Armor, +LifeSteal, +Harvesting, +Attack Speed</p>
+            </div>
+            <div class="howto-reward-type">
+              <span>🔮 Relikte</span>
+              <p>Passive Fähigkeiten: Salzstreuer (+Gold), Ofenhandschuhe (+Dmg/-Speed), Schälmesser (DoT), Glücksklee (+Reroll), Hasenfuß (Dodge bei low HP), Heiße Kartoffel (+ATK Speed)</p>
+            </div>
+          </div>
+          <p class="howto-tip">💡 Schadensfreie Ebenen = "Flawless" = +1 extra Wahl!</p>
+        </div>
+
+        <div class="howto-section">
+          <h3>⚡ Dash</h3>
+          <p>Mit Leertaste stürmst du in Bewegungsrichtung — dabei bist du kurz unverwundbar! Unten in der Mitte siehst du den ⚡-Indikator: blau = bereit, grau = Cooldown, gelb = aktiv.</p>
+        </div>
+
+        <div class="howto-section">
+          <h3>🔗 Synergien</h3>
+          <p>Waffen haben Tags (🗡️ Blade, 🏹 Ranged, 🔨 Heavy, 🔥 Fire, 🌿 Nature). Mehrere Waffen mit gleichem Tag aktivieren Boni:</p>
+          <div class="howto-synergies">
+            <div>×2 Blade → +10% Crit</div>
+            <div>×3 Ranged → +20% Range</div>
+            <div>×2 Heavy → +15% Knockback</div>
+            <div>×2 Fire → +8% DoT</div>
+            <div>×2 Nature → +5% LifeSteal</div>
+          </div>
+        </div>
+
+        <div class="howto-section">
+          <h3>🥔 Charaktere</h3>
+          <p>8 verschiedene Kartoffeln mit eigenen Stats und Fähigkeiten! Freischaltbar im Shop mit Gold:</p>
+          <div class="howto-chars">
+            <div class="howto-char"><span>🥔 Kartoffel</span> Ausgewogen, solider Allrounder</div>
+            <div class="howto-char"><span>🍟 Pommes</span> -3 HP, +25% Speed, Dash-Cooldown halbiert</div>
+            <div class="howto-char"><span>🍠 Süßkartoffel</span> +2 HP, +5% LifeSteal, +1 HP alle 10 Kills</div>
+            <div class="howto-char"><span>🥔 Chips</span> -4 HP, +8% Dodge, +1 Waffenslot</div>
+            <div class="howto-char"><span>✨ Goldene</span> -15% Dmg, +8% Crit, 2× Gold, Crit→Gold</div>
+            <div class="howto-char"><span>🖤 Schattenknolle</span> -4 HP, +15% Crit, Dash→Crit</div>
+            <div class="howto-char"><span>🌈 Regenbogen</span> Jede Waffe zählt für alle Synergien</div>
+            <div class="howto-char"><span>😈 Teufel</span> -6 HP, +30% Dmg, +5% Dmg/Waffe, -1 MaxHP/Ebene</div>
+          </div>
+        </div>
+
+        <div class="howto-section">
+          <h3>💰 Gold & Shop</h3>
+          <p>Gegner droppen Gold-Orbs (gelb). Gold sammelt sich über Runs hinweg! Im Shop kaufst du:</p>
+          <div class="howto-shop-items">
+            <div>🎭 Skins — Kosmetische Kartoffel-Looks</div>
+            <div>✨ Spuren — Partikeleffekte während du läufst</div>
+            <div>🥔 Charaktere — Neue Spielweisen freischalten</div>
+          </div>
+          <p class="howto-tip">💡 Zwischen-Ebenen-Shop: Alle 5 Ebenen gibt's einen Mini-Shop mit 3 Items!</p>
+        </div>
+
+        <div class="howto-section">
+          <h3>🛡️ Elite & Bosse</h3>
+          <p>Manche Gegner erscheinen als Elite (goldener Glow) mit Affixen: Brennend, Vampirisch, Schnell. Bosse alle 10 Ebenen — viel HP und Damage!</p>
+        </div>
+
+        <div class="howto-section">
+          <h3>🤝 Co-Op</h3>
+          <p>Spiel mit einem Freund! Einer erstellt einen Raum, teilt den 4-stelligen Code, der andere tritt bei. Gegner und Belohnungen sind synchronisiert.</p>
+        </div>
+
+      </div>
+      <button id="btn-howtoplay-back" class="btn btn-secondary lobby-back">← Zurück</button>
+    </div>
+  </div>
+
+  <!-- PROFILE SCREEN -->
+  <div id="screen-profile" class="screen">
+    <div class="profile-container">
+      <h2 class="profile-title">👤 Profil</h2>
+      <div id="profile-info" class="profile-info"></div>
+      <div id="profile-stats" class="profile-stats"></div>
+      <div class="profile-actions">
+        <button id="btn-change-name" class="btn btn-secondary">✏️ Namen ändern</button>
+        <button id="btn-change-pass" class="btn btn-secondary">🔑 Passwort ändern</button>
+        <button id="btn-logout" class="btn btn-danger">🚪 Abmelden</button>
+      </div>
+      <button id="btn-profile-back" class="btn btn-secondary lobby-back">← Zurück</button>
+    </div>
+  </div>
+
+  <!-- CHANGE NAME/Pass SCREEN -->
+  <div id="screen-changename" class="screen">
+    <div class="login-container">
+      <h2 class="login-title">✏️ Namen ändern</h2>
+      <div class="login-form">
+        <input id="input-new-name" class="login-input" type="text" placeholder="Neuer Username" maxlength="20" autocomplete="off">
+        <input id="input-confirm-pass-name" class="login-input" type="password" placeholder="Passwort bestätigen" maxlength="40">
+        <button id="btn-save-name" class="btn btn-primary">Speichern</button>
+        <div id="changename-error" class="login-error"></div>
+      </div>
+      <button id="btn-changename-back" class="btn btn-secondary lobby-back">← Zurück</button>
+    </div>
+  </div>
+
+  <div id="screen-changepass" class="screen">
+    <div class="login-container">
+      <h2 class="login-title">🔑 Passwort ändern</h2>
+      <div class="login-form">
+        <input id="input-old-pass" class="login-input" type="password" placeholder="Altes Passwort" maxlength="40">
+        <input id="input-new-pass" class="login-input" type="password" placeholder="Neues Passwort" maxlength="40">
+        <button id="btn-save-pass" class="btn btn-primary">Speichern</button>
+        <div id="changepass-error" class="login-error"></div>
+      </div>
+      <button id="btn-changepass-back" class="btn btn-secondary lobby-back">← Zurück</button>
+    </div>
+  </div>
+
+  <!-- HIGHSCORE SCREEN -->
+  <div id="screen-highscores" class="screen">
+    <div class="highscore-container">
+      <h2 class="highscore-title">🏆 Bestenliste</h2>
+      <div id="highscore-list" class="highscore-list"></div>
+      <button id="btn-hs-back" class="btn btn-secondary lobby-back">← Zurück</button>
+    </div>
+  </div>
+
+  <!-- CO-OP LOBBY -->
+  <div id="screen-lobby" class="screen">
+    <div class="lobby-container">
+      <h2 class="lobby-title">🤝 Co-Op Lobby</h2>
+      <div class="lobby-buttons">
+        <button id="btn-host" class="btn btn-primary">🏠 Raum erstellen</button>
+        <div class="lobby-divider">oder</div>
+        <div class="lobby-join">
+          <input id="input-room" class="lobby-input" type="text" placeholder="Raum-Code" maxlength="4" autocomplete="off" autocapitalize="characters">
+          <button id="btn-join" class="btn btn-secondary">🔗 Beitreten</button>
+        </div>
+      </div>
+      <div id="lobby-status" class="lobby-status"></div>
+      <div id="lobby-room-code" class="lobby-room-code" style="display:none;">
+        <span class="lobby-code-label">Dein Raum-Code:</span>
+        <span id="lobby-code" class="lobby-code"></span>
+        <span class="lobby-code-hint">Teile diesen Code mit deinem Mitspieler</span>
+      </div>
+      <button id="btn-lobby-back" class="btn btn-secondary lobby-back">← Zurück</button>
+    </div>
+  </div>
+
+  <!-- PAUSE OVERLAY -->
+  <div id="screen-pause" class="screen pause-overlay">
+    <div class="pause-container">
+      <h2 class="pause-title">⏸ PAUSE</h2>
+      <button id="btn-resume" class="btn btn-primary">▶️ Weiter</button>
+      <button id="btn-pause-quit" class="btn btn-secondary">🏠 Hauptmenü</button>
+    </div>
+  </div>
+
+  <!-- REWARD SCREEN (after each floor) -->
+  <div id="screen-reward" class="screen">
+    <div class="reward-container">
+      <h2 class="reward-title">🎁 Ebene geschafft!</h2>
+      <p class="reward-subtitle">Wähle eine Belohnung:</p>
+      <div class="reward-choices" id="reward-choices"></div>
+    </div>
+  </div>
+
+  <!-- WEAPON CHOICE DIALOG (upgrade vs new) -->
+  <div id="weapon-choice-dialog" class="weapon-choice-dialog" style="display:none;">
+    <div class="weapon-choice-content">
+      <div class="weapon-choice-icon" id="wcd-icon"></div>
+      <div class="weapon-choice-title" id="wcd-title"></div>
+      <div class="weapon-choice-subtitle">Du hast diese Waffe bereits!</div>
+      <button id="btn-wc-upgrade" class="btn btn-primary">⬆️ Upgrade Lv.+1</button>
+      <button id="btn-wc-new" class="btn btn-secondary">➕ Als 2. Waffe nehmen</button>
+      <button id="btn-wc-cancel" class="btn btn-secondary btn-small" style="margin-top:8px;font-size:12px;">Abbrechen</button>
+    </div>
+  </div>
+
+  <!-- WEAPON REPLACE DIALOG -->
+  <div id="weapon-replace-dialog" class="weapon-choice-dialog" style="display:none;">
+    <div class="weapon-choice-content">
+      <div class="weapon-choice-icon" id="wrd-icon"></div>
+      <div class="weapon-choice-title" id="wrd-title">Waffe ersetzen</div>
+      <div class="weapon-choice-subtitle" id="wrd-subtitle">Wähle eine Waffe zum Ersetzen:</div>
+      <div id="wrd-slots" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:12px 0;max-width:280px;"></div>
+      <button id="btn-wrd-cancel" class="btn btn-secondary btn-small" style="margin-top:8px;font-size:12px;">Abbrechen</button>
+    </div>
+  </div>
+
+  <!-- WEAPON INFO PANEL -->
+  <div id="weapon-panel" class="weapon-panel" style="display:none;">
+    <div class="weapon-panel-header">
+      <span id="weapon-panel-icon" class="weapon-panel-icon"></span>
+      <span id="weapon-panel-name" class="weapon-panel-name"></span>
+      <button id="weapon-panel-close" class="weapon-panel-close">✕</button>
+    </div>
+    <div id="weapon-panel-stats" class="weapon-panel-stats"></div>
+  </div>
+
+  <!-- FLOOR ANNOUNCE -->
+  <div id="floor-announce" class="floor-announce"></div>
+
+  <!-- LOGIN SCREEN -->
+  <div id="screen-login" class="screen">
+    <div class="login-container">
+      <h2 class="login-title">🥔 Konto</h2>
+      <div id="login-form" class="login-form">
+        <input id="input-username" class="login-input" type="text" placeholder="Username" maxlength="20" autocomplete="off">
+        <input id="input-password" class="login-input" type="password" placeholder="Passwort" maxlength="40" autocomplete="off">
+        <button id="btn-login" class="btn btn-primary">🔑 Anmelden</button>
+        <button id="btn-register" class="btn btn-secondary">📝 Registrieren</button>
+        <div id="login-error" class="login-error"></div>
+      </div>
+      <button id="btn-login-back" class="btn btn-secondary lobby-back">← Zurück</button>
+    </div>
+  </div>
+
+  <!-- SHOP SCREEN -->
+  <div id="screen-shop" class="screen">
+    <div class="shop-container">
+      <h2 class="shop-title">🛒 Shop</h2>
+      <div id="shop-gold" class="shop-gold">💰 0</div>
+      <div id="shop-tabs" class="shop-tabs">
+        <button class="shop-tab active" data-tab="skins">🎭 Skins</button>
+        <button class="shop-tab" data-tab="trails">✨ Spuren</button>
+        <button class="shop-tab" data-tab="chars">🥔 Charaktere</button>
+      </div>
+      <div id="shop-items" class="shop-items"></div>
+      <button id="btn-shop-back" class="btn btn-secondary lobby-back">← Zurück</button>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <script src="js/account.js?v=2j"></script>
+  <script src="js/config.js?v=2j"></script>
+  <script src="js/utils.js?v=2j"></script>
+  <script src="js/assets.js?v=2j"></script>
+  <script src="js/input.js?v=2j"></script>
+  <script src="js/audio.js?v=2j"></script>
+  <script src="js/particles.js?v=2j"></script>
+  <script src="js/floatingtext.js?v=2j"></script>
+  <script src="js/projectiles.js?v=2j"></script>
+  <script src="js/weapons.js?v=2j"></script>
+  <script src="js/enemies.js?v=2j"></script>
+  <script src="js/player.js?v=2j"></script>
+  <script src="js/dungeon.js?v=2j"></script>
+  <script src="js/rewards.js?v=2j"></script>
+  <script src="js/multiplayer.js?v=2j"></script>
+  <script src="js/renderer.js?v=2j"></script>
+  <script src="js/ui.js?v=2j"></script>
+  <script src="js/main.js?v=2j"></script>
+</body>
+</html>
