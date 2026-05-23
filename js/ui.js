@@ -502,6 +502,13 @@ const UI = {
     if (Account.loggedIn) {
       Account.saveProgress(player, floorNum);
     }
+
+    // Pre-fill player name in death screen (editable)
+    const nameInput = document.getElementById('input-playername');
+    if (nameInput) {
+      const prefill = (Account.loggedIn && Account.username) ? Account.username : (localStorage.getItem('pd_playername') || '');
+      nameInput.value = prefill;
+    }
   },
 
   _submitScore() {
