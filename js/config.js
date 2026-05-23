@@ -41,7 +41,7 @@ const CONFIG = {
       name: 'Stein-Dungeon', floorMin: 1, floorMax: 9,
       color: '#5a5a6a', wallColor: '#4a4a5a', floorColor: '#2a2a3a',
       wallType: 'stone_brick', floorType: 'stone_tile',
-      decor: { pillars: 0.15, chains: 0.05, runes: 0.1, moss: 0.05, bones: 0.05, cracks: 0.15 },
+      decor: { chains: 0.05, runes: 0.1, moss: 0.05, bones: 0.05, cracks: 0.15 },
       enemies: ['skeleton', 'slime', 'bat']
     },
     {
