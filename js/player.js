@@ -266,8 +266,8 @@ const Player = {
   render(ctx, camera, player) {
     if (!player.alive && player.flashTimer <= 0) return;
     const zoom = camera.zoom || 1;
-    const sx = (player.x - camera.x) * zoom + ctx.canvas.width / 2;
-    const sy = (player.y - camera.y) * zoom + ctx.canvas.height / 2;
+    const sx = (player.x - camera.x) * zoom + (ctx.canvas._cssWidth || ctx.canvas.width) / 2;
+    const sy = (player.y - camera.y) * zoom + (ctx.canvas._cssHeight || ctx.canvas.height) / 2;
     const s = player.size * zoom;
     const bob = Math.sin(player.bobTimer) * 2 * zoom;
 
@@ -433,8 +433,8 @@ const Player = {
   renderWeapon(ctx, camera, player) {
     if (player.weapons.length === 0) return;
     const zoom = camera.zoom || 1;
-    const sx = (player.x - camera.x) * zoom + ctx.canvas.width / 2;
-    const sy = (player.y - camera.y) * zoom + ctx.canvas.height / 2;
+    const sx = (player.x - camera.x) * zoom + (ctx.canvas._cssWidth || ctx.canvas.width) / 2;
+    const sy = (player.y - camera.y) * zoom + (ctx.canvas._cssHeight || ctx.canvas.height) / 2;
     const s = player.size * zoom;
     const bob = Math.sin(player.bobTimer) * 2 * zoom;
 

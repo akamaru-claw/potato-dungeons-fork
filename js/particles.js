@@ -68,8 +68,8 @@ const ParticleSystem = {
       const alpha = Utils.lerp(p.alpha, p.alphaEnd, t);
       const size = Utils.lerp(p.size, p.sizeEnd, t);
       if (alpha <= 0 || size <= 0) continue;
-      const zoom = camera.zoom || 1; const sx = (p.x - camera.x) * zoom + ctx.canvas.width / 2;
-      const sy = (p.y - camera.y) * zoom + ctx.canvas.height / 2;
+      const zoom = camera.zoom || 1; const sx = (p.x - camera.x) * zoom + (ctx.canvas._cssWidth || ctx.canvas.width) / 2;
+      const sy = (p.y - camera.y) * zoom + (ctx.canvas._cssHeight || ctx.canvas.height) / 2;
 
       ctx.globalAlpha = alpha;
 
@@ -215,8 +215,8 @@ const FloatingText = {
       const progress = t.life / t.duration;
       const alpha = 1 - Utils.easeOutQuad(progress);
       const zoom = camera.zoom || 1;
-      const sx = (t.x - camera.x) * zoom + ctx.canvas.width / 2;
-      const sy = (t.y - camera.y) * zoom + ctx.canvas.height / 2;
+      const sx = (t.x - camera.x) * zoom + (ctx.canvas._cssWidth || ctx.canvas.width) / 2;
+      const sy = (t.y - camera.y) * zoom + (ctx.canvas._cssHeight || ctx.canvas.height) / 2;
       ctx.save();
       ctx.globalAlpha = alpha;
       const fontSize = Math.round(t.size * t.scale);

@@ -10,14 +10,23 @@ const Renderer = {
   init(canvas) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
+    this._dpr = Math.min(window.devicePixelRatio || 1, 3); // Cap at 3x for performance
     this.resize();
     window.addEventListener('resize', () => this.resize());
   },
 
   resize() {
     const w = window.innerWidth, h = window.innerHeight;
-    this.canvas.width = w; this.canvas.height = h;
-    this.canvas.style.width = w + 'px'; this.canvas.style.height = h + 'px';
+    const dpr = Math.min(window.devicePixelRatio || 1, 3);
+    this._dpr = dpr;
+    this._width = w; this._height = h;
+    this.canvas.width = Math.floor(w * dpr);
+    this.canvas.height = Math.floor(h * dpr);
+    this.canvas.style.width = w + 'px';
+    this.canvas.style.height = h + 'px';
+    this.canvas._cssWidth = w;
+    this.canvas._cssHeight = h;
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   },
 
   updateCamera(target, dt) {
@@ -51,11 +60,11 @@ const Renderer = {
   renderDamageFlash(ctx) {
     if (this.damageFlash <= 0) return;
     ctx.fillStyle = `rgba(255, 50, 50, ${this.damageFlash * 0.35})`;
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.fillRect(0, 0, this._width, this._height);
   },
 
   renderVignette(ctx) {
-    const w = this.canvas.width, h = this.canvas.height;
+    const w = this._width, h = this._height;
     const grad = ctx.createRadialGradient(w/2, h/2, w*0.25, w/2, h/2, w*0.7);
     grad.addColorStop(0, 'rgba(0,0,0,0)');
     grad.addColorStop(1, 'rgba(0,0,0,0.6)');
@@ -64,7 +73,7 @@ const Renderer = {
   },
 
   renderHUD(ctx, player) {
-    const w = ctx.canvas.width, h = ctx.canvas.height;
+    const w = this._width, h = this._height;
     const pad = 15;
     const isMobile = Input.isMobile();
 

@@ -45,8 +45,8 @@ const Game = {
     Renderer.camera.x = this.player.x;
     Renderer.camera.y = this.player.y;
 
-    const fitZoomW = Renderer.canvas.width / CONFIG.ROOM_WIDTH;
-    const fitZoomH = Renderer.canvas.height / CONFIG.ROOM_HEIGHT;
+    const fitZoomW = Renderer._width / CONFIG.ROOM_WIDTH;
+    const fitZoomH = Renderer._height / CONFIG.ROOM_HEIGHT;
     const fitZoom = Math.min(fitZoomW, fitZoomH) * 0.9;
     const startZoom = Utils.clamp(fitZoom, CONFIG.CAMERA.MIN_ZOOM, CONFIG.CAMERA.MAX_ZOOM);
     Renderer.camera.zoom = startZoom;
@@ -136,8 +136,8 @@ const Game = {
 
     const rw = Dungeon.room?.pixelWidth || CONFIG.ROOM_WIDTH;
     const rh = Dungeon.room?.pixelHeight || CONFIG.ROOM_HEIGHT;
-    const fitZoomW = Renderer.canvas.width / rw;
-    const fitZoomH = Renderer.canvas.height / rh;
+    const fitZoomW = Renderer._width / rw;
+    const fitZoomH = Renderer._height / rh;
     // On mobile, use tighter zoom to ensure the room is fully visible
     const mobileFactor = Input.isMobile() ? 0.78 : 0.85;
     const fitZoom = Math.min(fitZoomW, fitZoomH) * mobileFactor;
@@ -230,8 +230,8 @@ const Game = {
     ParticleSystem.heal(this.player.x, this.player.y);
     Dungeon.startFloor(nextFloor, this.player);
 
-    const fitZoomW = Renderer.canvas.width / (Dungeon.room?.pixelWidth || CONFIG.ROOM_WIDTH);
-    const fitZoomH = Renderer.canvas.height / (Dungeon.room?.pixelHeight || CONFIG.ROOM_HEIGHT);
+    const fitZoomW = Renderer._width / (Dungeon.room?.pixelWidth || CONFIG.ROOM_WIDTH);
+    const fitZoomH = Renderer._height / (Dungeon.room?.pixelHeight || CONFIG.ROOM_HEIGHT);
     const mobileFactor = Input.isMobile() ? 0.78 : 0.9;
     Renderer.camera.targetZoom = Utils.clamp(Math.min(fitZoomW, fitZoomH) * mobileFactor, CONFIG.CAMERA.MIN_ZOOM, CONFIG.CAMERA.MAX_ZOOM);
     this.state = 'PLAYING';
@@ -497,7 +497,7 @@ const Game = {
     const zoom = camera.zoom || 1;
 
     ctx.fillStyle = '#0a0914';
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.fillRect(0, 0, (ctx.canvas._cssWidth || ctx.canvas.width), (ctx.canvas._cssHeight || ctx.canvas.height));
 
     if (this.state === 'PLAYING' || this.state === 'PAUSED' || this.state === 'REWARD') {
       Dungeon.render(ctx, camera);
@@ -505,8 +505,8 @@ const Game = {
       if (this.xpOrbs) {
         const time = Date.now() / 1000;
         for (const orb of this.xpOrbs) {
-          const sx = (orb.x - camera.x) * zoom + ctx.canvas.width / 2;
-          const sy = (orb.y - camera.y) * zoom + ctx.canvas.height / 2;
+          const sx = (orb.x - camera.x) * zoom + (ctx.canvas._cssWidth || ctx.canvas.width) / 2;
+          const sy = (orb.y - camera.y) * zoom + (ctx.canvas._cssHeight || ctx.canvas.height) / 2;
           const pulse = 1 + Math.sin(time * 5) * 0.25;
           const size = CONFIG.XP.ORB_SIZE * pulse * zoom;
           const glowColor = orb.isGold ? 'rgba(255,215,0,' : 'rgba(102,255,170,';
@@ -559,12 +559,12 @@ const Game = {
           const intensity = (0.25 - hpPct) / 0.25;
           const pulse = 0.5 + Math.sin(Date.now() / 200) * 0.3;
           ctx.save();
-          const vg = ctx.createRadialGradient(ctx.canvas.width/2, ctx.canvas.height/2, ctx.canvas.width * 0.3,
-            ctx.canvas.width/2, ctx.canvas.height/2, ctx.canvas.width * 0.7);
+          const vg = ctx.createRadialGradient((ctx.canvas._cssWidth || ctx.canvas.width)/2, (ctx.canvas._cssHeight || ctx.canvas.height)/2, (ctx.canvas._cssWidth || ctx.canvas.width) * 0.3,
+            (ctx.canvas._cssWidth || ctx.canvas.width)/2, (ctx.canvas._cssHeight || ctx.canvas.height)/2, (ctx.canvas._cssWidth || ctx.canvas.width) * 0.7);
           vg.addColorStop(0, 'rgba(200,0,0,0)');
           vg.addColorStop(1, `rgba(200,0,0,${intensity * 0.4 * pulse})`);
           ctx.fillStyle = vg;
-          ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+          ctx.fillRect(0, 0, (ctx.canvas._cssWidth || ctx.canvas.width), (ctx.canvas._cssHeight || ctx.canvas.height));
           ctx.restore();
         }
       }
@@ -577,11 +577,11 @@ const Game = {
         this._debugBannerTimer -= dt;
         ctx.fillStyle = 'rgba(0,0,0,0.75)';
         const bw = ctx.measureText(this._debugBanner).width + 20;
-        ctx.fillRect(10, ctx.canvas.height - 40, bw + 10, 30);
+        ctx.fillRect(10, (ctx.canvas._cssHeight || ctx.canvas.height) - 40, bw + 10, 30);
         ctx.fillStyle = '#ffdd44';
         ctx.font = "bold 13px monospace";
         ctx.textAlign = 'left';
-        ctx.fillText(this._debugBanner, 15, ctx.canvas.height - 20);
+        ctx.fillText(this._debugBanner, 15, (ctx.canvas._cssHeight || ctx.canvas.height) - 20);
         if (this._debugBannerTimer <= 0) this._debugBanner = null;
       }
 
@@ -591,10 +591,10 @@ const Game = {
         ctx.fillStyle = 'rgba(0,0,0,0.6)';
         ctx.font = "10px monospace";
         const tw = ctx.measureText(info).width;
-        ctx.fillRect(ctx.canvas.width - tw - 16, 2, tw + 12, 16);
+        ctx.fillRect((ctx.canvas._cssWidth || ctx.canvas.width) - tw - 16, 2, tw + 12, 16);
         ctx.fillStyle = '#aaa';
         ctx.textAlign = 'right';
-        ctx.fillText(info, ctx.canvas.width - 10, 13);
+        ctx.fillText(info, (ctx.canvas._cssWidth || ctx.canvas.width) - 10, 13);
         ctx.textAlign = 'left';
       }
 

@@ -141,12 +141,12 @@ const EnemySystem = {
 
   render(ctx, camera) {
     const zoom = camera.zoom || 1;
-    const w = ctx.canvas.width;
+    const w = (ctx.canvas._cssWidth || ctx.canvas.width);
 
     for (const e of this.enemies) {
       const sx = (e.x - camera.x) * zoom + w / 2;
-      const sy = (e.y - camera.y) * zoom + ctx.canvas.height / 2;
-      if (sx < -100 || sx > w + 100 || sy < -100 || sy > ctx.canvas.height + 100) continue;
+      const sy = (e.y - camera.y) * zoom + (ctx.canvas._cssHeight || ctx.canvas.height) / 2;
+      if (sx < -100 || sx > w + 100 || sy < -100 || sy > (ctx.canvas._cssHeight || ctx.canvas.height) + 100) continue;
 
       const scale = e.spawnAnim > 0 ? Utils.easeOutBack(1 - e.spawnAnim / 0.4) : 1;
       const s = e.size * scale * zoom;

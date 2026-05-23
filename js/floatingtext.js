@@ -25,11 +25,11 @@ const FloatingText = {
 
   render(ctx, camera) {
     const zoom = camera.zoom || 1;
-    const W = ctx.canvas.width;
+    const W = (ctx.canvas._cssWidth || ctx.canvas.width);
     for (const t of this.texts) {
       const alpha = 1 - t.life / t.maxLife;
       const sx = (t.x - camera.x) * zoom + W / 2;
-      const sy = (t.y - camera.y) * zoom + ctx.canvas.height / 2;
+      const sy = (t.y - camera.y) * zoom + (ctx.canvas._cssHeight || ctx.canvas.height) / 2;
       ctx.save();
       ctx.globalAlpha = alpha;
       ctx.font = `bold ${t.size * zoom}px 'Outfit', sans-serif`;

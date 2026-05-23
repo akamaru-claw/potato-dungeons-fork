@@ -175,8 +175,8 @@ const UI = {
           Game.player.x = pxW / 2;
           Game.player.y = pxH - CONFIG.WALL_THICKNESS - Game.player.size - 10;
           // Recalculate zoom for new room
-          const fitZoomW = Renderer.canvas.width / pxW;
-          const fitZoomH = Renderer.canvas.height / pxH;
+          const fitZoomW = Renderer._width / pxW;
+          const fitZoomH = Renderer._height / pxH;
           const mobileFactor = Input.isMobile() ? 0.78 : 0.85;
           const fitZoom = Math.min(fitZoomW, fitZoomH) * mobileFactor;
           Renderer.camera.targetZoom = Utils.clamp(fitZoom, CONFIG.CAMERA.MIN_ZOOM, CONFIG.CAMERA.MAX_ZOOM);
@@ -242,9 +242,11 @@ const UI = {
     const canvas = document.getElementById('menu-canvas');
     if (!canvas) return;
     this._menuCanvas = canvas;
-    canvas.width = 220;
-    canvas.height = 140;
+    const dpr = Math.min(window.devicePixelRatio || 1, 3);
+    canvas.width = Math.floor(220 * dpr);
+    canvas.height = Math.floor(140 * dpr);
     this._menuCtx = canvas.getContext('2d');
+    this._menuCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     // Character state in menu
     this._menuChar = {

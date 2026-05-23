@@ -408,7 +408,7 @@ const Multiplayer = {
     if (!rp || !rp.alive) return;
 
     const zoom = camera.zoom || 1;
-    const w = ctx.canvas.width, h = ctx.canvas.height;
+    const w = (ctx.canvas._cssWidth || ctx.canvas.width), h = (ctx.canvas._cssHeight || ctx.canvas.height);
     const sx = (rp.x - camera.x) * zoom + w / 2;
     const sy = (rp.y - camera.y) * zoom + h / 2;
     const s = rp.size * zoom;

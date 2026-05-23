@@ -410,7 +410,7 @@ const Dungeon = {
   render(ctx, camera) {
     if (!this.room) return;
     const zoom = camera.zoom || 1;
-    const w = ctx.canvas.width, h = ctx.canvas.height;
+    const w = (ctx.canvas._cssWidth || ctx.canvas.width), h = (ctx.canvas._cssHeight || ctx.canvas.height);
     const tiles = this.room.tiles;
     const ts = this.room.tileWidth;
     const theme = this.room.theme;
@@ -545,7 +545,7 @@ const Dungeon = {
 
   _renderTorches(ctx, camera, zoom) {
     if (!this._torchPositions) return;
-    const w = ctx.canvas.width, h = ctx.canvas.height, now = Date.now() / 1000;
+    const w = (ctx.canvas._cssWidth || ctx.canvas.width), h = (ctx.canvas._cssHeight || ctx.canvas.height), now = Date.now() / 1000;
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
     for (const torch of this._torchPositions) {
@@ -572,7 +572,7 @@ const Dungeon = {
   },
 
   _renderAO(ctx, camera, tiles, ts, zoom) {
-    const w = ctx.canvas.width, h = ctx.canvas.height;
+    const w = (ctx.canvas._cssWidth || ctx.canvas.width), h = (ctx.canvas._cssHeight || ctx.canvas.height);
     const cols2 = this.room.cols, rows2 = this.room.rows, ao = 8 * zoom;
     for (let r = 0; r < rows2; r++) {
       for (let c = 0; c < cols2; c++) {
@@ -601,7 +601,7 @@ const Dungeon = {
   },
 
   _renderVignette(ctx) {
-    const w = ctx.canvas.width, h = ctx.canvas.height;
+    const w = (ctx.canvas._cssWidth || ctx.canvas.width), h = (ctx.canvas._cssHeight || ctx.canvas.height);
     const cx = w / 2, cy = h / 2;
     const radius = Math.max(w, h) * 0.6;
     const g = ctx.createRadialGradient(cx, cy, radius * 0.5, cx, cy, radius);
@@ -611,7 +611,7 @@ const Dungeon = {
   },
 
   _renderDoor(ctx, camera, zoom) {
-    const w = ctx.canvas.width, h = ctx.canvas.height;
+    const w = (ctx.canvas._cssWidth || ctx.canvas.width), h = (ctx.canvas._cssHeight || ctx.canvas.height);
     const dx = (this.doorPos.x - camera.x) * zoom + w / 2;
     const dy = (this.doorPos.y - camera.y) * zoom + h / 2;
     if (this.doorOpen) {

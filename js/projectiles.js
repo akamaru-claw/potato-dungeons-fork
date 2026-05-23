@@ -84,15 +84,15 @@ const ProjectileSystem = {
 
   _renderList(ctx, camera, list) {
     for (const p of list) {
-      const zoom = camera.zoom || 1; const sx = (p.x - camera.x) * zoom + ctx.canvas.width / 2;
-      const sy = (p.y - camera.y) * zoom + ctx.canvas.height / 2;
-      if (sx < -30 || sx > ctx.canvas.width + 30 || sy < -30 || sy > ctx.canvas.height + 30) continue;
+      const zoom = camera.zoom || 1; const sx = (p.x - camera.x) * zoom + (ctx.canvas._cssWidth || ctx.canvas.width) / 2;
+      const sy = (p.y - camera.y) * zoom + (ctx.canvas._cssHeight || ctx.canvas.height) / 2;
+      if (sx < -30 || sx > (ctx.canvas._cssWidth || ctx.canvas.width) + 30 || sy < -30 || sy > (ctx.canvas._cssHeight || ctx.canvas.height) + 30) continue;
 
       // Trail
       for (const t of p.trail) {
         if (t.alpha <= 0) continue;
-        const tx = (t.x - camera.x) * zoom + ctx.canvas.width / 2;
-        const ty = (t.y - camera.y) * zoom + ctx.canvas.height / 2;
+        const tx = (t.x - camera.x) * zoom + (ctx.canvas._cssWidth || ctx.canvas.width) / 2;
+        const ty = (t.y - camera.y) * zoom + (ctx.canvas._cssHeight || ctx.canvas.height) / 2;
         ctx.globalAlpha = t.alpha * 0.3;
         ctx.fillStyle = p.color;
         ctx.beginPath();

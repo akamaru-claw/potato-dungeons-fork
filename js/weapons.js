@@ -125,8 +125,8 @@ const WeaponSystem = {
     
     for (const w of weapons) {
       if (w.def.type !== 'melee' || w.swingProgress < 0) continue;
-      const zoom = camera.zoom || 1; const px = (player.x - camera.x) * zoom + ctx.canvas.width / 2;
-      const py = (player.y - camera.y) * zoom + ctx.canvas.height / 2;
+      const zoom = camera.zoom || 1; const px = (player.x - camera.x) * zoom + (ctx.canvas._cssWidth || ctx.canvas.width) / 2;
+      const py = (player.y - camera.y) * zoom + (ctx.canvas._cssHeight || ctx.canvas.height) / 2;
       const range = (w.def.range + player.size) * zoom;
       const arc = w.def.arc;
       const progress = Utils.easeOutQuad(w.swingProgress);
