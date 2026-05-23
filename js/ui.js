@@ -557,8 +557,39 @@ const UI = {
 
     const maxHp = player.getMaxHp();
     const hpPct = Math.max(0, player.hp / maxHp);
+
+    // Track previous HP for damage flash
+    const prevHp = player._lastHudHp !== undefined ? player._lastHudHp : player.hp;
+    player._lastHudHp = player.hp;
+
     hpFill.style.width = (hpPct * 100) + '%';
-    hpFill.style.background = hpPct > 0.5 ? 'linear-gradient(90deg,#44dd66,#22bb44)' : hpPct > 0.25 ? 'linear-gradient(90deg,#ddcc44,#ccaa22)' : 'linear-gradient(90deg,#dd4444,#cc2222)';
+    hpFill.className = 'hud-hp-fill'; // reset
+    if (hpPct > 0.5) hpFill.classList.add('hp-high');
+    else if (hpPct > 0.3) hpFill.classList.add('hp-mid');
+    else hpFill.classList.add('hp-low');
+
+    // Damage flash if HP went down
+    if (player.hp < prevHp && player.hp > 0) {
+      const bar = document.getElementById('hud-hp-bar');
+      if (bar) {
+        bar.classList.remove('damage-flash');
+        void bar.offsetWidth; // force reflow
+        bar.classList.add('damage-flash');
+        setTimeout(() => bar.classList.remove('damage-flash'), 400);
+      }
+    }
+    // Low HP pulse effect on bar border
+    if (hpPct <= 0.3) {
+      const bar = document.getElementById('hud-hp-bar');
+      if (bar) bar.style.borderColor = 'rgba(255,68,85,0.6)';
+    } else if (hpPct <= 0.5) {
+      const bar = document.getElementById('hud-hp-bar');
+      if (bar) bar.style.borderColor = 'rgba(255,204,51,0.5)';
+    } else {
+      const bar = document.getElementById('hud-hp-bar');
+      if (bar) bar.style.borderColor = 'rgba(255,255,255,0.15)';
+    }
+
     hpText.textContent = `${Math.ceil(player.hp)}/${Math.ceil(maxHp)}`;
     xpFill.style.width = Math.min(100, (player.xp || 0) / (player.xpToLevel || 100) * 100) + '%';
     floorEl.textContent = `🏰 ${floorNum || 1}`;
@@ -718,8 +749,15 @@ const UI = {
         }, 400);
       });
       card.addEventListener('pointerup', () => { clearTimeout(pressTimer); });
-      card.addEventListener('pointerleave', () => { clearTimeout(pressTimer); });
+      card.addEventListener('pointerleave', () => { clearTimeout(pressTimer); this._hideRewardTooltip(); });
       card.addEventListener('pointercancel', () => { clearTimeout(pressTimer); });
+      // Desktop hover
+      card.addEventListener('mouseenter', () => {
+        pressTimer = setTimeout(() => {
+          this._showRewardTooltip(i, reward, card);
+        }, 250);
+      });
+      card.addEventListener('mouseleave', () => { clearTimeout(pressTimer); this._hideRewardTooltip(); });
       container.appendChild(card);
     });
     // Update pick counter
@@ -758,9 +796,21 @@ const UI = {
       `;
     } else if (reward.type === 'stat') {
       const valStr = reward.percent ? `${reward.value}%` : `+${reward.value}`;
+      const playerStat = Game.player ? (Game.player[reward.stat] || 0) : 0;
+      const maxHpVal = reward.stat === 'maxHp' && Game.player ? Game.player.getMaxHp() : null;
+      const currentVal = maxHpVal !== null && maxHpVal !== undefined ? maxHpVal : playerStat;
+      let newVal = currentVal;
+      if (reward.percent) newVal = currentVal * (1 + reward.value / 100);
+      else if (reward.stat === 'maxHp') newVal = currentVal + reward.value;
+      else newVal = currentVal + reward.value;
+      const statLabel = reward.stat === 'maxHp' ? '❤️ Max HP' : reward.stat === 'damage' ? '⚔️ Schaden' : reward.stat === 'attackSpeed' ? '⚡ Angriffstempo' : reward.stat === 'critChance' ? '💥 Krit-Chance' : reward.stat === 'armor' ? '🛡️ Rüstung' : reward.stat === 'speed' ? '👟 Tempo' : reward.stat === 'lifeSteal' ? '🧛 Lebensraub' : reward.stat;
       statsHtml = `
-        <div class="rt-stat"><span>📈 Effekt</span><strong>${reward.stat === 'maxHp' ? '❤️ Max HP' : reward.stat === 'damage' ? '⚔️ Schaden' : reward.stat === 'attackSpeed' ? '⚡ Angriffstempo' : reward.stat === 'critChance' ? '💥 Krit-Chance' : reward.stat === 'armor' ? '🛡️ Rüstung' : reward.stat === 'speed' ? '👟 Tempo' : reward.stat === 'lifeSteal' ? '🧛 Lebensraub' : reward.stat}</strong></div>
+        <div class="rt-stat"><span>📈 Effekt</span><strong>${statLabel}</strong></div>
         <div class="rt-stat"><span>📊 Wert</span><strong>${valStr}</strong></div>
+        <div style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.08);">
+          <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:3px;">Dein Build:</div>
+          <div class="rt-stat"><span>${statLabel}</span><strong>${Math.round(currentVal * 10) / 10} &#8594; ${Math.round(newVal * 10) / 10}</strong></div>
+        </div>
       `;
     }
 
