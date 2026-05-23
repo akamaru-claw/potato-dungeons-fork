@@ -793,26 +793,43 @@ const UI = {
         <div class="reward-type">${reward.type === 'weapon' ? '⚔️ Waffe' : reward.type === 'heal' ? '❤️ Heilung' : reward.type === 'relic' ? '✨ Relikt' : '📈 Upgrade'}</div>
         ${reward.desc ? `<div class="reward-desc">${reward.desc}</div>` : ''}
       `;
-      card.addEventListener('click', () => {
-        this._hideRewardTooltip();
-        this._toggleRewardPick(i);
-      });
 
-      // Long press / hover for tooltip
+      // Unified press handling: short tap = toggle, long press = tooltip
       let pressTimer = null;
+      let longPressFired = false;
       card.addEventListener('pointerdown', (e) => {
+        longPressFired = false;
         pressTimer = setTimeout(() => {
+          longPressFired = true;
           this._showRewardTooltip(i, reward, card);
         }, 400);
       });
-      card.addEventListener('pointerup', () => { clearTimeout(pressTimer); });
-      card.addEventListener('pointerleave', () => { clearTimeout(pressTimer); this._hideRewardTooltip(); });
-      card.addEventListener('pointercancel', () => { clearTimeout(pressTimer); });
-      // Desktop hover
+      card.addEventListener('pointerup', () => {
+        clearTimeout(pressTimer);
+        if (!longPressFired) {
+          // Short tap: toggle selection, hide any tooltip
+          this._hideRewardTooltip();
+          this._toggleRewardPick(i);
+        } else {
+          // Long press ended: just hide tooltip
+          this._hideRewardTooltip();
+        }
+      });
+      card.addEventListener('pointerleave', () => {
+        clearTimeout(pressTimer);
+        longPressFired = false;
+        this._hideRewardTooltip();
+      });
+      card.addEventListener('pointercancel', () => {
+        clearTimeout(pressTimer);
+        longPressFired = false;
+        this._hideRewardTooltip();
+      });
+      // Desktop hover: instant tooltip after short delay
       card.addEventListener('mouseenter', () => {
         pressTimer = setTimeout(() => {
           this._showRewardTooltip(i, reward, card);
-        }, 250);
+        }, 350);
       });
       card.addEventListener('mouseleave', () => { clearTimeout(pressTimer); this._hideRewardTooltip(); });
       container.appendChild(card);
@@ -917,10 +934,19 @@ const UI = {
     const idx = this._selectedRewards.indexOf(index);
     const card = document.getElementById(`reward-card-${index}`);
     if (idx >= 0) {
-      // Deselect
+      // Deselect — clear ALL visual states
       this._selectedRewards.splice(idx, 1);
       delete this._rewardModes[index];
-      if (card) { card.classList.remove('picked'); card.style.opacity = ''; card.style.pointerEvents = ''; }
+      if (card) {
+        card.classList.remove('picked');
+        card.style.opacity = '';
+        card.style.pointerEvents = '';
+        card.style.borderColor = '';
+        card.style.boxShadow = '';
+        card.style.transform = '';
+        // Force style recalc to flush any lingering hover/active states on mobile
+        void card.offsetHeight;
+      }
       this._updateRewardInfo();
       return;
     }
