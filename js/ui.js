@@ -227,6 +227,9 @@ const UI = {
     document.getElementById('weapon-bar').style.display = 'none';
     document.getElementById('hud').style.display = 'none';
     document.getElementById('hud-dash').style.display = 'none';
+    // Hide mobile dash button outside gameplay
+    const dashBtn = document.getElementById('mobile-dash-btn');
+    if (dashBtn) dashBtn.style.display = 'none';
     this.hideWeaponPanel();
     this.stopMenuCanvas();
   },
