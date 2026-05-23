@@ -402,7 +402,7 @@ const Game = {
     for (const e of EnemySystem.enemies) {
       if (!e.alive || e.hitCooldown > 0) continue;
       if (Utils.circleCollisionDist(e, player) < e.size + player.size) {
-        player.takeDamage(e.damage);
+        player.takeDamage(e.damage, e);
         e.hitCooldown = 0.5;
       }
     }
@@ -411,7 +411,7 @@ const Game = {
     for (let i = ProjectileSystem.enemyProjectiles.length - 1; i >= 0; i--) {
       const p = ProjectileSystem.enemyProjectiles[i];
       if (Utils.circleCollisionDist(p, player) < p.size + player.size) {
-        player.takeDamage(p.damage);
+        player.takeDamage(p.damage, p);
         ProjectileSystem.enemyProjectiles.splice(i, 1);
       }
     }

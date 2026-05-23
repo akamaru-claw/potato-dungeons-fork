@@ -90,6 +90,9 @@ html, body {
 .pause-container { text-align: center; animation: fadeInUp 0.2s ease; display: flex; flex-direction: column; gap: 14px; align-items: center; }
 .pause-title { font-size: 48px; font-weight: 900; color: #fff; text-shadow: 0 0 35px rgba(167,139,250,0.5); margin-bottom: 6px; }
 
+@keyframes bossShake { 0%, 100% { transform: translate(0, 0); } 10% { transform: translate(-4px, 2px); } 20% { transform: translate(4px, -2px); } 30% { transform: translate(-3px, -3px); } 40% { transform: translate(3px, 3px); } 50% { transform: translate(-2px, 1px); } 60% { transform: translate(2px, -1px); } 70% { transform: translate(-1px, -2px); } 80% { transform: translate(1px, 2px); } }
+body.boss-announce { animation: bossShake 0.6s ease; }
+
 /* Reward Screen */
 .reward-container { text-align: center; animation: fadeInUp 0.3s ease; padding: 20px; }
 .reward-title { font-size: 36px; font-weight: 900; color: var(--gold); text-shadow: 0 0 30px rgba(255,215,0,0.4); margin-bottom: 8px; }
@@ -288,7 +291,26 @@ html, body {
   color: var(--gold);
 }
 
-/* Highscore */
+/* GAME OVER — Killer & Timeline */
+.gameover-killer { display: flex; flex-direction: column; align-items: center; margin-bottom: 16px; animation: fadeInUp 0.4s ease; }
+.killer-icon { font-size: 64px; margin-bottom: 4px; animation: killerPulse 1.5s ease infinite; filter: drop-shadow(0 0 12px rgba(255,68,102,0.4)); }
+.killer-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; }
+.killer-name { font-size: 20px; font-weight: 800; color: #ff4466; text-shadow: 0 0 20px rgba(255,68,102,0.3); }
+@keyframes killerPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+
+.build-timeline { margin: 16px 0; animation: fadeInUp 0.5s ease 0.2s both; max-width: 360px; width: 100%; }
+.timeline-title { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; text-align: center; }
+.timeline-items { display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; padding-right: 4px; }
+.timeline-item { display: flex; align-items: center; gap: 10px; background: var(--bg-glass); border: 1px solid var(--border-glass); border-radius: 10px; padding: 8px 12px; backdrop-filter: blur(8px); }
+.timeline-item .ti-floor { font-size: 11px; font-weight: 700; color: var(--gold); min-width: 36px; text-align: center; background: rgba(255,215,0,0.1); border-radius: 6px; padding: 2px 6px; }
+.timeline-item .ti-icon { font-size: 20px; }
+.timeline-item .ti-info { flex: 1; text-align: left; }
+.timeline-item .ti-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.timeline-item .ti-tier { font-size: 10px; color: var(--gold); }
+.timeline-item .ti-type { font-size: 10px; color: var(--text-dim); }
+.timeline-item.upgrade { border-color: rgba(255,221,68,0.2); background: rgba(255,221,68,0.05); }
+.timeline-item.relic { border-color: rgba(187,85,238,0.2); background: rgba(187,85,238,0.05); }
+.timeline-empty { color: var(--text-dim); font-style: italic; font-size: 13px; text-align: center; padding: 12px; }
 .highscore-submit {
   display: flex;
   gap: 8px;
@@ -461,6 +483,12 @@ html, body {
 .hud-dash-ring.active { border-color: rgba(255,220,100,1); box-shadow: 0 0 12px rgba(255,220,100,0.6); }
 .hud-dash-ring .cd-fill { position: absolute; top: -3px; left: -3px; width: 42px; height: 42px; }
 #hud-dash-icon { font-size: 16px; }
+
+/* Mobile Joystick */
+.joystick-container { position: fixed; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; z-index: 40; }
+.joystick-base { position: absolute; width: 110px; height: 110px; border-radius: 50%; background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.12); backdrop-filter: blur(4px); transform: translate(-50%, -50%); transition: opacity 0.15s; }
+.joystick-knob { position: absolute; width: 52px; height: 52px; border-radius: 50%; background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); backdrop-filter: blur(4px); transform: translate(-50%, -50%); box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: opacity 0.15s; }
+
 .reward-card.rarity-epic { border-color: var(--rarity-epic, #bb55ee); }
 
 /* LOGIN */

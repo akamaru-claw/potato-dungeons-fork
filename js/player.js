@@ -32,6 +32,7 @@ const Player = {
       skin: Account.loggedIn ? Account.selectedCharacter || 'potato_default' : 'potato_default',
       cosmeticSkin: Account.loggedIn ? Account.skin : 'skin_default',
       weapons: [],
+      buildTimeline: [], // Track weapon/relic acquisitions: [{floor, type, name, icon, tier?}]
       kills: 0,
       gold: 0,
       tookDamageThisFloor: false,
@@ -130,11 +131,18 @@ const Player = {
       addRelic(key) {
         if (this.relics.find(r => r.key === key)) return false;
         this.relics.push({ key });
+        const def = CONFIG.RELIC_DEFS?.[key];
+        this.buildTimeline.push({
+          floor: Dungeon.currentFloor,
+          type: 'relic',
+          name: def?.name || key,
+          icon: def?.icon || '✨'
+        });
         this.applyRelics();
         return true;
       },
 
-      takeDamage(amount) {
+      takeDamage(amount, attacker) {
         if (!this.alive || this.invincible > 0) return;
         const dodgeChance = Math.min(this.stats.dodge, 60);
         if (Math.random() * 100 < dodgeChance) {
@@ -150,7 +158,22 @@ const Player = {
         FloatingText.add(this.x, this.y - this.size - 10, '-' + Math.round(dmg), CONFIG.COLORS.HEALTH_LOW, 22);
         Renderer.shake(8);
         Renderer.flashDamage();
-        if (this.hp <= 0) { this.hp = 0; this.alive = false; this.lastKilledBy = 'enemy'; }
+        if (this.hp <= 0) {
+          this.hp = 0; this.alive = false;
+          // Track killer info
+          if (attacker && attacker.def) {
+            this.lastKiller = {
+              name: attacker.def.name || 'Unbekannt',
+              icon: attacker.def.icon || '💀',
+              type: attacker.type || 'unknown',
+              isBoss: !!attacker.def.boss,
+              isElite: !!attacker.def.elite,
+              color: attacker.def.color || '#888'
+            };
+          } else {
+            this.lastKiller = { name: 'Unbekannt', icon: '💀', type: 'unknown', isBoss: false, isElite: false, color: '#888' };
+          }
+        }
       },
 
       heal(amount) {

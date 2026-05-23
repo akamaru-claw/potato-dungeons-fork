@@ -35,7 +35,13 @@
 
   <!-- PAUSE BUTTON -->
   <button id="btn-pause" class="pause-btn" aria-label="Pause">⏸</button>
-  <div id="version-tag" class="version-tag">v0.10</div>
+  <div id="version-tag" class="version-tag">v0.11</div>
+
+  <!-- Joystick Visual (Mobile) -->
+  <div id="joystick-container" class="joystick-container" style="display:none;">
+    <div id="joystick-base" class="joystick-base"></div>
+    <div id="joystick-knob" class="joystick-knob"></div>
+  </div>
 
   <!-- DASH INDICATOR (outside HUD, always positioned) -->
   <div id="hud-dash" class="hud-dash" style="display:none;">
@@ -73,9 +79,18 @@
   <!-- GAME OVER SCREEN -->
   <div id="screen-gameover" class="screen">
     <div class="endscreen-container">
+      <div id="gameover-killer" class="gameover-killer" style="display:none;">
+        <div class="killer-icon" id="killer-icon">💀</div>
+        <div class="killer-label">Getötet von</div>
+        <div class="killer-name" id="killer-name">Unbekannt</div>
+      </div>
       <h2 class="endscreen-title gameover-text">💀 GEFALLEN</h2>
       <p class="endscreen-subtitle" id="gameover-floor"></p>
       <div class="endscreen-stats" id="gameover-stats"></div>
+      <div id="build-timeline" class="build-timeline" style="display:none;">
+        <div class="timeline-title">📜 Build-Verlauf</div>
+        <div class="timeline-items" id="timeline-items"></div>
+      </div>
       <div id="highscore-submit" class="highscore-submit">
         <input id="input-playername" class="playername-input" type="text" placeholder="Dein Name" maxlength="20" autocomplete="off">
         <button id="btn-submit-score" class="btn btn-primary btn-small">💾 Speichern</button>

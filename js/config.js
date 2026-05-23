@@ -47,28 +47,28 @@ const CONFIG = {
   // Enemy definitions
   ENEMY_DEFS: {
     // --- Stone Dungeon ---
-    skeleton:    { hp: 8,  damage: 2, speed: 70,  size: 16, xp: 3, color: '#c8c8b0', colorDark: '#8a8a70', shape: 'circle', weight: 3, minFloor: 1, attackCooldown: 0 },
-    slime:       { hp: 5,  damage: 1, speed: 50,  size: 14, xp: 2, color: '#66cc66', colorDark: '#337733', shape: 'circle', weight: 3, minFloor: 1, attackCooldown: 0 },
-    bat:         { hp: 3,  damage: 1, speed: 130, size: 10, xp: 2, color: '#8866aa', colorDark: '#553377', shape: 'triangle', weight: 2, minFloor: 1, attackCooldown: 0 },
+    skeleton:    { name: 'Skelett',    icon: '💀', hp: 8,  damage: 2, speed: 70,  size: 16, xp: 3, color: '#c8c8b0', colorDark: '#8a8a70', shape: 'circle', weight: 3, minFloor: 1, attackCooldown: 0 },
+    slime:       { name: 'Schleim',    icon: '🟢', hp: 5,  damage: 1, speed: 50,  size: 14, xp: 2, color: '#66cc66', colorDark: '#337733', shape: 'circle', weight: 3, minFloor: 1, attackCooldown: 0 },
+    bat:         { name: 'Fledermaus', icon: '🦇', hp: 3,  damage: 1, speed: 130, size: 10, xp: 2, color: '#8866aa', colorDark: '#553377', shape: 'triangle', weight: 2, minFloor: 1, attackCooldown: 0 },
     // --- Cave ---
-    spider:      { hp: 10, damage: 3, speed: 90,  size: 14, xp: 4, color: '#444433', colorDark: '#222211', shape: 'circle', weight: 3, minFloor: 10, attackCooldown: 0 },
-    cave_crawler:{ hp: 15, damage: 2, speed: 60,  size: 18, xp: 5, color: '#556644', colorDark: '#334422', shape: 'square', weight: 2, minFloor: 10, attackCooldown: 0 },
+    spider:      { name: 'Spinne',     icon: '🕷️', hp: 10, damage: 3, speed: 90,  size: 14, xp: 4, color: '#444433', colorDark: '#222211', shape: 'circle', weight: 3, minFloor: 10, attackCooldown: 0 },
+    cave_crawler:{ name: 'Höhlenkrabbler', icon: '🪲', hp: 15, damage: 2, speed: 60,  size: 18, xp: 5, color: '#556644', colorDark: '#334422', shape: 'square', weight: 2, minFloor: 10, attackCooldown: 0 },
     // --- Fortress ---
-    knight:      { hp: 25, damage: 5, speed: 55,  size: 20, xp: 8, color: '#8888aa', colorDark: '#555577', shape: 'square', weight: 3, minFloor: 20, attackCooldown: 0 },
-    archer:      { hp: 12, damage: 4, speed: 65,  size: 14, xp: 6, color: '#aa8866', colorDark: '#775533', shape: 'diamond', weight: 2, minFloor: 20, ranged: true, attackRange: 250, projectileSpeed: 200, attackCooldown: 2.0 },
+    knight:      { name: 'Ritter',     icon: '🛡️', hp: 25, damage: 5, speed: 55,  size: 20, xp: 8, color: '#8888aa', colorDark: '#555577', shape: 'square', weight: 3, minFloor: 20, attackCooldown: 0 },
+    archer:      { name: 'Bogenschütze', icon: '🏹', hp: 12, damage: 4, speed: 65,  size: 14, xp: 6, color: '#aa8866', colorDark: '#775533', shape: 'diamond', weight: 2, minFloor: 20, ranged: true, attackRange: 250, projectileSpeed: 200, attackCooldown: 2.0 },
     // --- Nether ---
-    blaze:       { hp: 20, damage: 6, speed: 60,  size: 16, xp: 10, color: '#ffaa00', colorDark: '#cc7700', shape: 'diamond', weight: 3, minFloor: 30, ranged: true, attackRange: 200, projectileSpeed: 180, attackCooldown: 1.5 },
-    wither_skeleton:{ hp: 35, damage: 8, speed: 70, size: 22, xp: 12, color: '#333344', colorDark: '#111122', shape: 'triangle', weight: 2, minFloor: 30, attackCooldown: 0 },
-    ghast:       { hp: 15, damage: 10, speed: 40, size: 24, xp: 15, color: '#ddddcc', colorDark: '#aaaaaa', shape: 'circle', weight: 1, minFloor: 30, ranged: true, attackRange: 350, projectileSpeed: 150, attackCooldown: 3.0 },
+    blaze:       { name: 'Lohe',       icon: '🔥', hp: 20, damage: 6, speed: 60,  size: 16, xp: 10, color: '#ffaa00', colorDark: '#cc7700', shape: 'diamond', weight: 3, minFloor: 30, ranged: true, attackRange: 200, projectileSpeed: 180, attackCooldown: 1.5 },
+    wither_skeleton:{ name: 'Wither-Skelett', icon: '☠️', hp: 35, damage: 8, speed: 70, size: 22, xp: 12, color: '#333344', colorDark: '#111122', shape: 'triangle', weight: 2, minFloor: 30, attackCooldown: 0 },
+    ghast:       { name: 'Ghast',      icon: '👻', hp: 15, damage: 10, speed: 40, size: 24, xp: 15, color: '#ddddcc', colorDark: '#aaaaaa', shape: 'circle', weight: 1, minFloor: 30, ranged: true, attackRange: 350, projectileSpeed: 150, attackCooldown: 3.0 },
     // --- End ---
-    enderman:    { hp: 30, damage: 7, speed: 120, size: 20, xp: 15, color: '#1a1a2a', colorDark: '#0a0a1a', shape: 'diamond', weight: 3, minFloor: 40, charges: true, chargeSpeed: 300, chargeCooldown: 3 },
-    shulker:     { hp: 25, damage: 5, speed: 20,  size: 18, xp: 12, color: '#9955cc', colorDark: '#663399', shape: 'square', weight: 2, minFloor: 40, ranged: true, attackRange: 200, projectileSpeed: 120, attackCooldown: 2.5 },
-    dragon_minion:{ hp: 50, damage: 12, speed: 80, size: 26, xp: 25, color: '#334455', colorDark: '#112233', shape: 'triangle', weight: 1, minFloor: 40, attackCooldown: 0 },
+    enderman:    { name: 'Enderman',   icon: '👁️', hp: 30, damage: 7, speed: 120, size: 20, xp: 15, color: '#1a1a2a', colorDark: '#0a0a1a', shape: 'diamond', weight: 3, minFloor: 40, charges: true, chargeSpeed: 300, chargeCooldown: 3 },
+    shulker:     { name: 'Shulker',    icon: '📦', hp: 25, damage: 5, speed: 20,  size: 18, xp: 12, color: '#9955cc', colorDark: '#663399', shape: 'square', weight: 2, minFloor: 40, ranged: true, attackRange: 200, projectileSpeed: 120, attackCooldown: 2.5 },
+    dragon_minion:{ name: 'Drachenwächter', icon: '🐲', hp: 50, damage: 12, speed: 80, size: 26, xp: 25, color: '#334455', colorDark: '#112233', shape: 'triangle', weight: 1, minFloor: 40, attackCooldown: 0 },
     // --- Bosses ---
-    boss_stone:  { hp: 100, damage: 8, speed: 50,  size: 36, xp: 50, color: '#aaaacc', colorDark: '#666688', shape: 'circle', weight: 0, minFloor: 10, boss: true, elite: true, attackCooldown: 0 },
-    boss_cave:   { hp: 200, damage: 12, speed: 45,  size: 40, xp: 80, color: '#558855', colorDark: '#335533', shape: 'circle', weight: 0, minFloor: 20, boss: true, elite: true, attackCooldown: 0 },
-    boss_nether: { hp: 350, damage: 18, speed: 55,  size: 44, xp: 120, color: '#ff6600', colorDark: '#cc3300', shape: 'diamond', weight: 0, minFloor: 30, boss: true, elite: true, attackCooldown: 0 },
-    boss_end:    { hp: 500, damage: 25, speed: 65,  size: 48, xp: 200, color: '#6666cc', colorDark: '#333399', shape: 'triangle', weight: 0, minFloor: 40, boss: true, elite: true, attackCooldown: 0 },
+    boss_stone:  { name: 'Stein-Golem', icon: '🗿', hp: 100, damage: 8, speed: 50,  size: 36, xp: 50, color: '#aaaacc', colorDark: '#666688', shape: 'circle', weight: 0, minFloor: 10, boss: true, elite: true, attackCooldown: 0 },
+    boss_cave:   { name: 'Höhlen-Titan', icon: '🦎', hp: 200, damage: 12, speed: 45,  size: 40, xp: 80, color: '#558855', colorDark: '#335533', shape: 'circle', weight: 0, minFloor: 20, boss: true, elite: true, attackCooldown: 0 },
+    boss_nether: { name: 'Nether-Lord', icon: '👹', hp: 350, damage: 18, speed: 55,  size: 44, xp: 120, color: '#ff6600', colorDark: '#cc3300', shape: 'diamond', weight: 0, minFloor: 30, boss: true, elite: true, attackCooldown: 0 },
+    boss_end:    { name: 'Ender-Drache', icon: '🐉', hp: 500, damage: 25, speed: 65,  size: 48, xp: 200, color: '#6666cc', colorDark: '#333399', shape: 'triangle', weight: 0, minFloor: 40, boss: true, elite: true, attackCooldown: 0 },
   },
 
   // Weapon definitions — compatible with WeaponSystem (baseDamage, pellets, etc.)

@@ -15,6 +15,13 @@ const WeaponSystem = {
       return 'needs_replace';
     }
     player.weapons.push(weapon);
+    player.buildTimeline.push({
+      floor: Dungeon.currentFloor,
+      type: 'weapon',
+      name: weapon.def.name,
+      icon: weapon.def.icon,
+      tier: weapon.tier
+    });
     return 'added';
   },
 
@@ -24,6 +31,14 @@ const WeaponSystem = {
     const replaced = player.weapons[replaceIndex];
     FloatingText.add(player.x, player.y - 30, `🗑️ ${replaced.def.icon} ${replaced.def.name} ersetzt`, '#ff6644', 14, 1.5);
     player.weapons[replaceIndex] = weapon;
+    player.buildTimeline.push({
+      floor: Dungeon.currentFloor,
+      type: 'weapon',
+      name: weapon.def.name,
+      icon: weapon.def.icon,
+      tier: weapon.tier,
+      replaced: replaced.def.name
+    });
   },
 
   update(weapons, player, enemies, dt) {

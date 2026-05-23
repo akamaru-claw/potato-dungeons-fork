@@ -442,6 +442,24 @@ const UI = {
     const relicNames = (player.relics || []).map(r => (CONFIG.RELIC_DEFS?.[r.key]?.icon || '') + ' ' + (CONFIG.RELIC_DEFS?.[r.key]?.name || r.key)).join(', ');
     const weaponNames = player.weapons.map(w => w.def.icon + ' ' + w.def.name + ' Lv.' + (w.tier + 1)).join(', ');
     document.getElementById('gameover-floor').textContent = `Ebene ${floorNum}`;
+
+    // Killer info
+    const killerEl = document.getElementById('gameover-killer');
+    if (player.lastKiller) {
+      killerEl.style.display = 'flex';
+      document.getElementById('killer-icon').textContent = player.lastKiller.icon;
+      const kLabel = player.lastKiller.isBoss ? '💀 Getötet von BOSS' : player.lastKiller.isElite ? '⚡ Getötet von Elite' : '💀 Getötet von';
+      document.querySelector('.killer-label').textContent = kLabel;
+      document.getElementById('killer-name').textContent = player.lastKiller.name;
+      document.getElementById('killer-icon').style.filter = player.lastKiller.isBoss
+        ? 'drop-shadow(0 0 16px rgba(255,215,0,0.6))'
+        : player.lastKiller.isElite
+          ? 'drop-shadow(0 0 12px rgba(255,220,100,0.5))'
+          : 'drop-shadow(0 0 12px rgba(255,68,102,0.4))';
+    } else {
+      killerEl.style.display = 'none';
+    }
+
     document.getElementById('gameover-stats').innerHTML = `
       <div class="endscreen-stat"><span>💀 Kills</span><strong>${player.kills}</strong></div>
       <div class="endscreen-stat"><span>🏰 Ebene</span><strong>${floorNum}</strong></div>
@@ -449,9 +467,33 @@ const UI = {
       <div class="endscreen-stat"><span>💰 Gold</span><strong>${player.gold || 0}</strong></div>
       <div class="endscreen-stat"><span>🔥 Streak</span><strong>${player.maxKillStreak || 0}</strong></div>
       <div class="endscreen-stat"><span>⚔️ Waffen</span><strong>${player.weapons.length}</strong></div>
-      ${weaponNames ? `<div class="endscreen-detail"><span>Waffen:</span> ${weaponNames}</div>` : ''}
-      ${relicNames ? `<div class="endscreen-detail"><span>Relikte:</span> ${relicNames}</div>` : ''}
     `;
+
+    // Build Timeline
+    const timelineEl = document.getElementById('build-timeline');
+    const timelineItems = document.getElementById('timeline-items');
+    if (player.buildTimeline && player.buildTimeline.length > 0) {
+      timelineEl.style.display = 'block';
+      timelineItems.innerHTML = player.buildTimeline.slice(-10).map(item => {
+        const typeClass = item.type === 'upgrade' ? 'upgrade' : item.type === 'relic' ? 'relic' : '';
+        const tierLabel = item.tier !== undefined ? `Lv.${item.tier + 1}` : '';
+        const typeLabel = item.type === 'weapon' ? 'Waffe' : item.type === 'upgrade' ? 'Upgrade' : item.type === 'relic' ? 'Relikt' : '';
+        return `
+          <div class="timeline-item ${typeClass}">
+            <span class="ti-floor">E${item.floor}</span>
+            <span class="ti-icon">${item.icon}</span>
+            <div class="ti-info">
+              <div class="ti-name">${item.name}${item.replaced ? ` → ${item.replaced}` : ''}</div>
+              ${tierLabel ? `<span class="ti-tier">${tierLabel}</span>` : ''}
+              <span class="ti-type">${typeLabel}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    } else {
+      timelineEl.style.display = 'none';
+    }
+
     this._lastScore = { floor: floorNum, kills: player.kills, weapons: player.weapons.length };
 
     // Save gold to account
@@ -971,6 +1013,16 @@ const UI = {
     const theme = Dungeon.getTheme(floorNum);
     const text = isBoss ? `⚔️ BOSS — Ebene ${floorNum}` : `🏰 Ebene ${floorNum} — ${theme.name}`;
     el.textContent = text;
+    // Theme color
+    el.style.color = isBoss ? '#ff4466' : (theme.color || '#fff');
+    el.style.textShadow = isBoss
+      ? '0 0 40px rgba(255,68,102,0.7), 0 6px 12px rgba(0,0,0,0.5)'
+      : `0 0 40px ${theme.color}88, 0 6px 12px rgba(0,0,0,0.5)`;
+    // Boss shake
+    if (isBoss) {
+      document.body.classList.add('boss-announce');
+      setTimeout(() => document.body.classList.remove('boss-announce'), 2200);
+    }
     el.classList.add('active');
     setTimeout(() => el.classList.remove('active'), 2200);
   },

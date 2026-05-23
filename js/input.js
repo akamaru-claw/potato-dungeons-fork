@@ -43,6 +43,9 @@ const Input = {
     baseRadius: 55, knobRadius: 26,
     deadzone: 10, maxDist: 60,
     opacity: 0, targetOpacity: 0,
+    // Swipe dash tracking
+    swipeStartX: 0, swipeStartY: 0,
+    swipeStartTime: 0,
   },
 
   aim: {
@@ -148,6 +151,12 @@ const Input = {
         this.touch.currentY = ty;
         this.touch.active = true;
         this.touch.targetOpacity = 1;
+        // Swipe tracking
+        this.touch.swipeStartX = tx;
+        this.touch.swipeStartY = ty;
+        this.touch.swipeStartTime = Date.now();
+        // Show joystick visual
+        this._showJoystick(tx, ty);
       } else if (this.aim.touchId === null) {
         this.aim.touchId = t.identifier;
         this.aim.active = true;
@@ -179,6 +188,7 @@ const Input = {
         const rect = this._canvas.getBoundingClientRect();
         this.touch.currentX = t.clientX - rect.left;
         this.touch.currentY = t.clientY - rect.top;
+        this._updateJoystick();
       } else if (t.identifier === this.aim.touchId) {
         const rect = this._canvas.getBoundingClientRect();
         this.aim.x = t.clientX - rect.left;
@@ -204,6 +214,18 @@ const Input = {
         this.touch.targetOpacity = 0;
         this.touch.joystickX = 0;
         this.touch.joystickY = 0;
+        this._hideJoystick();
+        // Swipe dash detection
+        const swipeTime = Date.now() - this.touch.swipeStartTime;
+        const swipeDx = this.touch.currentX - this.touch.swipeStartX;
+        const swipeDy = this.touch.currentY - this.touch.swipeStartY;
+        const swipeDist = Math.sqrt(swipeDx * swipeDx + swipeDy * swipeDy);
+        // Fast swipe (< 250ms) over 80px = dash
+        if (swipeTime < 250 && swipeDist > 80 && Game.player && Game.player.dashCooldown <= 0) {
+          const swipeAngle = Math.atan2(swipeDy, swipeDx);
+          Game.player.dashDir = { x: Math.cos(swipeAngle), y: Math.sin(swipeAngle) };
+          Game.player.dash();
+        }
       }
       if (t.identifier === this.aim.touchId) {
         this.aim.touchId = null;
@@ -211,6 +233,43 @@ const Input = {
         this.mouse.down = false;
       }
     }
+  },
+
+  // Joystick visual helpers
+  _showJoystick(x, y) {
+    const container = document.getElementById('joystick-container');
+    const base = document.getElementById('joystick-base');
+    const knob = document.getElementById('joystick-knob');
+    if (!container || !base || !knob) return;
+    container.style.display = 'block';
+    base.style.left = x + 'px';
+    base.style.top = y + 'px';
+    base.style.opacity = '1';
+    knob.style.left = x + 'px';
+    knob.style.top = y + 'px';
+    knob.style.opacity = '1';
+  },
+  _updateJoystick() {
+    const base = document.getElementById('joystick-base');
+    const knob = document.getElementById('joystick-knob');
+    if (!base || !knob) return;
+    const dx = this.touch.currentX - this.touch.startX;
+    const dy = this.touch.currentY - this.touch.startY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const clamped = Math.min(dist, this.touch.maxDist);
+    const angle = Math.atan2(dy, dx);
+    const kx = this.touch.startX + Math.cos(angle) * clamped;
+    const ky = this.touch.startY + Math.sin(angle) * clamped;
+    knob.style.left = kx + 'px';
+    knob.style.top = ky + 'px';
+  },
+  _hideJoystick() {
+    const container = document.getElementById('joystick-container');
+    const base = document.getElementById('joystick-base');
+    const knob = document.getElementById('joystick-knob');
+    if (container) container.style.display = 'none';
+    if (base) base.style.opacity = '0';
+    if (knob) knob.style.opacity = '0';
   },
 
   getMovement() {

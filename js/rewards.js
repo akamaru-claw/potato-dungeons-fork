@@ -151,6 +151,13 @@ const Rewards = {
           w.def.attackSpeed = CONFIG.WEAPON_DEFS[reward.weaponKey].attackSpeed * (1 + w.tier * 0.08);
           w.def.range = CONFIG.WEAPON_DEFS[reward.weaponKey].range * (1 + w.tier * 0.1);
           FloatingText.add(player.x, player.y - 30, `⬆️ ${w.def.name} Lv.${w.tier + 1}!`, '#ffdd44', 18, 1.5);
+          player.buildTimeline.push({
+            floor: Dungeon.currentFloor,
+            type: 'upgrade',
+            name: w.def.name,
+            icon: w.def.icon,
+            tier: w.tier
+          });
         } else {
           // Fallback: no existing weapon, just add new
           const w = WeaponSystem.create(reward.weaponKey);
