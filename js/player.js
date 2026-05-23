@@ -4,14 +4,38 @@
 const Player = {
   // Character class visual definitions — each looks distinct
   _charDefs: {
-    potato_default:  { body: '#e8b84b', outline: '#c89830', label: 'Kartoffel' },
-    potato_fries:    { body: '#ffe066', outline: '#ccaa22', label: 'Pommes', tall: true },
-    potato_sweet:    { body: '#cc6633', outline: '#993322', label: 'Süßkartoffel', wide: true },
-    potato_chips:    { body: '#f0d890', outline: '#bba860', label: 'Chips', thin: true },
-    potato_golden:   { body: '#ffd700', outline: '#cc9900', label: 'Goldene', glow: true },
-    potato_shadow:   { body: '#2a2a3d', outline: '#151522', label: 'Schatten', shadow: true },
-    potato_rainbow:  { body: '#e8b84b', outline: '#888', label: 'Regenbogen', rainbow: true },
-    potato_devil:    { body: '#cc2222', outline: '#880000', label: 'Teufel', horns: true },
+    potato_default:  {
+      body: '#e8b84b', outline: '#c89830', label: 'Kartoffel',
+      draw: '_drawPotato', eyeStyle: 'normal', features: ['sprout']
+    },
+    potato_fries:    {
+      body: '#ffe066', outline: '#ccaa22', label: 'Pommes', tall: true,
+      draw: '_drawFries', eyeStyle: 'wide', features: ['stripes']
+    },
+    potato_sweet:    {
+      body: '#cc6633', outline: '#993322', label: 'Süßkartoffel', wide: true,
+      draw: '_drawSweetPotato', eyeStyle: 'normal', features: ['spots']
+    },
+    potato_chips:    {
+      body: '#f0d890', outline: '#bba860', label: 'Chips', thin: true,
+      draw: '_drawChips', eyeStyle: 'squint', features: ['waves']
+    },
+    potato_golden:   {
+      body: '#ffd700', outline: '#cc9900', label: 'Goldene',
+      draw: '_drawGolden', eyeStyle: 'shine', features: ['glow', 'sparkle']
+    },
+    potato_shadow:   {
+      body: '#2a2a3d', outline: '#151522', label: 'Schatten',
+      draw: '_drawShadow', eyeStyle: 'red', features: ['shadowAura', 'smoke']
+    },
+    potato_rainbow:  {
+      body: '#e8b84b', outline: '#888', label: 'Regenbogen',
+      draw: '_drawRainbow', eyeStyle: 'star', features: ['rainbowGlow']
+    },
+    potato_devil:    {
+      body: '#cc2222', outline: '#880000', label: 'Teufel',
+      draw: '_drawDevil', eyeStyle: 'angry', features: ['horns', 'tail']
+    },
   },
 
   _getCharDefs(charKey) {
@@ -280,7 +304,6 @@ const Player = {
     // Invincibility flash
     if (player.invincible > 0 && Math.sin(player.invincible * 30) > 0) return;
 
-    // Character class — each looks distinct
     const charDef = this._getCharDefs(player.skin);
     const cosSkin = player.cosmeticSkin || 'skin_default';
     const cosDef = Account.SKINS?.[cosSkin] || Account.SKINS.skin_default;
@@ -291,71 +314,18 @@ const Player = {
       ctx.globalAlpha = cosDef.effect === 'ghost_transparent' ? 0.4 : 0.7;
     }
 
-    // Shape varies by character
     const drawRadiusX = charDef.tall ? s * 0.75 : charDef.wide ? s * 1.25 : charDef.thin ? s * 0.6 : s;
     const drawRadiusY = charDef.tall ? s * 1.2 : charDef.wide ? s * 0.85 : charDef.thin ? s * 1.1 : s;
 
-    ctx.fillStyle = charDef.body;
-    ctx.strokeStyle = charDef.outline;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.ellipse(sx, sy + bob, drawRadiusX, drawRadiusY, 0, 0, Math.PI * 2);
-    ctx.fill(); ctx.stroke();
-
-    // Character-specific visuals
-    if (charDef.horns) {
-      // Devil horns
-      ctx.fillStyle = '#440000';
-      ctx.beginPath();
-      ctx.moveTo(sx - drawRadiusX * 0.75, sy + bob - drawRadiusY * 0.4);
-      ctx.lineTo(sx - drawRadiusX, sy + bob - drawRadiusY * 1.3);
-      ctx.lineTo(sx - drawRadiusX * 0.25, sy + bob - drawRadiusY * 0.5);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(sx + drawRadiusX * 0.75, sy + bob - drawRadiusY * 0.4);
-      ctx.lineTo(sx + drawRadiusX, sy + bob - drawRadiusY * 1.3);
-      ctx.lineTo(sx + drawRadiusX * 0.25, sy + bob - drawRadiusY * 0.5);
-      ctx.fill();
-    }
-    if (charDef.glow) {
-      ctx.save();
-      ctx.shadowColor = '#ffd700';
-      ctx.shadowBlur = 20 + Math.sin(Date.now() / 200) * 8;
-      ctx.beginPath();
-      ctx.ellipse(sx, sy + bob, drawRadiusX + 4, drawRadiusY + 4, 0, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(255,215,0,0.35)';
-      ctx.lineWidth = 3;
-      ctx.stroke();
-      ctx.restore();
-    }
-    if (charDef.shadow) {
-      ctx.save();
-      ctx.globalAlpha = 0.3 + Math.sin(Date.now() / 400) * 0.1;
-      ctx.beginPath();
-      ctx.arc(sx, sy + bob, Math.max(drawRadiusX, drawRadiusY) + 14, 0, Math.PI * 2);
-      ctx.fillStyle = '#6600aa';
-      ctx.fill();
-      ctx.restore();
-    }
-    if (charDef.rainbow) {
-      const hue = (Date.now() / 8) % 360;
-      ctx.save();
-      ctx.beginPath();
-      ctx.ellipse(sx, sy + bob, drawRadiusX + 4, drawRadiusY + 4, 0, 0, Math.PI * 2);
-      ctx.strokeStyle = `hsl(${hue}, 80%, 55%)`;
-      ctx.lineWidth = 3;
-      ctx.stroke();
-      ctx.restore();
-    }
-    if (charDef.thin) {
-      // Chips: crispy lines
-      ctx.strokeStyle = charDef.outline + '88';
-      ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(sx - drawRadiusX*0.4, sy + bob - drawRadiusY*0.3); ctx.lineTo(sx + drawRadiusX*0.3, sy + bob + drawRadiusY*0.3); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(sx + drawRadiusX*0.3, sy + bob - drawRadiusY*0.2); ctx.lineTo(sx - drawRadiusX*0.15, sy + bob + drawRadiusY*0.4); ctx.stroke();
+    // === NEW: Call the character-specific detailed drawer ===
+    const drawer = charDef.draw || '_drawPotato';
+    if (typeof this[drawer] === 'function') {
+      this[drawer](ctx, sx, sy + bob, drawRadiusX, drawRadiusY, s, charDef);
+    } else {
+      this._drawPotato(ctx, sx, sy + bob, drawRadiusX, drawRadiusY, s, charDef);
     }
 
-    // Cosmetic skin overlay effects
+    // Cosmetic skin overlay effects (after body, before eyes)
     if (cosDef.effect === 'glow') {
       ctx.save();
       ctx.shadowColor = cosDef.glowColor || '#ffd700';
@@ -418,16 +388,368 @@ const Player = {
 
     ctx.restore();
 
-    // Eyes
-    ctx.fillStyle = '#222';
-    const eyeOffset = s * 0.3;
-    ctx.beginPath();
-    ctx.arc(sx - eyeOffset, sy + bob - s * 0.15, 2, 0, Math.PI * 2);
-    ctx.arc(sx + eyeOffset, sy + bob - s * 0.15, 2, 0, Math.PI * 2);
-    ctx.fill();
+    // Eyes — drawn on top, not affected by ghost alpha
+    this._drawEyes(ctx, sx, sy + bob, s, charDef.eyeStyle);
 
     // Render weapons
     this.renderWeapon(ctx, camera, player);
+  },
+
+  // === DETAILED CHARACTER DRAWERS ===
+
+  _drawPotato(ctx, x, y, rx, ry, s, def) {
+    // Body: irregular "potato" shape using bezier
+    ctx.fillStyle = def.body;
+    ctx.strokeStyle = def.outline;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x - rx * 0.9, y - ry * 0.3);
+    ctx.bezierQuadraticCurveTo = ctx.bezierCurveTo; // compat
+    ctx.bezierCurveTo(x - rx, y - ry * 0.8, x - rx * 0.3, y - ry, x + rx * 0.2, y - ry * 0.85);
+    ctx.bezierCurveTo(x + rx * 0.9, y - ry * 0.7, x + rx, y + ry * 0.2, x + rx * 0.8, y + ry * 0.6);
+    ctx.bezierCurveTo(x + rx * 0.5, y + ry * 0.95, x - rx * 0.4, y + ry * 0.9, x - rx * 0.9, y + ry * 0.4);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+
+    // Potato "eyes" (dark spots) — characteristic of a real potato
+    ctx.fillStyle = def.outline + 'aa';
+    ctx.beginPath(); ctx.ellipse(x - rx * 0.3, y - ry * 0.1, rx * 0.12, ry * 0.08, 0.3, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x + rx * 0.25, y + ry * 0.15, rx * 0.1, ry * 0.07, -0.4, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x + rx * 0.1, y - ry * 0.4, rx * 0.08, ry * 0.06, 0.6, 0, Math.PI * 2); ctx.fill();
+
+    // Sprout on top
+    ctx.fillStyle = '#448833';
+    ctx.beginPath();
+    ctx.ellipse(x, y - ry * 0.9, rx * 0.15, ry * 0.25, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#336622';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    // Sprout leaves
+    ctx.fillStyle = '#55aa44';
+    ctx.beginPath(); ctx.ellipse(x - rx * 0.12, y - ry * 1.05, rx * 0.12, ry * 0.08, -0.8, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x + rx * 0.12, y - ry * 1.0, rx * 0.1, ry * 0.07, 0.8, 0, Math.PI * 2); ctx.fill();
+  },
+
+  _drawFries(ctx, x, y, rx, ry, s, def) {
+    // Body: elongated with vertical fry-stripes
+    ctx.fillStyle = def.body;
+    ctx.strokeStyle = def.outline;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(x, y, rx * 0.7, ry, 0, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+
+    // Vertical "fry" stripes
+    ctx.strokeStyle = def.outline + '99';
+    ctx.lineWidth = 1.5;
+    for (let i = -3; i <= 3; i++) {
+      const fx = x + i * rx * 0.18;
+      ctx.beginPath();
+      ctx.moveTo(fx, y - ry * 0.75);
+      ctx.bezierCurveTo(fx - rx * 0.05, y, fx + rx * 0.05, y + ry * 0.3, fx, y + ry * 0.8);
+      ctx.stroke();
+    }
+
+    // Crispy tips ( golden edges )
+    ctx.fillStyle = '#ffcc44';
+    ctx.beginPath(); ctx.ellipse(x, y - ry * 0.85, rx * 0.4, ry * 0.12, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x, y + ry * 0.85, rx * 0.4, ry * 0.12, 0, 0, Math.PI * 2); ctx.fill();
+  },
+
+  _drawSweetPotato(ctx, x, y, rx, ry, s, def) {
+    // Wider, slightly flattened shape
+    ctx.fillStyle = def.body;
+    ctx.strokeStyle = def.outline;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x - rx * 0.8, y - ry * 0.2);
+    ctx.bezierCurveTo(x - rx, y - ry * 0.6, x, y - ry * 0.9, x + rx * 0.7, y - ry * 0.4);
+    ctx.bezierCurveTo(x + rx, y, x + rx * 0.6, y + ry * 0.8, x, y + ry * 0.85);
+    ctx.bezierCurveTo(x - rx * 0.6, y + ry * 0.7, x - rx * 0.9, y + ry * 0.2, x - rx * 0.8, y - ry * 0.2);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+
+    // Characteristic sweet potato spots
+    ctx.fillStyle = '#aa5522aa';
+    ctx.beginPath(); ctx.ellipse(x - rx * 0.2, y + ry * 0.1, rx * 0.18, ry * 0.12, 0.2, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x + rx * 0.35, y - ry * 0.15, rx * 0.14, ry * 0.1, -0.3, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x, y + ry * 0.35, rx * 0.1, ry * 0.08, 0.5, 0, Math.PI * 2); ctx.fill();
+
+    // Small stem
+    ctx.fillStyle = '#664422';
+    ctx.beginPath(); ctx.ellipse(x, y - ry * 0.85, rx * 0.08, ry * 0.1, 0, 0, Math.PI * 2); ctx.fill();
+  },
+
+  _drawChips(ctx, x, y, rx, ry, s, def) {
+    // Very flat, wave-like shape
+    ctx.fillStyle = def.body;
+    ctx.strokeStyle = def.outline;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(x - rx * 0.9, y - ry * 0.2);
+    ctx.quadraticCurveTo(x - rx * 0.4, y - ry * 0.5, x, y - ry * 0.15);
+    ctx.quadraticCurveTo(x + rx * 0.5, y + ry * 0.2, x + rx * 0.9, y - ry * 0.1);
+    ctx.quadraticCurveTo(x + rx * 0.5, y + ry * 0.5, x, y + ry * 0.25);
+    ctx.quadraticCurveTo(x - rx * 0.5, y + ry * 0.4, x - rx * 0.9, y - ry * 0.2);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+
+    // Ridge lines for "crisp" look
+    ctx.strokeStyle = def.outline + '77';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath(); ctx.moveTo(x - rx * 0.5, y - ry * 0.05); ctx.quadraticCurveTo(x, y + ry * 0.15, x + rx * 0.5, y - ry * 0.05); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x - rx * 0.3, y + ry * 0.05); ctx.quadraticCurveTo(x, y + ry * 0.3, x + rx * 0.3, y + ry * 0.05); ctx.stroke();
+
+    // Golden crispy edges
+    ctx.strokeStyle = '#ffdd66';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(x - rx * 0.6, y, 3, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x + rx * 0.5, y - ry * 0.1, 2.5, 0, Math.PI * 2); ctx.stroke();
+  },
+
+  _drawGolden(ctx, x, y, rx, ry, s, def) {
+    // Shiny golden body with star sparkle
+    ctx.fillStyle = def.body;
+    ctx.strokeStyle = def.outline;
+    ctx.lineWidth = 2;
+
+    // Glow behind
+    ctx.save();
+    ctx.shadowColor = '#ffd700';
+    ctx.shadowBlur = 25 + Math.sin(Date.now() / 200) * 10;
+    ctx.beginPath();
+    ctx.ellipse(x, y, rx + 5, ry + 5, 0, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,215,0,0.15)';
+    ctx.fill();
+    ctx.restore();
+
+    // Body
+    ctx.beginPath();
+    ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+
+    // Shine spot
+    ctx.fillStyle = '#fff8';
+    ctx.beginPath(); ctx.ellipse(x - rx * 0.25, y - ry * 0.25, rx * 0.2, ry * 0.15, -0.5, 0, Math.PI * 2); ctx.fill();
+
+    // Star sparkles
+    const t = Date.now() / 300;
+    ctx.fillStyle = '#fff';
+    for (let i = 0; i < 5; i++) {
+      const angle = t + i * 1.2;
+      const dist = rx + 6 + Math.sin(t * 2 + i) * 3;
+      const sx2 = x + Math.cos(angle) * dist;
+      const sy2 = y + Math.sin(angle) * dist;
+      ctx.beginPath(); ctx.arc(sx2, sy2, 1.2, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // Gold crown hint
+    ctx.fillStyle = '#ffee44';
+    ctx.beginPath();
+    ctx.moveTo(x - rx * 0.35, y - ry * 0.55);
+    ctx.lineTo(x - rx * 0.2, y - ry * 0.85);
+    ctx.lineTo(x, y - ry * 0.65);
+    ctx.lineTo(x + rx * 0.2, y - ry * 0.85);
+    ctx.lineTo(x + rx * 0.35, y - ry * 0.55);
+    ctx.closePath();
+    ctx.fill();
+  },
+
+  _drawShadow(ctx, x, y, rx, ry, s, def) {
+    // Dark body with purple aura
+    ctx.save();
+    ctx.globalAlpha = 0.25 + Math.sin(Date.now() / 400) * 0.1;
+    ctx.beginPath();
+    ctx.arc(x, y, Math.max(rx, ry) + 16, 0, Math.PI * 2);
+    ctx.fillStyle = '#4400aa';
+    ctx.fill();
+    ctx.restore();
+
+    ctx.fillStyle = def.body;
+    ctx.strokeStyle = def.outline;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+
+    // Smoke wisps
+    ctx.strokeStyle = '#6600aa88';
+    ctx.lineWidth=1;
+    const t = Date.now()/500;
+    ctx.beginPath();
+    ctx.moveTo(x-rx, y-ry*0.3);
+    ctx.quadraticCurveTo(x-rx*1.4, y-ry*0.8+Math.sin(t)*3, x-rx*0.6, y-ry*1.1);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x+rx*0.8, y-ry*0.5);
+    ctx.quadraticCurveTo(x+rx*1.3, y-ry*0.2+Math.sin(t+1)*3, x+rx*0.9, y+ry*0.3);
+    ctx.stroke();
+  },
+
+  _drawRainbow(ctx, x, y, rx, ry, s, def) {
+    const t = Date.now() / 60;
+    // Rainbow gradient body
+    const grad = ctx.createRadialGradient(x - rx*0.2, y - ry*0.2, 2, x, y, Math.max(rx, ry));
+    grad.addColorStop(0, '#ff6666');
+    grad.addColorStop(0.2, '#ffaa44');
+    grad.addColorStop(0.4, '#ffdd44');
+    grad.addColorStop(0.6, '#44dd88');
+    grad.addColorStop(0.8, '#4488ff');
+    grad.addColorStop(1, '#aa44ff');
+    ctx.fillStyle = grad;
+    ctx.strokeStyle = `hsl(${t % 360}, 60%, 60%)`;
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+    // Shimmer ring
+    ctx.save();
+    ctx.strokeStyle = `hsl(${(t+180)%360}, 80%, 70%)`;
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.ellipse(x, y, rx + 6, ry + 6, t/20, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+  },
+
+  _drawDevil(ctx, x, y, rx, ry, s, def) {
+    // Body
+    ctx.fillStyle = def.body;
+    ctx.strokeStyle = def.outline;
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+    // Horns — curved, more detailed
+    ctx.fillStyle = '#330000';
+    ctx.strokeStyle = '#550000';
+    ctx.lineWidth = 1;
+    // Left horn
+    ctx.beginPath();
+    ctx.moveTo(x - rx * 0.5, y - ry * 0.5);
+    ctx.quadraticCurveTo(x - rx * 1.1, y - ry * 1.4, x - rx * 0.6, y - ry * 1.6);
+    ctx.quadraticCurveTo(x - rx * 0.3, y - ry * 1.3, x - rx * 0.2, y - ry * 0.55);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    // Right horn
+    ctx.beginPath();
+    ctx.moveTo(x + rx * 0.5, y - ry * 0.5);
+    ctx.quadraticCurveTo(x + rx * 1.1, y - ry * 1.4, x + rx * 0.6, y - ry * 1.6);
+    ctx.quadraticCurveTo(x + rx * 0.3, y - ry * 1.3, x + rx * 0.2, y - ry * 0.55);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+
+    // Small tail
+    ctx.strokeStyle = def.outline;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x + rx * 0.8, y + ry * 0.3);
+    ctx.quadraticCurveTo(x + rx * 1.3, y + ry * 0.1, x + rx * 1.1, y + ry * 0.6);
+    ctx.quadraticCurveTo(x + rx * 1.0, y + ry * 0.9, x + rx * 1.2, y + ry * 0.8);
+    ctx.stroke();
+    // Tail tip (arrow shape)
+    ctx.fillStyle = def.outline;
+    ctx.beginPath();
+    ctx.moveTo(x + rx * 1.2, y + ry * 0.75);
+    ctx.lineTo(x + rx * 1.35, y + ry * 0.85);
+    ctx.lineTo(x + rx * 1.15, y + ry * 0.9);
+    ctx.closePath(); ctx.fill();
+
+    // Fire aura (subtle)
+    ctx.save();
+    ctx.globalAlpha = 0.15 + Math.sin(Date.now()/300)*0.1;
+    ctx.beginPath(); ctx.ellipse(x, y+ry*0.5, rx*1.2, ry*0.4, 0, 0, Math.PI*2);
+    ctx.fillStyle = '#ff4400'; ctx.fill();
+    ctx.restore();
+  },
+
+  _drawEyes(ctx, x, y, s, style) {
+    const eyeOffset = s * 0.28;
+    const eyeY = y - s * 0.12;
+    const eyeSize = Math.max(2, s * 0.12);
+    const pupilSize = Math.max(1, eyeSize * 0.45);
+
+    if (style === 'red') {
+      // Glowing red eyes for shadow
+      ctx.fillStyle = '#ff2222';
+      ctx.shadowColor = '#ff0000';
+      ctx.shadowBlur = 8;
+      ctx.beginPath(); ctx.arc(x - eyeOffset, eyeY, eyeSize, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x + eyeOffset, eyeY, eyeSize, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+      // Pupils
+      ctx.fillStyle = '#000';
+      ctx.beginPath(); ctx.arc(x - eyeOffset, eyeY, pupilSize, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x + eyeOffset, eyeY, pupilSize, 0, Math.PI * 2); ctx.fill();
+    } else if (style === 'angry') {
+      // Angry slanted eyes for devil
+      ctx.fillStyle = '#ffddaa';
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 0.8;
+      // Left eye (slanted \\)
+      ctx.beginPath(); ctx.moveTo(x - eyeOffset - eyeSize, eyeY - eyeSize*0.5); ctx.lineTo(x - eyeOffset + eyeSize, eyeY + eyeSize*0.5); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x - eyeOffset - eyeSize, eyeY + eyeSize*0.5); ctx.lineTo(x - eyeOffset + eyeSize, eyeY - eyeSize*0.5); ctx.stroke();
+      // Right eye
+      ctx.beginPath(); ctx.moveTo(x + eyeOffset - eyeSize, eyeY - eyeSize*0.5); ctx.lineTo(x + eyeOffset + eyeSize, eyeY + eyeSize*0.5); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x + eyeOffset - eyeSize, eyeY + eyeSize*0.5); ctx.lineTo(x + eyeOffset + eyeSize, eyeY - eyeSize*0.5); ctx.stroke();
+    } else if (style === 'shine') {
+      // Golden shine eyes
+      ctx.fillStyle = '#fff8cc';
+      ctx.beginPath(); ctx.arc(x - eyeOffset, eyeY, eyeSize, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x + eyeOffset, eyeY, eyeSize, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#cc9900';
+      ctx.beginPath(); ctx.arc(x - eyeOffset, eyeY, pupilSize, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x + eyeOffset, eyeY, pupilSize, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(x - eyeOffset + 1, eyeY - 1, eyeSize * 0.25, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x + eyeOffset + 1, eyeY - 1, eyeSize * 0.25, 0, Math.PI * 2); ctx.fill();
+    } else if (style === 'star') {
+      // Star-shaped pupils for rainbow
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(x - eyeOffset, eyeY, eyeSize, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x + eyeOffset, eyeY, eyeSize, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = `hsl(${(Date.now()/10)%360}, 80%, 50%)`;
+      this._drawStar(ctx, x - eyeOffset, eyeY, 4, eyeSize * 0.5, eyeSize * 0.25);
+      this._drawStar(ctx, x + eyeOffset, eyeY, 4, eyeSize * 0.5, eyeSize * 0.25);
+    } else if (style === 'squint') {
+      // Squinted happy eyes (like ^ ^)
+      ctx.strokeStyle = '#222';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(x - eyeOffset, eyeY, eyeSize * 0.8, -0.8, -0.2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(x + eyeOffset, eyeY, eyeSize * 0.8, -0.8, -0.2); ctx.stroke();
+    } else if (style === 'wide') {
+      // Wide excited eyes
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(x - eyeOffset, eyeY, eyeSize * 1.1, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x + eyeOffset, eyeY, eyeSize * 1.1, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#333';
+      ctx.beginPath(); ctx.arc(x - eyeOffset + 0.5, eyeY, eyeSize * 0.5, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x + eyeOffset + 0.5, eyeY, eyeSize * 0.5, 0, Math.PI * 2); ctx.fill();
+    } else {
+      // Normal eyes
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(x - eyeOffset, eyeY, eyeSize, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x + eyeOffset, eyeY, eyeSize, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#222';
+      ctx.beginPath(); ctx.arc(x - eyeOffset, eyeY, pupilSize, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x + eyeOffset, eyeY, pupilSize, 0, Math.PI * 2); ctx.fill();
+      // Eye shine
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(x - eyeOffset + 1, eyeY - 1, Math.max(0.8, eyeSize * 0.2), 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x + eyeOffset + 1, eyeY - 1, Math.max(0.8, eyeSize * 0.2), 0, Math.PI * 2); ctx.fill();
+    }
+  },
+
+  _drawStar(ctx, cx, cy, spikes, outerR, innerR) {
+    let rot = Math.PI / 2 * 3;
+    let step = Math.PI / spikes;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - outerR);
+    for (let i = 0; i < spikes; i++) {
+      ctx.lineTo(cx + Math.cos(rot) * outerR, cy + Math.sin(rot) * outerR);
+      rot += step;
+      ctx.lineTo(cx + Math.cos(rot) * innerR, cy + Math.sin(rot) * innerR);
+      rot += step;
+    }
+    ctx.lineTo(cx, cy - outerR);
+    ctx.closePath();
+    ctx.fill();
   },
 
   renderWeapon(ctx, camera, player) {
