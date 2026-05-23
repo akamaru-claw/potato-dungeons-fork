@@ -37,11 +37,41 @@ const CONFIG = {
 
   // Dungeon themes per floor range
   THEMES: [
-    { name: 'Stein-Dungeon', floorMin: 1, floorMax: 9, color: '#4a4a5a', wallColor: '#3a3a5a', floorColor: '#1e1e32', enemies: ['skeleton', 'slime', 'bat'] },
-    { name: 'Höhle', floorMin: 10, floorMax: 19, color: '#3a5a3a', wallColor: '#2a4a28', floorColor: '#142a14', enemies: ['spider', 'cave_crawler', 'slime'] },
-    { name: 'Festung', floorMin: 20, floorMax: 29, color: '#6a5a4a', wallColor: '#4a3a22', floorColor: '#2a1e10', enemies: ['knight', 'archer', 'skeleton'] },
-    { name: 'Nether', floorMin: 30, floorMax: 39, color: '#6a2a2a', wallColor: '#4a1a1a', floorColor: '#2a0e0e', enemies: ['blaze', 'wither_skeleton', 'ghast'] },
-    { name: 'End', floorMin: 40, floorMax: 999, color: '#3a3a6a', wallColor: '#1a1a4a', floorColor: '#0e0e28', enemies: ['enderman', 'shulker', 'dragon_minion'] },
+    {
+      name: 'Stein-Dungeon', floorMin: 1, floorMax: 9,
+      color: '#5a5a6a', wallColor: '#4a4a5a', floorColor: '#2a2a3a',
+      wallType: 'stone_brick', floorType: 'stone_tile',
+      decor: { pillars: 0.15, chains: 0.05, runes: 0.1, moss: 0.05, bones: 0.05, cracks: 0.15 },
+      enemies: ['skeleton', 'slime', 'bat']
+    },
+    {
+      name: 'Höhle', floorMin: 10, floorMax: 19,
+      color: '#3a4a3a', wallColor: '#2a3a2a', floorColor: '#1a2a18',
+      wallType: 'rough_stone', floorType: 'earth',
+      decor: { pillars: 0.1, crystals: 0.25, stalactites: 0.1, mushrooms: 0.15, veins: 0.2, bones: 0.1 },
+      enemies: ['spider', 'cave_crawler', 'slime']
+    },
+    {
+      name: 'Festung', floorMin: 20, floorMax: 29,
+      color: '#5a5a4a', wallColor: '#4a4030', floorColor: '#302820',
+      wallType: 'fortress_brick', floorType: 'stone_slab',
+      decor: { pillars: 0.35, chains: 0.25, banners: 0.05, metal_grating: 0.15, runes: 0.05, spikes: 0.1 },
+      enemies: ['knight', 'archer', 'skeleton']
+    },
+    {
+      name: 'Nether', floorMin: 30, floorMax: 39,
+      color: '#5a2a1a', wallColor: '#4e1818', floorColor: '#2a0e0e',
+      wallType: 'obsidian', floorType: 'netherrack',
+      decor: { lava: 0.25, chains: 0.3, skulls: 0.15, flames: 0.1, spikes: 0.2, glow: 0.15 },
+      enemies: ['blaze', 'wither_skeleton', 'ghast']
+    },
+    {
+      name: 'End', floorMin: 40, floorMax: 999,
+      color: '#2a2a5a', wallColor: '#181844', floorColor: '#0e0e22',
+      wallType: 'endframe', floorType: 'endstone',
+      decor: { void_tendrils: 0.15, crystals: 0.2, runes: 0.3, pillars: 0.05, glow: 0.3, particles: 0.2 },
+      enemies: ['enderman', 'shulker', 'dragon_minion']
+    },
   ],
 
   // Enemy definitions

@@ -446,8 +446,7 @@ const Dungeon = {
   _renderTileTexture(tiles, theme, ts) {
     const canvas = document.createElement('canvas');
     const cols = this.room.cols, rows = this.room.rows;
-    canvas.width = cols * ts;
-    canvas.height = rows * ts;
+    canvas.width = cols * ts; canvas.height = rows * ts;
     const c = canvas.getContext('2d');
     let rng = cols * 31 + rows * 17;
     function rand() { rng = (rng * 1664525 + 1013904223) & 0xFFFFFFFF; return (rng >>> 0) / 4294967296; }
@@ -459,47 +458,17 @@ const Dungeon = {
         const v = rand() * 0.06 - 0.03;
 
         if (tile === 0) {
-          // ── Floor: stone tiles with cracks + moss ──
-          c.fillStyle = this._adjustColor(theme.floorColor, v);
-          c.fillRect(x, y, ts, ts);
-          for (let k = 0, n = Math.floor(rand() * 3); k < n; k++) {
-            c.fillStyle = this._adjustColor(theme.floorColor, v - 0.04);
-            c.fillRect(x + rand() * ts, y + rand() * ts, rand() * ts * 0.6 + 2, rand() * 2 + 1);
-          }
-          if (rand() < 0.1) {
-            c.fillStyle = 'rgba(60,120,50,0.12)';
-            c.beginPath(); c.arc(x + rand() * ts, y + rand() * ts, rand() * ts * 0.4 + 4, 0, Math.PI * 2); c.fill();
-          }
-          c.strokeStyle = 'rgba(0,0,0,0.08)'; c.lineWidth = 1;
-          c.strokeRect(x + 0.5, y + 0.5, ts - 1, ts - 1);
-          if (rand() < 0.3) {
-            c.fillStyle = 'rgba(0,0,0,0.06)';
-            const s2 = Math.floor(rand() * 4);
-            if (s2 === 0) c.fillRect(x, y, ts, 3);
-            else if (s2 === 1) c.fillRect(x, y + ts - 3, ts, 3);
-            else if (s2 === 2) c.fillRect(x, y, 3, ts);
-            else c.fillRect(x + ts - 3, y, 3, ts);
-          }
+          // ── FLOOR: biome-specific flooring ──
+          this._drawFloorTile(c, x, y, ts, theme, v, rand);
+          // Decorative elements on floor
+          this._drawFloorDecor(c, x, y, ts, theme, rand);
         } else if (tile === 1) {
-          // ── Wall: brick pattern + 3D depth ──
-          c.fillStyle = this._adjustColor(theme.wallColor, v);
-          c.fillRect(x, y, ts, ts);
-          const bH = ts / 4, bW = ts / 2;
-          c.strokeStyle = 'rgba(0,0,0,0.15)'; c.lineWidth = 1;
-          for (let br = 0; br < 4; br++) {
-            const off = br % 2 === 0 ? 0 : bW / 2;
-            for (let bc = -1; bc < 3; bc++) {
-              const bx = x + bc * bW + off, by2 = y + br * bH;
-              c.strokeRect(bx + 0.5, by2 + 0.5, bW - 1, bH - 1);
-              c.fillStyle = this._adjustColor(theme.wallColor, rand() * 0.05 - 0.025);
-              c.fillRect(bx + 1, by2 + 1, bW - 2, bH - 2);
-            }
-          }
-          c.fillStyle = 'rgba(255,255,255,0.12)'; c.fillRect(x, y, ts, 2);
-          c.fillStyle = 'rgba(255,255,255,0.06)'; c.fillRect(x, y, ts, ts * 0.15);
-          c.fillStyle = 'rgba(0,0,0,0.1)'; c.fillRect(x, y + ts * 0.85, ts, ts * 0.15);
+          // ── WALL: biome-specific wall ──
+          this._drawWallTile(c, x, y, ts, theme, v, rand);
+          // Wall decorations
+          this._drawWallDecor(c, x, y, ts, theme, rand);
         } else if (tile === 2) {
-          // ── Obstacle: boulder with gradient + cracks ──
+          // ── OBSTACLE: boulder with gradient + cracks ──
           c.fillStyle = this._adjustColor(theme.wallColor, v);
           c.fillRect(x, y, ts, ts);
           const cx = x + ts / 2, cy = y + ts / 2, rad = ts * 0.38;
@@ -510,7 +479,7 @@ const Dungeon = {
           gr.addColorStop(0.7, this._adjustColor(theme.wallColor, -0.02));
           gr.addColorStop(1, this._adjustColor(theme.wallColor, -0.08));
           c.fillStyle = gr; c.beginPath(); c.arc(cx, cy, rad, 0, Math.PI * 2); c.fill();
-          c.strokeStyle = 'rgba(0,0,0,0.2)'; c.lineWidth = 1;
+          c.strokeStyle = 'rgba(0,0,0,0.25)'; c.lineWidth = 1;
           for (let k = 0; k < 2; k++) {
             c.beginPath(); c.moveTo(cx + rand() * rad * 0.5 - rad * 0.25, cy + rand() * rad * 0.5 - rad * 0.25);
             c.lineTo(cx + rand() * rad - rad * 0.5, cy + rand() * rad - rad * 0.5); c.stroke();
@@ -520,6 +489,392 @@ const Dungeon = {
       }
     }
     return canvas;
+  },
+
+  _drawFloorTile(c, x, y, ts, theme, v, rand) {
+    const ft = theme.floorType || 'stone_tile';
+    // Base fill
+    c.fillStyle = this._adjustColor(theme.floorColor, v);
+    c.fillRect(x, y, ts, ts);
+
+    if (ft === 'stone_tile') {
+      c.strokeStyle = 'rgba(0,0,0,0.1)'; c.lineWidth = 1;
+      // Grid
+      c.strokeRect(x + 0.5, y + 0.5, ts - 1, ts - 1);
+      // Subtle tile lines
+      c.beginPath(); c.moveTo(x + ts * 0.33, y); c.lineTo(x + ts * 0.33, y + ts); c.stroke();
+      c.beginPath(); c.moveTo(x + ts * 0.66, y); c.lineTo(x + ts * 0.66, y + ts); c.stroke();
+      c.beginPath(); c.moveTo(x, y + ts * 0.33); c.lineTo(x + ts, y + ts * 0.33); c.stroke();
+      c.beginPath(); c.moveTo(x, y + ts * 0.66); c.lineTo(x + ts, y + ts * 0.66); c.stroke();
+      // Cracks
+      if (rand() < 0.4) {
+        c.strokeStyle = 'rgba(0,0,0,0.12)'; c.lineWidth = 1;
+        const cx2 = x + rand() * ts, cy2 = y + rand() * ts;
+        c.beginPath(); c.moveTo(cx2, cy2); c.lineTo(cx2 + (rand()-0.5)*ts*0.4, cy2 + (rand()-0.5)*ts*0.4); c.stroke();
+      }
+    } else if (ft === 'stone_slab') {
+      // Uneven slabs
+      const slabH = ts * 0.45;
+      c.fillStyle = this._adjustColor(theme.floorColor, v + 0.03);
+      c.fillRect(x + 1, y + 1, ts - 2, slabH);
+      c.fillStyle = this._adjustColor(theme.floorColor, v - 0.03);
+      c.fillRect(x + 1, y + slabH, ts - 2, ts - slabH - 1);
+      c.strokeStyle = 'rgba(0,0,0,0.1)'; c.lineWidth = 1;
+      c.strokeRect(x + 1, y + slabH - 0.5, ts - 2, 2);
+    } else if (ft === 'earth') {
+      // Earthy ground with small stones
+      c.fillStyle = this._adjustColor(theme.floorColor, v);
+      c.fillRect(x, y, ts, ts);
+      // Small pebbles
+      if (rand() < 0.6) {
+        c.fillStyle = this._adjustColor(theme.wallColor, v * 0.5);
+        const px = x + rand() * (ts - 4), py = y + rand() * (ts - 4);
+        c.beginPath(); c.arc(px + 2, py + 2, 1.5 + rand() * 2, 0, Math.PI * 2); c.fill();
+      }
+      // Grass tuft
+      if (rand() < 0.08) {
+        c.strokeStyle = 'rgba(60,140,50,0.25)'; c.lineWidth = 1.5;
+        const gx = x + 3 + rand() * (ts - 6);
+        for (let gi = 0; gi < 3; gi++) {
+          c.beginPath(); c.moveTo(gx + gi * 2, y + ts - 2); c.lineTo(gx + gi * 2 + (rand()-0.5)*3, y + ts - 6 - rand()*4); c.stroke();
+        }
+      }
+    } else if (ft === 'netherrack') {
+      // Rough, fiery ground
+      c.fillStyle = this._adjustColor(theme.floorColor, v);
+      c.fillRect(x, y, ts, ts);
+      // Rough texture
+      for (let i = 0; i < 5; i++) {
+        c.fillStyle = this._adjustColor(theme.wallColor, v + (rand() - 0.5) * 0.1);
+        c.beginPath(); c.arc(x + rand() * ts, y + rand() * ts, 2 + rand() * 3, 0, Math.PI * 2); c.fill();
+      }
+      // Small glow cracks
+      if (rand() < 0.15) {
+        c.fillStyle = 'rgba(255,100,30,0.4)'; c.strokeStyle = 'rgba(255,60,20,0.5)'; c.lineWidth = 1;
+        const lx = x + rand() * (ts - 4), ly = y + rand() * (ts - 4);
+        c.beginPath(); c.moveTo(lx, ly); c.lineTo(lx + (rand()-0.5)*6, ly + (rand()-0.5)*6); c.stroke();
+        c.beginPath(); c.arc(lx, ly, 2, 0, Math.PI * 2); c.fill();
+      }
+    } else if (ft === 'endstone') {
+      // Endstone tiles with subtle cracks
+      c.fillStyle = this._adjustColor(theme.floorColor, v);
+      c.fillRect(x, y, ts, ts);
+      c.strokeStyle = 'rgba(0,0,0,0.07)'; c.lineWidth = 1;
+      // Uneven tiles
+      const tw = ts * 0.5, th = ts * 0.5;
+      c.strokeRect(x + 1, y + 1, tw, th); c.strokeRect(x + tw - 1, y + 1, ts - tw, th);
+      c.strokeRect(x + 1, y + th - 1, tw, th); c.strokeRect(x + tw - 1, y + th - 1, ts - tw, ts - th);
+      // Glow dots
+      if (rand() < 0.12) {
+        c.fillStyle = 'rgba(160,120, 255, 0.35)';
+        c.beginPath(); c.arc(x + 3 + rand() * (ts - 6), y + 3 + rand() * (ts - 6), 1.5, 0, Math.PI * 2); c.fill();
+      }
+    }
+
+    // Generic floor edge shadow
+    c.strokeStyle = 'rgba(0,0,0,0.06)'; c.lineWidth = 1;
+    if (rand() < 0.2) {
+      c.fillStyle = 'rgba(0,0,0,0.05)';
+      const s2 = Math.floor(rand() * 4);
+      if (s2 === 0) c.fillRect(x, y, ts, 2);
+      else if (s2 === 1) c.fillRect(x, y + ts - 2, ts, 2);
+      else if (s2 === 2) c.fillRect(x, y, 2, ts);
+      else c.fillRect(x + ts - 2, y, 2, ts);
+    }
+  },
+
+  _drawFloorDecor(c, x, y, ts, theme, rand) {
+    if (!theme.decor) return;
+    const d = theme.decor;
+
+    // Pillars (large floor decorations)
+    if (d.pillars && rand() < d.pillars) {
+      const px = x + ts * 0.3, py = y + ts * 0.2, pw = ts * 0.4, ph = ts * 0.6;
+      c.fillStyle = this._adjustColor(theme.wallColor, 0.05);
+      c.fillRect(px, py, pw, ph);
+      c.strokeStyle = 'rgba(0,0,0,0.12)'; c.lineWidth = 1;
+      c.strokeRect(px + 0.5, py + 0.5, pw - 1, ph - 1);
+      // Base
+      c.fillStyle = 'rgba(0,0,0,0.1)'; c.fillRect(px - 2, py + ph - 2, pw + 4, 4);
+      // Top
+      c.fillStyle = 'rgba(255,255,255,0.06)'; c.fillRect(px - 1, py - 1, pw + 2, 3);
+    }
+
+    // Chains (hanging from ceiling shadows on floor)
+    if (d.chains && rand() < d.chains) {
+      c.fillStyle = 'rgba(0,0,0,0.12)';
+      const lw = 3;
+      for (let ci = 0; ci < 3; ci++) {
+        const lx = x + 4 + ci * 5;
+        c.beginPath(); c.arc(lx, y + 4 + ci * 3, 2, 0, Math.PI * 2); c.fill();
+      }
+    }
+
+    // Crystals (cave/end crystals)
+    if (d.crystals && rand() < d.crystals) {
+      const cx3 = x + ts * 0.5, cy3 = y + ts * 0.6;
+      c.fillStyle = 'rgba(120,220,255,0.45)';
+      c.beginPath(); c.moveTo(cx3, cy3 - ts * 0.25);
+      c.lineTo(cx3 + ts * 0.12, cy3 + ts * 0.1);
+      c.lineTo(cx3 - ts * 0.08, cy3 + ts * 0.15);
+      c.closePath(); c.fill();
+      c.fillStyle = 'rgba(180,255,255,0.3)';
+      c.beginPath(); c.moveTo(cx3 - 2, cy3 - ts * 0.2);
+      c.lineTo(cx3 + 3, cy3 + ts * 0.05);
+      c.lineTo(cx3 - 4, cy3 + ts * 0.12);
+      c.closePath(); c.fill();
+    }
+
+    // Lava (nether only)
+    if (d.lava && rand() < d.lava) {
+      c.fillStyle = 'rgba(255,60,10,0.5)';
+      c.beginPath(); c.ellipse(x + ts * 0.5, y + ts * 0.45, ts * 0.35, ts * 0.15, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = 'rgba(255,180,40,0.6)'; c.beginPath();
+      c.ellipse(x + ts * 0.5 - 2, y + ts * 0.42, ts * 0.2, ts * 0.08, 0, 0, Math.PI * 2); c.fill();
+    }
+
+    // Moss (green patches)
+    if (d.moss && rand() < d.moss) {
+      c.fillStyle = 'rgba(40,100,40,0.15)';
+      c.beginPath(); c.arc(x + rand() * ts, y + rand() * ts, rand() * ts * 0.4 + 4, 0, Math.PI * 2); c.fill();
+    }
+
+    // Bones (scatter)
+    if (d.bones && rand() < d.bones) {
+      c.strokeStyle = 'rgba(200,190,160,0.3)'; c.lineWidth = 1.5;
+      const bx2 = x + 2 + rand() * (ts - 4), by2 = y + 2 + rand() * (ts - 4);
+      c.beginPath(); c.moveTo(bx2, by2); c.lineTo(bx2 + 4 + rand() * 3, by2 + (rand()-0.5)*2); c.stroke();
+      // Joint
+      c.fillStyle = 'rgba(200,190,160,0.25)'; c.beginPath(); c.arc(bx2, by2, 1.5, 0, Math.PI * 2); c.fill();
+    }
+
+    // Skulls (nether)
+    if (d.skulls && rand() < d.skulls) {
+      const sx = x + ts * 0.5, sy = y + ts * 0.45;
+      c.fillStyle = 'rgba(200,200,160,0.35)';
+      c.beginPath(); c.arc(sx, sy, ts * 0.12, 0, Math.PI * 2); c.fill();
+      c.fillStyle = 'rgba(0,0,0,0.3)';
+      c.beginPath(); c.arc(sx - 1, sy - 1, 1, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.arc(sx + 1, sy - 1, 1, 0, Math.PI * 2); c.fill();
+    }
+
+    // Runes (glowing symbols)
+    if (d.runes && rand() < d.runes) {
+      c.fillStyle = 'rgba(160,120,255,0.35)';
+      const rx2 = x + 3 + rand() * (ts - 6), ry2 = y + 3 + rand() * (ts - 6);
+      c.font = '8px Outfit'; c.textAlign = 'center'; c.textBaseline = 'middle';
+      c.fillText(String.fromCharCode(0x16A0 + Math.floor(rand() * 30)), rx2, ry2);
+    }
+
+    // Glow (ambient glow patches)
+    if (d.glow && rand() < d.glow) {
+      const gx2 = x + rand() * ts, gy2 = y + rand() * ts;
+      c.beginPath(); c.arc(gx2, gy2, 4 + rand() * 4, 0, Math.PI * 2);
+      c.fillStyle = 'rgba(180,160,255,0.12)'; c.fill();
+    }
+
+    // Banners (fortress only)
+    if (d.banners && rand() < d.banners) {
+      const bx3 = x + ts * 0.5, by3 = y + 1;
+      c.fillStyle = 'rgba(180,60,30,0.3)';
+      c.fillRect(bx3 - 3, by3, 6, ts * 0.4);
+      c.fillStyle = 'rgba(200,200,160,0.2)';
+      c.fillRect(bx3 - 1, by3 - 2, 2, 3);
+    }
+
+    // Veins (cave ore veins)
+    if (d.veins && rand() < d.veins) {
+      c.strokeStyle = 'rgba(200,180,140,0.2)'; c.lineWidth = 1.5;
+      const vx = x + rand() * ts, vy = y + rand() * ts;
+      c.beginPath(); c.moveTo(vx, vy);
+      c.lineTo(vx + (rand()-0.5)*ts*0.5, vy + (rand()-0.5)*ts*0.5); c.stroke();
+    }
+
+    // Spikes
+    if (d.spikes && rand() < d.spikes) {
+      const sx2 = x + ts * 0.5, sy2 = y + ts * 0.8;
+      c.fillStyle = 'rgba(160,160,170,0.3)';
+      c.beginPath(); c.moveTo(sx2, sy2); c.lineTo(sx2 - 3, sy2 - ts * 0.3); c.lineTo(sx2 + 3, sy2 - ts * 0.35); c.closePath(); c.fill();
+    }
+
+    // Stalactites / mushrooms
+    if (d.stalactites && rand() < d.stalactites) {
+      c.fillStyle = 'rgba(140,140,140,0.25)';
+      const stx = x + rand() * ts, sty = y;
+      c.beginPath(); c.moveTo(stx, sty); c.lineTo(stx - 2, sty + 5); c.lineTo(stx + 3, sty + 4); c.closePath(); c.fill();
+    }
+    if (d.mushrooms && rand() < d.mushrooms) {
+      c.fillStyle = 'rgba(180,60,60,0.35)';
+      const mx = x + rand() * ts, my = y + ts - 2;
+      c.beginPath(); c.arc(mx, my - 3, 3, Math.PI, 0); c.fill();
+      c.strokeStyle = 'rgba(120,80,50,0.3)'; c.lineWidth = 1;
+      c.beginPath(); c.moveTo(mx, my - 3); c.lineTo(mx, my); c.stroke();
+    }
+
+    // Metal grating (fortress)
+    if (d.metal_grating && rand() < d.metal_grating) {
+      c.fillStyle = 'rgba(60,60,60,0.25)';
+      for (let gi = 0; gi < 3; gi++) {
+        c.fillRect(x + gi * (ts/3), y, 1, ts);
+        c.fillRect(x, y + gi * (ts/3), ts, 1);
+      }
+    }
+
+    // Flames
+    if (d.flames && rand() < d.flames) {
+      c.fillStyle = 'rgba(255,80,20,0.4)';
+      const fx2 = x + ts * 0.5, fy2 = y + ts * 0.5;
+      c.beginPath(); c.moveTo(fx2, fy2 + 3); c.lineTo(fx2 - 2, fy2 - 4); c.lineTo(fx2 + 2, fy2 - 2); c.closePath(); c.fill();
+    }
+
+    // Void tendrils (end)
+    if (d.void_tendrils && rand() < d.void_tendrils) {
+      c.strokeStyle = 'rgba(100,60,200,0.15)'; c.lineWidth = 1.5;
+      const tx2 = x + ts * 0.5, ty2 = y + ts * 0.5;
+      c.beginPath(); c.moveTo(tx2, ty2);
+      c.quadraticCurveTo(tx2 + (rand()-0.5)*ts, ty2 + (rand()-0.5)*ts, tx2 + (rand()-0.5)*ts*0.7, ty2 + (rand()-0.5)*ts*0.7); c.stroke();
+    }
+
+    // Particles (end floating)
+    if (d.particles && rand() < d.particles) {
+      c.fillStyle = 'rgba(180,160,255,0.2)';
+      c.beginPath(); c.arc(x + rand() * ts, y + rand() * ts, 1 + rand(), 0, Math.PI * 2); c.fill();
+    }
+  },
+
+  _drawWallTile(c, x, y, ts, theme, v, rand) {
+    const wt = theme.wallType || 'stone_brick';
+    // Base wall fill
+    c.fillStyle = this._adjustColor(theme.wallColor, v);
+    c.fillRect(x, y, ts, ts);
+
+    if (wt === 'stone_brick') {
+      this._drawBrickPattern(c, x, y, ts, theme, v, rand, 4, 2);
+    } else if (wt === 'rough_stone') {
+      // Uneven rough stone blocks
+      c.fillStyle = this._adjustColor(theme.wallColor, v + (rand() - 0.5) * 0.06);
+      c.fillRect(x + 1, y + 1, ts - 2, ts - 2);
+      // Cracks and rough patches
+      c.strokeStyle = 'rgba(0,0,0,0.08)'; c.lineWidth = 1;
+      for (let i = 0; i < 3; i++) {
+        const crx = x + rand() * ts, cry = y + rand() * ts;
+        c.beginPath(); c.moveTo(crx, cry); c.lineTo(crx + (rand()-0.5)*6, cry + (rand()-0.5)*6); c.stroke();
+      }
+      // Moss patches on walls
+      if (rand() < 0.1) {
+        c.fillStyle = 'rgba(40,100,40,0.12)';
+        c.beginPath(); c.arc(x + rand() * ts, y + rand() * ts, rand() * ts * 0.3 + 3, 0, Math.PI * 2); c.fill();
+      }
+    } else if (wt === 'fortress_brick') {
+      this._drawBrickPattern(c, x, y, ts, theme, v, rand, 3, 2.5);
+      // Metal reinforcements
+      if (rand() < 0.25) {
+        c.fillStyle = 'rgba(80,70,60,0.25)';
+        c.fillRect(x, y + ts * 0.4, ts, ts * 0.2);
+      }
+      // Rust spots
+      if (rand() < 0.15) {
+        c.fillStyle = 'rgba(160,80,30,0.15)';
+        c.beginPath(); c.arc(x + rand() * ts, y + rand() * ts, 3 + rand() * 2, 0, Math.PI * 2); c.fill();
+      }
+    } else if (wt === 'obsidian') {
+      // Smooth dark obsidian with subtle facets
+      c.fillStyle = this._adjustColor(theme.wallColor, v);
+      c.fillRect(x, y, ts, ts);
+      // Facet lines
+      c.strokeStyle = 'rgba(255,255,255,0.03)'; c.lineWidth = 1;
+      c.beginPath(); c.moveTo(x, y); c.lineTo(x + ts, y + ts); c.stroke();
+      c.beginPath(); c.moveTo(x + ts, y); c.lineTo(x, y + ts); c.stroke();
+      // Tiny lava glow dots
+      if (rand() < 0.08) {
+        c.fillStyle = 'rgba(255,60,20,0.4)';
+        c.beginPath(); c.arc(x + rand() * ts, y + rand() * ts, 1.5, 0, Math.PI * 2); c.fill();
+      }
+    } else if (wt === 'endframe') {
+      // Obsidian frame with endstone center
+      c.fillStyle = this._adjustColor(theme.wallColor, v);
+      c.fillRect(x, y, ts, ts);
+      // Center block
+      const pad = ts * 0.12;
+      c.fillStyle = this._adjustColor(theme.floorColor, v + 0.05);
+      c.fillRect(x + pad, y + pad, ts - pad * 2, ts - pad * 2);
+      c.strokeStyle = 'rgba(180,160,255,0.15)'; c.lineWidth = 1;
+      c.strokeRect(x + pad + 0.5, y + pad + 0.5, ts - pad * 2 - 1, ts - pad * 2 - 1);
+      // Glowing rune lines
+      if (rand() < 0.3) {
+        c.strokeStyle = 'rgba(160,120,255,0.2)'; c.lineWidth = 1;
+        const cx = x + ts * 0.5, cy = y + ts * 0.5;
+        c.beginPath(); c.moveTo(cx - 3, cy); c.lineTo(cx + 3, cy); c.stroke();
+        c.beginPath(); c.moveTo(cx, cy - 3); c.lineTo(cx, cy + 3); c.stroke();
+      }
+    }
+
+    // Generic wall depth
+    c.fillStyle = 'rgba(255,255,255,0.1)'; c.fillRect(x, y, ts, 2);
+    c.fillStyle = 'rgba(255,255,255,0.05)'; c.fillRect(x, y, ts, ts * 0.12);
+    c.fillStyle = 'rgba(0,0,0,0.08)'; c.fillRect(x, y + ts * 0.88, ts, ts * 0.12);
+  },
+
+  _drawBrickPattern(c, x, y, ts, theme, v, rand, rows, cols) {
+    const bH = ts / rows, bW = ts / cols;
+    c.strokeStyle = 'rgba(0,0,0,0.12)'; c.lineWidth = 1;
+    for (let br = 0; br < rows; br++) {
+      const off = br % 2 === 0 ? 0 : bW / 2;
+      for (let bc = -1; bc < Math.ceil(cols) + 1; bc++) {
+        const bx = x + bc * bW + off, by2 = y + br * bH;
+        c.strokeRect(bx + 0.5, by2 + 0.5, bW - 1, bH - 1);
+        c.fillStyle = this._adjustColor(theme.wallColor, rand() * 0.04 - 0.02);
+        c.fillRect(bx + 1, by2 + 1, bW - 2, bH - 2);
+      }
+    }
+  },
+
+  _drawWallDecor(c, x, y, ts, theme, rand) {
+    if (!theme.decor) return;
+    const d = theme.decor;
+
+    // Pillars (wall-mounted half-pillars)
+    if (d.pillars && rand() < d.pillars * 0.6) {
+      c.fillStyle = this._adjustColor(theme.wallColor, 0.03);
+      c.fillRect(x + ts * 0.75, y + 2, ts * 0.2, ts - 4);
+      c.strokeStyle = 'rgba(0,0,0,0.08)'; c.lineWidth = 1;
+      c.strokeRect(x + ts * 0.75 + 0.5, y + 2.5, ts * 0.2 - 1, ts - 5);
+    }
+
+    // Chains hanging from wall
+    if (d.chains && rand() < d.chains * 0.5) {
+      c.fillStyle = 'rgba(100,100,100,0.2)';
+      const cw = 2;
+      for (let ci = 0; ci < 4; ci++) {
+        const ly = y + 3 + ci * (ts / 5);
+        c.fillRect(x + ts * 0.3, ly, cw, ts / 5 - 1);
+      }
+    }
+
+    // Crystals on walls
+    if (d.crystals && rand() < d.crystals * 0.4) {
+      const crx = x + ts * 0.8, cry = y + ts * 0.5;
+      c.fillStyle = 'rgba(140,220,255,0.4)';
+      c.beginPath(); c.moveTo(crx, cry); c.lineTo(crx + 5, cry - 4); c.lineTo(crx + 3, cry + 3); c.closePath(); c.fill();
+    }
+
+    // Skulls mounted on wall
+    if (d.skulls && rand() < d.skulls * 0.5) {
+      const skx = x + ts * 0.5, sky = y + ts * 0.35;
+      c.fillStyle = 'rgba(200,200,170,0.35)';
+      c.beginPath(); c.arc(skx, sky, ts * 0.12, 0, Math.PI * 2); c.fill();
+      c.fillStyle = 'rgba(0,0,0,0.25)';
+      c.beginPath(); c.arc(skx - 1, sky - 1, 1, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.arc(skx + 1, sky - 1, 1, 0, Math.PI * 2); c.fill();
+    }
+
+    // Banners (hanging from wall top)
+    if (d.banners && rand() < d.banners * 0.8) {
+      c.fillStyle = 'rgba(180,60,30,0.35)';
+      c.fillRect(x + ts * 0.3, y + 2, ts * 0.4, ts * 0.5);
+      c.fillStyle = 'rgba(200,200,160,0.25)';
+      c.fillRect(x + ts * 0.3, y, ts * 0.4, 3);
+    }
   },
 
   _generateTorchPositions(tiles, ts) {
