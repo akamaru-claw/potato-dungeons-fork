@@ -87,6 +87,32 @@ const Input = {
 
   init(canvas) {
     this._canvas = canvas;
+
+    // Mobile dash button handler (DOM element, much more reliable than canvas hit-testing)
+    const dashBtn = document.getElementById('mobile-dash-btn');
+    if (dashBtn) {
+      dashBtn.addEventListener('touchstart', e => {
+        e.preventDefault();
+        if (Game.state === 'PLAYING' && Game.player) {
+          if (Game.player.dashCooldown <= 0) {
+            Game.player.dash();
+            if (navigator.vibrate) navigator.vibrate(25);
+          } else {
+            UI.showToast(`Dash: ${(Game.player.dashCooldown).toFixed(1)}s`, 'error');
+          }
+        }
+      }, { passive: false });
+      dashBtn.addEventListener('mousedown', e => {
+        e.preventDefault();
+        if (Game.state === 'PLAYING' && Game.player) {
+          if (Game.player.dashCooldown <= 0) {
+            Game.player.dash();
+          } else {
+            UI.showToast(`Dash: ${(Game.player.dashCooldown).toFixed(1)}s`, 'error');
+          }
+        }
+      });
+    }
     window.addEventListener('keydown', e => {
       this.keys[e.code] = true;
       if (['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Escape'].includes(e.code)) e.preventDefault();
