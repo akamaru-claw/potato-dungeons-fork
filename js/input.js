@@ -7,10 +7,13 @@ const Input = {
   // Check if a click/tap hit a weapon slot in the HUD
   _checkDashButtonClick(screenX, screenY) {
     if (!Game.player || !this.isMobile()) return false;
+    const rect = this._canvas.getBoundingClientRect();
     const pad = 15, size = 56;
-    const h = this._canvas.height;
-    const dashX = pad, dashY = h - pad - size;
-    if (screenX >= dashX && screenX <= dashX + size && screenY >= dashY && screenY <= dashY + size) {
+    const dpr = this._canvas.height / rect.height; // logical / css
+    // Convert screen (logical) to CSS pixels to match renderHUD
+    const cssX = screenX / dpr, cssY = screenY / dpr;
+    const dashX = pad, dashY = rect.height - pad - size;
+    if (cssX >= dashX && cssX <= dashX + size && cssY >= dashY && cssY <= dashY + size) {
       if (Game.player.dashCooldown <= 0) {
         Game.player.dash();
         // Haptic feedback if available
