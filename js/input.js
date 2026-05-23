@@ -5,6 +5,24 @@
 const Input = {
 
   // Check if a click/tap hit a weapon slot in the HUD
+  _checkDashButtonClick(screenX, screenY) {
+    if (!Game.player || !this.isMobile()) return false;
+    const pad = 15, size = 56;
+    const h = this._canvas.height;
+    const dashX = pad, dashY = h - pad - size;
+    if (screenX >= dashX && screenX <= dashX + size && screenY >= dashY && screenY <= dashY + size) {
+      if (Game.player.dashCooldown <= 0) {
+        Game.player.dash();
+        // Haptic feedback if available
+        if (navigator.vibrate) navigator.vibrate(25);
+      } else {
+        UI.showToast(`Dash: ${(Game.player.dashCooldown).toFixed(1)}s`, 'error');
+      }
+      return true;
+    }
+    return false;
+  },
+
   _checkWeaponSlotClick(screenX, screenY) {
     if (!Game.player || !Game.player.weapons || Game.player.weapons.length === 0) return false;
     const isMobile = this.isMobile();
@@ -14,9 +32,12 @@ const Input = {
     const canvas = this._canvas;
     const h = canvas.height;
     const slotsY = h - pad - slotSize;
+    // Push slots right if dash button exists (mobile)
+    const dashBtnSize = isMobile ? 56 : 0;
+    const slotsOffsetX = isMobile ? dashBtnSize + pad + 8 : 0;
 
     for (let i = 0; i < Game.player.weapons.length; i++) {
-      const sx = pad + i * (slotSize + slotPad);
+      const sx = pad + slotsOffsetX + i * (slotSize + slotPad);
       if (screenX >= sx && screenX <= sx + slotSize && screenY >= slotsY && screenY <= slotsY + slotSize) {
         const panel = document.getElementById('weapon-panel');
         // Toggle: close if same weapon, open if different
@@ -135,6 +156,8 @@ const Input = {
       const t0 = e.changedTouches[0];
       const tx = (t0.clientX - rect.left) * (canvas.width / rect.width);
       const ty = (t0.clientY - rect.top) * (canvas.height / rect.height);
+      // Check dash button tap first
+      if (this._checkDashButtonClick(tx, ty)) return;
       if (this._checkWeaponSlotClick(tx, ty)) return;
     }
 

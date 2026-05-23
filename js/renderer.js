@@ -140,13 +140,49 @@ const Renderer = {
     ctx.fillText(`💀 ${player.kills}`, w - pad, isMobile ? 35 : 30);
     ctx.textAlign = 'left';
 
+    // Dash button + cooldown (mobile only)
+    if (isMobile) {
+      const dashBtnSize = 56;
+      const dashX = pad, dashY = h - pad - dashBtnSize; // left bottom
+      const dashCD = Math.max(0, player.dashCooldown || 0);
+      const dashMax = player.charKey === 'potato_fries' ? 0.75 : 1.5;
+      const cdRatio = 1 - Math.min(dashCD / dashMax, 1);
+
+      // Button bg
+      ctx.fillStyle = dashCD <= 0 ? 'rgba(80,120,255,0.8)' : 'rgba(40,50,80,0.7)';
+      ctx.strokeStyle = dashCD <= 0 ? '#88aaff' : '#445577';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(dashX + dashBtnSize/2, dashY + dashBtnSize/2, dashBtnSize/2, 0, Math.PI*2);
+      ctx.fill(); ctx.stroke();
+
+      // Cooldown radial overlay
+      if (dashCD > 0) {
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        ctx.beginPath();
+        ctx.moveTo(dashX + dashBtnSize/2, dashY + dashBtnSize/2);
+        ctx.arc(dashX + dashBtnSize/2, dashY + dashBtnSize/2, dashBtnSize/2, -Math.PI/2, -Math.PI/2 + (1-cdRatio) * Math.PI * 2);
+        ctx.closePath(); ctx.fill();
+      }
+
+      // Lightning icon
+      ctx.fillStyle = dashCD <= 0 ? '#ffffff' : '#7788aa';
+      ctx.font = 'bold 24px Outfit'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('⚡', dashX + dashBtnSize/2, dashY + dashBtnSize/2);
+      ctx.textBaseline = 'alphabetic';
+
+      // Dash button hit area for input.js
+      this._dashBtn = { x: dashX, y: dashY, size: dashBtnSize };
+    }
+
     // Weapon slots (bottom left)
     const slotSize = isMobile ? 46 : 42;
     const slotPad = 5;
+    // Push slots right if dash button exists
+    const slotsOffsetX = (isMobile && this._dashBtn) ? this._dashBtn.size + pad + 8 : 0;
     const slotsY = h - pad - slotSize;
     for (let i = 0; i < player.weapons.length; i++) {
       const w2 = player.weapons[i];
-      const sx = pad + i * (slotSize + slotPad);
+      const sx = pad + slotsOffsetX + i * (slotSize + slotPad);
       const level = (w2.tier || 0) + 1;
       const tierColors = ['#888', '#44cc66', '#4488ff', '#bb55ee', '#ff8800', '#ff4444', '#ff2222', '#ff00ff'];
       const tierColor = tierColors[Math.min(w2.tier, tierColors.length - 1)];
