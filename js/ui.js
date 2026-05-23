@@ -538,11 +538,13 @@ const UI = {
         document.getElementById('highscore-submit').style.display = 'none';
         document.getElementById('highscore-saved').style.display = 'block';
         document.getElementById('highscore-rank').textContent = data.rank ? `Platz ${data.rank}!` : '';
+        this.showToast(data.rank ? `🏆 Highscore gespeichert — Platz ${data.rank}!` : 'Highscore gespeichert!', 'success');
       }
     })
     .catch(e => {
       console.error('Highscore save failed:', e);
       if (btn) btn.textContent = '❌ Fehler';
+      this.showToast('Highscore konnte nicht gespeichert werden', 'error');
       setTimeout(() => { if (btn) btn.textContent = '💾 Speichern'; }, 2000);
     });
   },
@@ -1040,10 +1042,12 @@ const UI = {
     const result = await Account.login(username, password);
     if (result.ok) {
       errEl.textContent = '';
+      this.showToast(`Willkommen zurück, ${username}!`, 'success');
       this.showMenu();
       this.updateMenuAccount();
     } else {
       errEl.textContent = result.error || 'Anmeldung fehlgeschlagen';
+      this.showToast(result.error || 'Anmeldung fehlgeschlagen', 'error');
     }
   },
 
@@ -1056,6 +1060,7 @@ const UI = {
     const result = await Account.register(username, password);
     if (result.ok) {
       errEl.textContent = '';
+      this.showToast('Konto erstellt! Willkommen.', 'success');
       this.showMenu();
       this.updateMenuAccount();
     } else {
@@ -1320,8 +1325,9 @@ const UI = {
             Account._save();
             this._renderShopItems(tab);
             this.updateMenuAccount();
+            this.showToast(type === 'trail' ? 'Trail gekauft!' : 'Skin gekauft!', 'success');
           } else {
-            alert(result.error || 'Kauf fehlgeschlagen');
+            this.showToast(result.error || 'Kauf fehlgeschlagen', 'error');
           }
         } else if (action === 'buy-char') {
           const result = await Account.buyItem(key);
@@ -1331,8 +1337,9 @@ const UI = {
             Account._save();
             this._renderShopItems(tab);
             this.updateMenuAccount();
+            this.showToast('Charakter freigeschaltet!', 'success');
           } else {
-            alert(result.error || 'Kauf fehlgeschlagen');
+            this.showToast(result.error || 'Kauf fehlgeschlagen', 'error');
           }
         } else if (action === 'select-char') {
           Account.selectedCharacter = key;
@@ -1438,6 +1445,7 @@ const UI = {
 
   _handleLogout() {
     Account.logout();
+    this.showToast('Abgemeldet', 'info');
     this.showMenu();
     this.updateMenuAccount();
   },
@@ -1459,9 +1467,11 @@ const UI = {
         Account.username = newName;
         Account._save();
         errEl.textContent = '';
+        this.showToast('Name geändert!', 'success');
         this.showProfile();
       } else {
         errEl.textContent = data.error || 'Fehler';
+        this.showToast(data.error || 'Fehler', 'error');
       }
     } catch(e) { errEl.textContent = 'Netzwerkfehler'; }
   },
@@ -1482,9 +1492,25 @@ const UI = {
       const data = await res.json();
       if (data.ok) {
         errEl.textContent = '✅ Passwort geändert!';
+        this.showToast('Passwort geändert!', 'success');
       } else {
         errEl.textContent = data.error || 'Fehler';
+        this.showToast(data.error || 'Fehler', 'error');
       }
     } catch(e) { errEl.textContent = 'Netzwerkfehler'; }
-  }
+  },
+
+  // Toast notification system
+  showToast(message, type = 'info', duration = 2500) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => {
+      toast.classList.add('toast-out');
+      setTimeout(() => toast.remove(), 300);
+    }, duration);
+  },
 };
