@@ -416,7 +416,7 @@ const Dungeon = {
     const theme = this.room.theme;
 
     // ── 1) Render Tiles with procedural textures (cached) ──
-    const cacheKey = `${this.room.cols}x${this.room.rows}_${ts}_${theme.floorColor}_${theme.wallColor}`;
+    const cacheKey = `${this.room.cols}x${this.room.rows}_${ts}_${theme.floorColor}_${theme.wallColor}_f${this.currentFloor}`;
     if (this._tileCacheKey !== cacheKey) {
       this._tileCache = this._renderTileTexture(tiles, theme, ts);
       this._tileCacheKey = cacheKey;
