@@ -10,6 +10,7 @@ const Game = {
   multiplayerDoorTriggered: false,
   _mpSyncTimer: 0,
   _lastEnemyCount: -1,
+  _magnetUnlimited: false,
 
   async init() {
     const canvas = document.getElementById('game-canvas');
@@ -33,6 +34,7 @@ const Game = {
     this.xpOrbs = [];
     this.multiplayerDoorTriggered = false;
     this._lastEnemyCount = -1;
+    this._magnetUnlimited = false;
     EnemySystem.clear();
     ProjectileSystem.clear();
     ParticleSystem.clear();
@@ -63,6 +65,7 @@ const Game = {
     this.xpOrbs = [];
     this.multiplayerDoorTriggered = false;
     this._lastEnemyCount = -1;
+    this._magnetUnlimited = false;
     EnemySystem.clear();
     ProjectileSystem.clear();
     ParticleSystem.clear();
@@ -228,6 +231,7 @@ const Game = {
       FloatingText.add(this.player.x, this.player.y - 20, '😈 -1 Max HP', '#ff4466', 14, 1.5);
     }
     ParticleSystem.heal(this.player.x, this.player.y);
+    this._magnetUnlimited = false;
     Dungeon.startFloor(nextFloor, this.player);
 
     const fitZoomW = Renderer._width / (Dungeon.room?.pixelWidth || CONFIG.ROOM_WIDTH);
@@ -360,6 +364,14 @@ const Game = {
               if (charDef?.ability === 'gold_rush' && isCrit) {
                 this.xpOrbs.push({ x: e.x, y: e.y - 10, value: Math.ceil(Math.random() * 3) + 1, isGold: true });
               }
+
+              // Magnet pull: when last enemy dies, unlimited magnet range
+              if (EnemySystem.enemies.filter(e2 => e2.alive).length <= 1) {
+                this._magnetUnlimited = true;
+                // Visual feedback: burst particles at player position
+                ParticleSystem.levelUpBurst(player.x, player.y);
+                FloatingText.add(player.x, player.y - 30, '🧲 MAGNET', '#ffdd44', 18, 1.2);
+              }
             }
             break;
           }
@@ -418,12 +430,14 @@ const Game = {
 
     // === HOST ONLY: XP + Dungeon logic ===
     if (isHost) {
+      const magnetRange = this._magnetUnlimited ? Infinity : 140;
+      const magnetSpeed = this._magnetUnlimited ? 800 : 350;
       for (let i = this.xpOrbs.length - 1; i >= 0; i--) {
         const orb = this.xpOrbs[i];
         const dist = Utils.vecDist(orb, player);
-        if (dist < 140) {
+        if (dist < magnetRange) {
           const dir = Utils.vecNormalize(Utils.vecSub(player, orb));
-          orb.x += dir.x * 350 * dt; orb.y += dir.y * 350 * dt;
+          orb.x += dir.x * magnetSpeed * dt; orb.y += dir.y * magnetSpeed * dt;
         }
         if (dist < player.size + 10) {
           if (orb.isGold) { player.gold += orb.value; ParticleSystem.goldCollect(orb.x, orb.y); }
@@ -442,6 +456,11 @@ const Game = {
           }
           this.xpOrbs.splice(i, 1);
         }
+      }
+
+      // Reset magnet once all orbs collected
+      if (this._magnetUnlimited && this.xpOrbs.length === 0) {
+        this._magnetUnlimited = false;
       }
 
       const result = Dungeon.update(dt, player);
