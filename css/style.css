@@ -114,8 +114,8 @@ body.boss-announce { animation: bossShake 0.6s ease; }
 .reward-card:nth-child(6) { animation-delay: 0.18s; }
 .reward-card:nth-child(7) { animation-delay: 0.21s; }
 .reward-card:nth-child(8) { animation-delay: 0.24s; }
-.reward-card.picked { opacity: 0.65; border-color: var(--gold); box-shadow: 0 0 12px rgba(232,184,75,0.3); }
-.reward-card.picked-locked { opacity: 0.4; pointer-events: none; }
+.reward-card.picked { opacity: 0.55; border-color: var(--gold) !important; box-shadow: 0 0 16px rgba(232,184,75,0.4), inset 0 0 8px rgba(232,184,75,0.15); transform: scale(0.97); }
+.reward-card.picked-locked { opacity: 0.35; pointer-events: none; }
 .reward-card:active { transform: scale(0.94); }
 .reward-card.rarity-common { border-color: var(--rarity-common); }
 .reward-card.rarity-uncommon { border-color: var(--rarity-uncommon); }

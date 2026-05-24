@@ -798,17 +798,20 @@ const UI = {
       `;
 
       // Unified press handling: short tap = toggle, long press = tooltip
-      let pressTimer = null;
+      let holdTimer = null;
+      let hoverTimer = null;
       let longPressFired = false;
       card.addEventListener('pointerdown', (e) => {
+        clearTimeout(holdTimer);
+        clearTimeout(hoverTimer);
         longPressFired = false;
-        pressTimer = setTimeout(() => {
+        holdTimer = setTimeout(() => {
           longPressFired = true;
           this._showRewardTooltip(i, reward, card);
         }, 400);
       });
       card.addEventListener('pointerup', () => {
-        clearTimeout(pressTimer);
+        clearTimeout(holdTimer);
         if (!longPressFired) {
           // Short tap: toggle selection, hide any tooltip
           this._hideRewardTooltip();
@@ -819,22 +822,25 @@ const UI = {
         }
       });
       card.addEventListener('pointerleave', () => {
-        clearTimeout(pressTimer);
+        clearTimeout(holdTimer);
+        clearTimeout(hoverTimer);
         longPressFired = false;
         this._hideRewardTooltip();
       });
       card.addEventListener('pointercancel', () => {
-        clearTimeout(pressTimer);
+        clearTimeout(holdTimer);
+        clearTimeout(hoverTimer);
         longPressFired = false;
         this._hideRewardTooltip();
       });
-      // Desktop hover: instant tooltip after short delay
+      // Desktop hover: tooltip after delay (separate timer from hold)
       card.addEventListener('mouseenter', () => {
-        pressTimer = setTimeout(() => {
+        clearTimeout(hoverTimer);
+        hoverTimer = setTimeout(() => {
           this._showRewardTooltip(i, reward, card);
-        }, 350);
+        }, 500);
       });
-      card.addEventListener('mouseleave', () => { clearTimeout(pressTimer); this._hideRewardTooltip(); });
+      card.addEventListener('mouseleave', () => { clearTimeout(hoverTimer); this._hideRewardTooltip(); });
       container.appendChild(card);
     });
     // Update pick counter
@@ -937,18 +943,11 @@ const UI = {
     const idx = this._selectedRewards.indexOf(index);
     const card = document.getElementById(`reward-card-${index}`);
     if (idx >= 0) {
-      // Deselect — clear ALL visual states
+      // Deselect
       this._selectedRewards.splice(idx, 1);
       delete this._rewardModes[index];
       if (card) {
         card.classList.remove('picked');
-        card.style.opacity = '';
-        card.style.pointerEvents = '';
-        card.style.borderColor = '';
-        card.style.boxShadow = '';
-        card.style.transform = '';
-        // Force style recalc to flush any lingering hover/active states on mobile
-        void card.offsetHeight;
       }
       this._updateRewardInfo();
       return;
@@ -969,7 +968,7 @@ const UI = {
     this._selectedRewards.push(index);
     if (!this._rewardModes) this._rewardModes = {};
     this._rewardModes[index] = reward.type === 'weapon' ? 'new' : 'normal';
-    if (card) { card.classList.add('picked'); card.style.opacity = '0.65'; }
+    if (card) card.classList.add('picked');
     this._updateRewardInfo();
   },
 
@@ -981,7 +980,7 @@ const UI = {
     if (!this._rewardModes) this._rewardModes = {};
     this._rewardModes[index] = 'upgrade';
     const card = document.getElementById(`reward-card-${index}`);
-    if (card) { card.classList.add('picked'); card.style.opacity = '0.65'; }
+    if (card) card.classList.add('picked');
     this._pendingWeaponPickIndex = null;
     this.hideWeaponChoiceDialog();
     this._updateRewardInfo();
@@ -995,7 +994,7 @@ const UI = {
     if (!this._rewardModes) this._rewardModes = {};
     this._rewardModes[index] = 'new';
     const card = document.getElementById(`reward-card-${index}`);
-    if (card) { card.classList.add('picked'); card.style.opacity = '0.65'; }
+    if (card) card.classList.add('picked');
     this._pendingWeaponPickIndex = null;
     this.hideWeaponChoiceDialog();
     this._updateRewardInfo();
@@ -1045,9 +1044,7 @@ const UI = {
   _markCardPicked(index) {
     const card = document.getElementById(`reward-card-${index}`);
     if (card) {
-      card.classList.add('picked');
-      card.style.opacity = '0.4';
-      card.style.pointerEvents = 'none';
+      card.classList.add('picked-locked');
     }
   },
 
