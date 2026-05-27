@@ -7,254 +7,213 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🃏</text></svg>">
     <style>
         :root {
-            --bg: #1a472a;
-            --felt: #1e5c35;
-            --card-bg: #fff;
-            --card-shadow: rgba(0,0,0,0.4);
-            --accent: #ffd700;
-            --danger: #e74c3c;
-            --trump: #e74c3c;
-            --text: #eee;
-            --text-dim: #9ab;
-            --btn: #2d8a4e;
-            --btn-hover: #35a05a;
+            --bg: #1a472a; --felt: #1e5c35; --card-bg: #fff;
+            --card-shadow: rgba(0,0,0,0.4); --accent: #ffd700;
+            --danger: #e74c3c; --trump: #e74c3c; --text: #eee;
+            --text-dim: #9ab; --btn: #2d8a4e; --btn-hover: #35a05a;
+            --info: #3498db;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            overflow: hidden;
+            background: var(--bg); color: var(--text);
+            min-height: 100vh; overflow-x: hidden;
             touch-action: manipulation;
         }
-        #game-table {
-            width: 100vw; height: 100vh;
-            background: radial-gradient(ellipse at center, var(--felt) 0%, var(--bg) 100%);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-        }
-        /* TOP BAR */
-        .top-bar {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 6px 12px;
-            background: rgba(0,0,0,0.3);
-            font-size: 0.85rem;
-            z-index: 10;
-        }
-        .top-bar .trump-suit { font-size: 1.3rem; }
-        .top-bar .deck-count { color: var(--text-dim); }
-        .top-bar .btn-icon {
-            background: none; border: none; color: var(--text); font-size: 1.2rem;
-            cursor: pointer; padding: 4px 8px; border-radius: 6px;
-        }
-        .top-bar .btn-icon:hover { background: rgba(255,255,255,0.1); }
-
-        /* OPPONENT AREA */
-        .opponent-area {
-            flex: 0 0 auto;
-            display: flex; flex-direction: column; align-items: center;
-            padding: 4px 0;
-        }
-        .opponent-name {
-            font-size: 0.8rem; color: var(--accent); margin-bottom: 2px;
-        }
-        .opponent-hand {
-            display: flex; justify-content: center; gap: 2px;
-            min-height: 50px;
-        }
-        .card-back {
-            width: 36px; height: 52px;
-            background: linear-gradient(135deg, #c0392b, #8e2424);
-            border-radius: 4px; border: 1px solid #a93226;
-            box-shadow: 0 1px 3px var(--card-shadow);
-            position: relative;
-        }
-        .card-back::after {
-            content: ''; position: absolute; inset: 3px;
-            border: 1px solid rgba(255,255,255,0.15); border-radius: 2px;
-        }
-
-        /* TABLE AREA */
-        .table-area {
-            flex: 1 1 auto;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 8px;
-            position: relative;
-            min-height: 120px;
-        }
-        .attack-pairs {
-            display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
-            max-width: 95vw;
-        }
-        .pair {
-            display: flex; flex-direction: column; align-items: center; gap: 2px;
-            position: relative;
-        }
-        .pair .attack-card, .pair .defend-card {
-            position: relative;
-        }
-        .pair .defend-card {
-            margin-top: -30px;
-        }
-
-        /* PLAYER AREA */
-        .player-area {
-            flex: 0 0 auto;
-            display: flex; flex-direction: column; align-items: center;
-            padding: 4px 0 8px;
-        }
-        .player-hand {
-            display: flex; justify-content: center; gap: 3px; flex-wrap: wrap;
-            max-width: 95vw;
-            padding: 4px;
-        }
-        .player-actions {
-            display: flex; gap: 8px; margin-top: 4px;
-        }
-
-        /* CARDS */
-        .card {
-            width: 52px; height: 76px;
-            background: var(--card-bg);
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            box-shadow: 0 2px 5px var(--card-shadow);
-            display: flex; flex-direction: column;
-            justify-content: space-between;
-            padding: 2px 4px;
-            cursor: pointer;
-            transition: transform 0.15s, box-shadow 0.15s;
-            user-select: none;
-            position: relative;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-        }
-        .card.selected {
-            transform: translateY(-12px);
-            box-shadow: 0 4px 15px rgba(255,215,0,0.6);
-            border-color: var(--accent);
-        }
-        .card.playable:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 4px 10px rgba(255,215,0,0.4);
-        }
-        .card.not-playable {
-            opacity: 0.5;
-            cursor: default;
-        }
-        .card .top { font-size: 0.7rem; font-weight: 700; line-height: 1; }
-        .card .center { font-size: 1.4rem; text-align: center; line-height: 1; }
-        .card .bottom { font-size: 0.7rem; font-weight: 700; line-height: 1; text-align: right; }
-        .card.red { color: #c0392b; }
-        .card.black { color: #1a1a2e; }
-        .card.trump-card { border-color: var(--trump); box-shadow: 0 2px 8px rgba(231,76,60,0.4); }
-        .card .trump-badge {
-            position: absolute; top: -6px; right: -6px;
-            background: var(--trump); color: #fff;
-            font-size: 0.55rem; padding: 1px 3px;
-            border-radius: 3px; font-weight: 700;
-        }
-
-        .card.table-card {
-            cursor: default;
-            width: 46px; height: 68px;
-            font-size: 0.65rem;
-        }
-        .card.table-card .center { font-size: 1.2rem; }
-
-        /* DECK+TRUMP */
-        .deck-area {
-            position: absolute; top: 42px; right: 12px;
-            display: flex; flex-direction: column; align-items: center; gap: 2px;
-            z-index: 5;
-        }
-        .deck-trump {
-            width: 46px; height: 68px;
-            background: var(--card-bg);
-            border-radius: 5px; border: 1px solid #ccc;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.6rem;
-            transform: rotate(90deg);
-            box-shadow: 0 2px 5px var(--card-shadow);
-        }
-        .deck-pile {
-            position: relative; width: 46px; height: 68px;
-        }
-        .deck-pile .card-back {
-            width: 46px; height: 68px;
-            position: absolute; top: 0; left: 0;
-        }
-
-        /* BUTTONS */
-        .btn {
-            padding: 8px 20px; border-radius: 8px; border: none;
-            font-size: 0.95rem; font-weight: 600; cursor: pointer;
-            transition: background 0.15s;
-        }
-        .btn-attack { background: var(--btn); color: #fff; }
-        .btn-attack:hover { background: var(--btn-hover); }
-        .btn-defend { background: #2980b9; color: #fff; }
-        .btn-defend:hover { background: #3498db; }
-        .btn-take { background: var(--danger); color: #fff; }
-        .btn-take:hover { background: #c0392b; }
-        .btn-pass { background: #555; color: #ddd; }
-        .btn-pass:hover { background: #666; }
-        .btn:disabled { opacity: 0.4; cursor: default; }
-
-        /* STATUS */
-        .status-msg {
-            text-align: center; font-size: 0.95rem;
-            color: var(--accent); padding: 4px;
-            min-height: 1.5em;
-            font-weight: 600;
-        }
-
-        /* MENU SCREEN */
+        /* MENU */
         .menu-screen {
             position: absolute; inset: 0;
             background: radial-gradient(ellipse at center, var(--felt) 0%, var(--bg) 100%);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 100;
+            z-index: 100; padding: 16px;
         }
         .menu-screen.hidden { display: none; }
-        .menu-screen h1 {
-            font-size: 2.5rem; margin-bottom: 0.3rem;
-        }
+        .menu-screen h1 { font-size: 2.5rem; }
         .menu-screen h1 .accent { color: var(--accent); }
-        .menu-screen .subtitle { color: var(--text-dim); margin-bottom: 2rem; }
-        .menu-options { display: flex; flex-direction: column; gap: 12px; margin-bottom: 1.5rem; }
-        .menu-options label { display: flex; align-items: center; gap: 8px; color: var(--text-dim); font-size: 0.9rem; }
-        .menu-options select, .menu-options input[type="checkbox"] {
+        .menu-screen .subtitle { color: var(--text-dim); margin-bottom: 1.5rem; }
+        .menu-btn {
+            padding: 12px 32px; font-size: 1.1rem; font-weight: 700;
+            background: var(--btn); color: #fff; border: none;
+            border-radius: 10px; cursor: pointer; margin: 6px;
+            transition: background 0.15s; min-width: 200px;
+        }
+        .menu-btn:hover { background: var(--btn-hover); }
+        .menu-btn.secondary { background: #555; }
+        .menu-btn.secondary:hover { background: #666; }
+        .menu-btn.danger { background: var(--danger); }
+        .menu-btn.danger:hover { background: #c0392b; }
+        .menu-input {
+            padding: 10px 16px; font-size: 1.1rem; border-radius: 8px;
+            border: 1px solid #555; background: rgba(0,0,0,0.3);
+            color: #fff; width: 220px; text-align: center;
+        }
+        .menu-input::placeholder { color: var(--text-dim); }
+        .menu-label { color: var(--text-dim); font-size: 0.9rem; margin: 8px 0 4px; }
+        .menu-row { display: flex; gap: 8px; align-items: center; margin: 4px 0; }
+        .menu-opt { display: flex; align-items: center; gap: 6px; color: var(--text-dim); font-size: 0.9rem; margin: 4px 0; }
+        .menu-opt select, .menu-opt input[type="checkbox"] {
             background: rgba(0,0,0,0.3); color: #fff; border: 1px solid #555;
             padding: 4px 8px; border-radius: 4px;
         }
-        .menu-btn {
-            padding: 12px 40px; font-size: 1.2rem; font-weight: 700;
-            background: var(--btn); color: #fff; border: none;
-            border-radius: 10px; cursor: pointer;
+        .room-code-big {
+            font-size: 2.5rem; letter-spacing: 8px; font-weight: 900;
+            color: var(--accent); margin: 12px 0; user-select: all;
+        }
+        .lobby-players { margin: 12px 0; }
+        .lobby-player {
+            padding: 6px 12px; margin: 4px; background: rgba(255,255,255,0.05);
+            border-radius: 6px; font-size: 0.95rem; display: inline-block;
+        }
+        .lobby-player.host { border: 1px solid var(--accent); color: var(--accent); }
+        .copy-btn {
+            padding: 4px 12px; background: var(--info); color: #fff;
+            border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem;
+        }
+
+        /* GAME TABLE */
+        #game-table {
+            width: 100vw; height: 100vh;
+            background: radial-gradient(ellipse at center, var(--felt) 0%, var(--bg) 100%);
+            position: relative; display: none;
+            flex-direction: column;
+        }
+        .top-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 6px 12px; background: rgba(0,0,0,0.3);
+            font-size: 0.85rem; z-index: 10;
+        }
+        .top-bar .trump-suit { font-size: 1.3rem; }
+        .top-bar .deck-count { color: var(--text-dim); margin-left: 6px; }
+        .top-bar .room-info { color: var(--text-dim); font-size: 0.75rem; }
+        .top-bar .btn-icon {
+            background: none; border: none; color: var(--text);
+            font-size: 1.1rem; cursor: pointer; padding: 4px 8px; border-radius: 6px;
+        }
+        .top-bar .btn-icon:hover { background: rgba(255,255,255,0.1); }
+
+        /* OPPONENTS */
+        .opponents-row {
+            display: flex; justify-content: center; flex-wrap: wrap;
+            gap: 12px; padding: 4px 8px;
+        }
+        .opp-box {
+            display: flex; flex-direction: column; align-items: center;
+            padding: 4px 10px; background: rgba(0,0,0,0.15); border-radius: 8px;
+            min-width: 80px; border: 1px solid transparent;
+        }
+        .opp-box.attacker { border-color: var(--accent); }
+        .opp-box.defender { border-color: var(--info); }
+        .opp-name { font-size: 0.75rem; color: var(--accent); font-weight: 600; }
+        .opp-cards { display: flex; gap: 1px; margin-top: 2px; }
+        .opp-count { font-size: 0.7rem; color: var(--text-dim); }
+
+        .card-back {
+            width: 24px; height: 36px;
+            background: linear-gradient(135deg, #c0392b, #8e2424);
+            border-radius: 3px; border: 1px solid #a93226;
+            box-shadow: 0 1px 2px var(--card-shadow);
+        }
+
+        /* TABLE */
+        .table-area {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 8px; min-height: 100px;
+        }
+        .status-msg {
+            text-align: center; font-size: 0.95rem;
+            color: var(--accent); padding: 4px;
+            min-height: 1.4em; font-weight: 600;
+        }
+        .attack-pairs {
+            display: flex; flex-wrap: wrap; justify-content: center;
+            gap: 6px; max-width: 95vw; margin-top: 8px;
+        }
+        .pair {
+            display: flex; flex-direction: column; align-items: center; gap: 1px;
+        }
+        .pair .defend-card-slot { margin-top: -24px; min-height: 48px; }
+
+        /* CARDS */
+        .card {
+            width: 48px; height: 70px;
+            background: var(--card-bg); border-radius: 5px;
+            border: 1.5px solid #ccc; box-shadow: 0 2px 5px var(--card-shadow);
+            display: flex; flex-direction: column;
+            justify-content: space-between; padding: 2px 4px;
+            cursor: pointer; transition: transform 0.12s, box-shadow 0.12s;
+            user-select: none; position: relative;
+        }
+        .card.selected {
+            transform: translateY(-14px);
+            box-shadow: 0 6px 18px rgba(255,215,0,0.7);
+            border-color: var(--accent); z-index: 5;
+        }
+        .card.playable:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 4px 12px rgba(255,215,0,0.5);
+        }
+        .card.not-playable { opacity: 0.45; cursor: default; }
+        .card .top { font-size: 0.65rem; font-weight: 700; line-height: 1; }
+        .card .center { font-size: 1.3rem; text-align: center; line-height: 1; }
+        .card .bottom { font-size: 0.65rem; font-weight: 700; line-height: 1; text-align: right; }
+        .card.red { color: #c0392b; }
+        .card.black { color: #1a1a2e; }
+        .card.trump-card { border-color: var(--trump); box-shadow: 0 2px 8px rgba(231,76,60,0.4); }
+        .card .trump-badge {
+            position: absolute; top: -5px; right: -5px;
+            background: var(--trump); color: #fff;
+            font-size: 0.5rem; padding: 1px 3px;
+            border-radius: 3px; font-weight: 700;
+        }
+        .card.table-card {
+            cursor: default; width: 44px; height: 64px;
+        }
+        .card.table-card .center { font-size: 1.1rem; }
+
+        /* PLAYER AREA */
+        .player-area {
+            flex: 0 0 auto; display: flex; flex-direction: column;
+            align-items: center; padding: 4px 0 10px;
+        }
+        .player-hand {
+            display: flex; justify-content: center; gap: 2px;
+            flex-wrap: wrap; max-width: 95vw; padding: 4px;
+        }
+        .player-actions { display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; justify-content: center; }
+        .btn {
+            padding: 8px 18px; border-radius: 8px; border: none;
+            font-size: 0.9rem; font-weight: 600; cursor: pointer;
             transition: background 0.15s;
         }
-        .menu-btn:hover { background: var(--btn-hover); }
+        .btn-attack { background: var(--btn); color: #fff; }
+        .btn-attack:hover { background: var(--btn-hover); }
+        .btn-defend { background: var(--info); color: #fff; }
+        .btn-defend:hover { background: #2e86c1; }
+        .btn-take { background: var(--danger); color: #fff; }
+        .btn-take:hover { background: #c0392b; }
+        .btn-pass { background: #555; color: #ddd; }
+        .btn-pass:hover { background: #666; }
+        .btn:disabled { opacity: 0.35; cursor: default; }
+        .btn-transfer { background: #8e44ad; color: #fff; }
+        .btn-transfer:hover { background: #9b59b6; }
 
-        /* RESULT OVERLAY */
+        /* RESULT */
         .result-overlay {
             position: absolute; inset: 0;
-            background: rgba(0,0,0,0.75);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.8);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
             z-index: 200;
         }
         .result-overlay.hidden { display: none; }
-        .result-overlay h2 { font-size: 2rem; margin-bottom: 0.5rem; }
-        .result-overlay .result-emoji { font-size: 4rem; margin-bottom: 0.5rem; }
-        .result-overlay .result-sub { color: var(--text-dim); margin-bottom: 1.5rem; }
-        .result-overlay .btn { background: var(--btn); color: #fff; }
-        .result-overlay .btn:hover { background: var(--btn-hover); }
+        .result-overlay .result-emoji { font-size: 4rem; margin-bottom: 8px; }
+        .result-overlay h2 { font-size: 1.8rem; margin-bottom: 8px; }
+        .result-overlay .result-sub { color: var(--text-dim); margin-bottom: 16px; }
 
-        /* HOW TO PLAY */
+        /* RULES */
         .rules-overlay {
-            position: absolute; inset: 0;
-            background: rgba(0,0,0,0.85);
+            position: absolute; inset: 0; background: rgba(0,0,0,0.85);
             display: flex; align-items: center; justify-content: center;
             z-index: 300; padding: 16px;
         }
@@ -266,816 +225,739 @@
         }
         .rules-box h2 { color: var(--accent); margin-bottom: 10px; font-size: 1.3rem; }
         .rules-box h3 { color: #7dcea0; margin-top: 12px; }
-        .rules-box .close-btn {
+        .close-btn {
             display: block; margin: 16px auto 0; padding: 8px 24px;
             background: var(--btn); color: #fff; border: none;
             border-radius: 8px; cursor: pointer; font-size: 1rem;
         }
 
-        /* RESPONSIVE */
+        /* LOADING */
+        .loading { color: var(--text-dim); font-size: 0.9rem; margin: 8px; }
+        .spinner { display: inline-block; width: 16px; height: 16px;
+            border: 2px solid var(--text-dim); border-top-color: var(--accent);
+            border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 6px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* CONNECTING OVERLAY */
+        .connecting {
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 150; color: var(--accent); font-size: 1.2rem;
+        }
+        .connecting.hidden { display: none; }
+
         @media (max-width: 400px) {
-            .card { width: 42px; height: 62px; font-size: 0.6rem; }
-            .card .center { font-size: 1.1rem; }
-            .card.table-card { width: 38px; height: 56px; }
+            .card { width: 40px; height: 60px; }
+            .card .center { font-size: 1rem; }
+            .card.table-card { width: 36px; height: 54px; }
+            .card-back { width: 20px; height: 30px; }
+            .menu-screen h1 { font-size: 1.8rem; }
         }
     </style>
 </head>
 <body>
 
-<!-- MENU -->
+<!-- MAIN MENU -->
 <div id="menu" class="menu-screen">
     <h1>🃏 <span class="accent">Durak</span></h1>
-    <p class="subtitle">Das russische Kartenspiel</p>
-    <div class="menu-options">
-        <label>Spieler: <select id="opt-players">
-            <option value="2">2 Spieler</option>
-            <option value="3">3 Spieler</option>
-            <option value="4" selected>4 Spieler</option>
-        </select></label>
-        <label><input type="checkbox" id="opt-36" checked> 36-Karten-Deck (6–Ass)</label>
-        <label><input type="checkbox" id="opt-transfer"> Transfer-Variante (Perevodnoy)</label>
+    <p class="subtitle">Das russische Kartenspiel — jetzt mit Freunden!</p>
+    <div style="margin-top:20px;">
+        <button class="menu-btn" id="btn-create">🏠 Raum erstellen</button>
+        <button class="menu-btn secondary" id="btn-join-menu">🚪 Raum beitreten</button>
+        <button class="menu-btn secondary" id="btn-solo">🤖 Solo gegen KI</button>
     </div>
-    <button class="menu-btn" id="btn-start">▶ Spielen</button>
-    <button class="menu-btn" style="background:#555;margin-top:8px;font-size:0.95rem;" id="btn-rules">📖 Spielregeln</button>
+    <button class="menu-btn secondary" style="margin-top:20px;font-size:0.9rem;" id="btn-rules">📖 Spielregeln</button>
 </div>
 
-<!-- HOW TO PLAY -->
+<!-- CREATE ROOM -->
+<div id="create-room" class="menu-screen hidden">
+    <h1>🏠 Raum erstellen</h1>
+    <div class="menu-label">Dein Name:</div>
+    <input class="menu-input" id="create-name" placeholder="Name" maxlength="15" value="">
+    <div class="menu-opt"><select id="create-players">
+        <option value="2">2 Spieler</option>
+        <option value="3">3 Spieler</option>
+        <option value="4" selected>4 Spieler</option>
+    </select></div>
+    <div class="menu-opt"><input type="checkbox" id="create-transfer"> <span>Transfer-Variante</span></div>
+    <div style="margin-top:12px;">
+        <button class="menu-btn" id="btn-create-go">Erstellen</button>
+        <button class="menu-btn secondary" id="btn-create-back">← Zurück</button>
+    </div>
+</div>
+
+<!-- JOIN ROOM -->
+<div id="join-room" class="menu-screen hidden">
+    <h1>🚪 Raum beitreten</h1>
+    <div class="menu-label">Raum-Code:</div>
+    <input class="menu-input" id="join-code" placeholder="ABC12" maxlength="5" style="text-transform:uppercase;">
+    <div class="menu-label">Dein Name:</div>
+    <input class="menu-input" id="join-name" placeholder="Name" maxlength="15" value="">
+    <div style="margin-top:12px;">
+        <button class="menu-btn" id="btn-join-go">Beitreten</button>
+        <button class="menu-btn secondary" id="btn-join-back">← Zurück</button>
+    </div>
+</div>
+
+<!-- LOBBY -->
+<div id="lobby" class="menu-screen hidden">
+    <h1>🚪 Raum <span class="accent" id="lobby-code"></span></h1>
+    <div class="menu-label">Teile diesen Code mit deinen Freunden:</div>
+    <div class="room-code-big" id="lobby-code-big"></div>
+    <button class="copy-btn" id="btn-copy">📋 Code kopieren</button>
+    <div class="lobby-players" id="lobby-players"></div>
+    <div class="loading" id="lobby-wait">⏳ Warte auf Spieler...</div>
+    <div style="margin-top:12px;">
+        <button class="menu-btn" id="btn-start-game">▶ Spiel starten!</button>
+        <button class="menu-btn danger" id="btn-leave-lobby">Verlassen</button>
+    </div>
+</div>
+
+<!-- RULES -->
 <div id="rules" class="rules-overlay hidden">
     <div class="rules-box">
         <h2>🃏 Durak — Spielregeln</h2>
         <h3>Ziel</h3>
         <p>Wer als Letzter noch Karten hat, ist der <strong>Durak</strong> (Narr). Ziel: Alle Karten ablegen!</p>
         <h3>Setup</h3>
-        <p>36 Karten (6–Ass), jeder bekommt 6. Die unterste Karte des Stapels bestimmt die <strong>Trumpf-Farbe</strong>. Trumpfkarten schlagen jede Nicht-Trumpf-Karte.</p>
+        <p>36 Karten (6–Ass), jeder bekommt 6. Die unterste Karte des Stapels bestimmt die <strong>Trumpf-Farbe</strong>. Trumpfs schlagen jede Nicht-Trumpf-Karte.</p>
         <h3>Spielablauf</h3>
-        <p><strong>Angreifer</strong> spielt eine Karte. Der <strong>Verteidiger</strong> muss sie mit einer höheren Karte derselben Farbe oder einer Trumpfkarte schlagen.</p>
-        <p>Kann der Verteidiger nicht schlagen, muss er <strong>alle Angriffskarten aufnehmen</strong>.</p>
-        <p>Schlägt er alles, werden die Karten abgelegt und er wird zum nächsten Angreifer.</p>
-        <h3>Zusatzkarten (Podkidnoy)</h3>
-        <p>Andere Spieler können Karten des <strong>gleichen Rangs</strong> (z.B. eine andere 7, wenn eine 7 liegt) dazulegen. Max. 6 Angriffskarten pro Runde.</p>
-        <h3>Transfer (Perevodnoy)</h3>
-        <p>Wenn aktiv: Der Verteidiger kann den Angriff an den nächsten Spieler <strong>weitergeben</strong>, indem er eine Karte gleichen Rangs spielt.</p>
-        <h3>Stapel leeren</h3>
-        <p>Wenn der Stapel leer ist, zieht niemand mehr. Wer zuerst leer ist, ist raus. Der Letzte ist der Durak.</p>
+        <p><strong>Angreifer</strong> spielt eine Karte. Der <strong>Verteidiger</strong> muss sie mit einer höheren Karte derselben Farbe oder einem Trumpf schlagen.</p>
+        <p>Kann nicht geschlagen werden → <strong>aufnehmen</strong>.</p>
+        <p>Geschlagen → Karten abgelegt, Verteidiger wird nächster Angreifer.</p>
+        <h3>Zusatzkarten</h3>
+        <p>Andere Spieler können Karten des <strong>gleichen Rangs</strong> dazulegen. Max 6 Angriffskarten pro Runde.</p>
+        <h3>Transfer</h3>
+        <p>Wenn aktiv: Verteidiger kann Angriff an nächsten Spieler weitergeben (gleicher Rang).</p>
+        <h3>Multiplayer</h3>
+        <p>Erstelle einen Raum → teile den Code → Freunde treten bei → Spiel starten!</p>
         <button class="close-btn" id="btn-close-rules">Verstanden ✓</button>
     </div>
 </div>
 
 <!-- GAME TABLE -->
-<div id="game-table" style="display:none;">
+<div id="game-table">
     <div class="top-bar">
         <div>
             <span class="trump-suit" id="trump-display">♠</span>
             <span class="deck-count" id="deck-count">Stapel: 0</span>
+            <span class="room-info" id="room-info"></span>
         </div>
-        <div style="display:flex;gap:8px;align-items:center;">
+        <div style="display:flex;gap:6px;align-items:center;">
             <span id="round-num">Runde 1</span>
             <button class="btn-icon" id="btn-help" title="Regeln">📖</button>
-            <button class="btn-icon" id="btn-restart" title="Neustart">🔄</button>
+            <button class="btn-icon" id="btn-quit" title="Verlassen">✖</button>
         </div>
     </div>
-
-    <div class="opponent-area" id="opponent-area"></div>
-
+    <div class="opponents-row" id="opponents-row"></div>
     <div class="table-area">
-        <div class="status-msg" id="status-msg">Dein Zug!</div>
+        <div class="status-msg" id="status-msg"></div>
         <div class="attack-pairs" id="attack-pairs"></div>
     </div>
-
     <div class="player-area">
         <div class="player-hand" id="player-hand"></div>
         <div class="player-actions" id="player-actions"></div>
     </div>
 </div>
 
-<!-- RESULT OVERLAY -->
+<!-- CONNECTING -->
+<div id="connecting" class="connecting hidden">
+    <div><div class="spinner"></div>Verbinde...</div>
+</div>
+
+<!-- RESULT -->
 <div id="result" class="result-overlay hidden">
     <div class="result-emoji" id="result-emoji">😞</div>
     <h2 id="result-title">Du bist der Durak!</h2>
-    <p class="result-sub" id="result-sub">Besser nächstes Mal...</p>
-    <button class="btn" id="btn-again">🔄 Nochmal</button>
+    <p class="result-sub" id="result-sub"></p>
+    <button class="btn btn-attack" id="btn-again">🔄 Nochmal</button>
+    <button class="btn btn-pass" id="btn-result-menu" style="margin-top:8px;">Menü</button>
 </div>
 
 <script>
 // ============================
-// DURAK — Full Game Engine
+// DURAK Multiplayer Client
 // ============================
 
+const API = 'api.php';
 const SUITS = ['♠','♥','♦','♣'];
-const SUIT_NAMES = {'♠':'spades','♥':'hearts','♦':'diamonds','♣':'clubs'};
-const RANKS_36 = ['6','7','8','9','10','J','Q','K','A'];
-const RANK_VALUES = {'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14};
 const SUIT_COLORS = {'♠':'black','♥':'red','♦':'red','♣':'black'};
+const RANK_VALUES = {'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14};
 
-let game = null;
+let state = null;          // current game state from server
+let roomId = null;
+let playerId = null;
+let pollTimer = null;
+let myName = '';
 
-class DurakGame {
-    constructor(numPlayers, withTransfer) {
-        this.numPlayers = numPlayers;
-        this.withTransfer = withTransfer;
-        this.deck = [];
-        this.discardPile = [];
-        this.trumpSuit = null;
-        this.trumpCard = null;
-        this.hands = [];
-        this.playersIn = [];
-        this.currentAttacker = 0;
-        this.currentDefender = 1;
-        this.attackCards = []; // [{card, attackerIdx}]
-        this.defendCards = []; // [{card, attackIdx}]
-        this.selectedCard = null;
-        this.phase = 'attack'; // attack, defend, take, gameOver
-        this.round = 1;
-        this.addingCards = []; // additional attack cards this round
-        this.maxAttacks = 6;
-        this.humanIdx = 0;
-        this.aiThinking = false;
-        this.statusMsg = '';
+// ========== HELPERS ==========
 
-        this.initDeck();
-        this.deal();
-        this.findFirstAttacker();
-        this.updateUI();
+const $ = id => document.getElementById(id);
+
+async function api(action, data = {}) {
+    const isGet = ['poll','list'].includes(action);
+    if (isGet) {
+        const params = new URLSearchParams(data);
+        const r = await fetch(`${API}?action=${action}&${params}`);
+        return r.json();
     }
+    const form = new FormData();
+    form.append('action', action);
+    for (const [k, v] of Object.entries(data)) form.append(k, typeof v === 'object' ? JSON.stringify(v) : v);
+    const r = await fetch(API, { method: 'POST', body: form });
+    return r.json();
+}
 
-    initDeck() {
-        this.deck = [];
-        const ranks = RANKS_36;
-        for (const suit of SUITS) {
-            for (const rank of ranks) {
-                this.deck.push({ rank, suit, value: RANK_VALUES[rank] });
-            }
-        }
-        this.shuffle(this.deck);
+function show(id) { $(id).classList.remove('hidden'); }
+function hide(id) { $(id).classList.add('hidden'); }
+function showOnly(id) {
+    ['menu','create-room','join-room','lobby','game-table'].forEach(s => hide(s));
+    show(id);
+}
+
+// ========== MENU ==========
+
+$('btn-create').onclick = () => {
+    $('create-name').value = localStorage.getItem('durak_name') || '';
+    showOnly('create-room');
+};
+$('btn-join-menu').onclick = () => {
+    $('join-name').value = localStorage.getItem('durak_name') || '';
+    showOnly('join-room');
+};
+$('btn-solo').onclick = startSolo;
+$('btn-create-back').onclick = () => showOnly('menu');
+$('btn-join-back').onclick = () => showOnly('menu');
+$('btn-rules').onclick = () => show('rules');
+$('btn-close-rules').onclick = () => hide('rules');
+$('btn-help').onclick = () => show('rules');
+
+$('btn-create-go').onclick = async () => {
+    const name = $('create-name').value.trim() || 'Spieler';
+    const numPlayers = $('create-players').value;
+    const withTransfer = $('create-transfer').checked ? 1 : 0;
+    localStorage.setItem('durak_name', name);
+    myName = name;
+    $('connecting').classList.remove('hidden');
+    const res = await api('create', { name, num_players: numPlayers, with_transfer: withTransfer });
+    $('connecting').classList.add('hidden');
+    if (res.error) { alert(res.error); return; }
+    roomId = res.roomId;
+    playerId = res.playerId;
+    showLobby(res);
+};
+
+$('btn-join-go').onclick = async () => {
+    const code = $('join-code').value.trim().toUpperCase();
+    const name = $('join-name').value.trim() || 'Spieler';
+    if (code.length < 4) { alert('Bitte Code eingeben'); return; }
+    localStorage.setItem('durak_name', name);
+    myName = name;
+    $('connecting').classList.remove('hidden');
+    const res = await api('join', { room_id: code, name });
+    $('connecting').classList.add('hidden');
+    if (res.error) { alert(res.error); return; }
+    roomId = res.roomId;
+    playerId = res.playerId;
+    showLobby(res);
+};
+
+$('btn-copy').onclick = () => {
+    navigator.clipboard.writeText(roomId).then(() => {
+        $('btn-copy').textContent = '✅ Kopiert!';
+        setTimeout(() => $('btn-copy').textContent = '📋 Code kopieren', 1500);
+    });
+};
+
+$('btn-start-game').onclick = async () => {
+    const res = await api('start', { room_id: roomId, player_id: playerId });
+    if (res.error) { alert(res.error); return; }
+    state = res;
+    startGame();
+};
+
+$('btn-leave-lobby').onclick = () => {
+    stopPoll();
+    roomId = null; playerId = null;
+    showOnly('menu');
+};
+
+// ========== LOBBY ==========
+
+function showLobby(res) {
+    $('lobby-code').textContent = res.roomId;
+    $('lobby-code-big').textContent = res.roomId;
+    updateLobbyPlayers(res);
+    showOnly('lobby');
+    // Start polling lobby
+    startPoll(2000);
+}
+
+function updateLobbyPlayers(res) {
+    const el = $('lobby-players');
+    el.innerHTML = '';
+    const players = res.opponents ? [{ name: myName, seat: 0 }, ...res.opponents] : [];
+    // Reconstruct from state
+    if (res.mySeat === 0) {
+        const d = document.createElement('div');
+        d.className = 'lobby-player host';
+        d.textContent = '👑 ' + myName;
+        el.appendChild(d);
     }
-
-    shuffle(arr) {
-        for (let i = arr.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [arr[i], arr[j]] = [arr[j], arr[i]];
-        }
-    }
-
-    deal() {
-        this.hands = Array.from({ length: this.numPlayers }, () => []);
-        for (let round = 0; round < 6; round++) {
-            for (let p = 0; p < this.numPlayers; p++) {
-                if (this.deck.length > 0) {
-                    this.hands[p].push(this.deck.pop());
-                }
-            }
-        }
-        // Trump card
-        if (this.deck.length > 0) {
-            this.trumpCard = this.deck[0]; // bottom card
-            this.trumpSuit = this.trumpCard.suit;
-        }
-    }
-
-    findFirstAttacker() {
-        // Lowest trump starts
-        let lowestTrump = null;
-        let firstAttacker = 0;
-        for (let p = 0; p < this.numPlayers; p++) {
-            for (const card of this.hands[p]) {
-                if (card.suit === this.trumpSuit) {
-                    if (!lowestTrump || card.value < lowestTrump.value) {
-                        lowestTrump = card;
-                        firstAttacker = p;
-                    }
-                }
-            }
-        }
-        this.currentAttacker = firstAttacker;
-        this.currentDefender = (firstAttacker + 1) % this.numPlayers;
-        this.playersIn = Array.from({ length: this.numPlayers }, () => true);
-    }
-
-    isTrump(card) {
-        return card.suit === this.trumpSuit;
-    }
-
-    canBeat(attackCard, defendCard) {
-        if (defendCard.suit === attackCard.suit && defendCard.value > attackCard.value) return true;
-        if (this.isTrump(defendCard) && !this.isTrump(attackCard)) return true;
-        if (this.isTrump(defendCard) && this.isTrump(attackCard) && defendCard.value > attackCard.value) return true;
-        return false;
-    }
-
-    canAddCard(card) {
-        if (this.attackCards.length === 0) return true;
-        // Must match rank of any card on the table (attacking or defending)
-        const ranksOnTable = new Set();
-        for (const ac of this.attackCards) ranksOnTable.add(ac.card.rank);
-        for (const dc of this.defendCards) ranksOnTable.add(dc.card.rank);
-        return ranksOnTable.has(card.rank);
-    }
-
-    getUnbeatenAttacks() {
-        const beaten = new Set(this.defendCards.map(d => d.attackIdx));
-        return this.attackCards.filter((_, i) => !beaten.has(i));
-    }
-
-    activePlayers() {
-        return this.playersIn.filter(p => p).length;
-    }
-
-    // Check if defender can defend at all
-    canDefenderBeatAnything() {
-        const unbeaten = this.getUnbeatenAttacks();
-        const defHand = this.hands[this.currentDefender];
-        for (const atk of unbeaten) {
-            let canBeatThis = false;
-            for (const card of defHand) {
-                if (this.canBeat(atk.card, card)) {
-                    canBeatThis = true;
-                    break;
-                }
-            }
-            if (!canBeatThis) return false;
-        }
-        return true;
-    }
-
-    // Draw cards up to 6
-    drawUp() {
-        // Attacker draws first, then others clockwise, then defender last
-        const drawOrder = [];
-        // Starting from attacker, clockwise, skip defender, then defender
-        for (let i = 0; i < this.numPlayers; i++) {
-            const idx = (this.currentAttacker + i) % this.numPlayers;
-            if (idx !== this.currentDefender && this.playersIn[idx]) {
-                drawOrder.push(idx);
-            }
-        }
-        drawOrder.push(this.currentDefender);
-
-        for (const p of drawOrder) {
-            if (!this.playersIn[p]) continue;
-            while (this.hands[p].length < 6 && this.deck.length > 0) {
-                this.hands[p].push(this.deck.pop());
-            }
+    if (res.opponents) {
+        for (const opp of res.opponents) {
+            const d = document.createElement('div');
+            d.className = 'lobby-player';
+            d.textContent = opp.name;
+            el.appendChild(d);
         }
     }
+    // Show/hide start button (only host)
+    const isHost = res.mySeat === 0;
+    $('btn-start-game').style.display = isHost ? 'inline-block' : 'none';
+    const total = (res.opponents ? res.opponents.length + 1 : 1);
+    $('lobby-wait').textContent = total < res.numPlayers
+        ? `⏳ ${total}/${res.numPlayers} Spieler — warte...`
+        : `✅ ${total} Spieler bereit!`;
+}
 
-    // Advance to next attacker/defender
-    nextBout(defenderWon) {
-        if (defenderWon) {
-            // Discard all cards on table
-            this.discardPile.push(...this.attackCards.map(a => a.card));
-            this.discardPile.push(...this.defendCards.map(d => d.card));
-            this.attackCards = [];
-            this.defendCards = [];
-            this.drawUp();
-            // Defender becomes next attacker
-            this.currentAttacker = this.currentDefender;
-        } else {
-            // Defender takes all cards
-            const allCards = [
-                ...this.attackCards.map(a => a.card),
-                ...this.defendCards.map(d => d.card)
-            ];
-            this.hands[this.currentDefender].push(...allCards);
-            this.attackCards = [];
-            this.defendCards = [];
-            // Next attacker is player after defender
-            this.currentAttacker = (this.currentDefender + 1) % this.numPlayers;
-        }
+// ========== POLLING ==========
 
-        // Check for game over
-        this.checkPlayersOut();
-        if (this.checkGameOver()) return;
+function startPoll(interval) {
+    stopPoll();
+    pollTimer = setInterval(pollState, interval || 1500);
+}
 
-        // Find next defender (next active player after attacker)
-        this.currentDefender = this.findNextActive(this.currentAttacker);
-        this.round++;
-        this.phase = 'attack';
-    }
+function stopPoll() {
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+}
 
-    findNextActive(from) {
-        let idx = (from + 1) % this.numPlayers;
-        let count = 0;
-        while (!this.playersIn[idx] && count < this.numPlayers) {
-            idx = (idx + 1) % this.numPlayers;
-            count++;
-        }
-        return idx;
-    }
-
-    checkPlayersOut() {
-        for (let p = 0; p < this.numPlayers; p++) {
-            if (this.hands[p].length === 0 && this.deck.length === 0) {
-                if (this.playersIn[p]) {
-                    this.playersIn[p] = false;
-                }
-            }
-        }
-    }
-
-    checkGameOver() {
-        const playersWithCards = [];
-        for (let p = 0; p < this.numPlayers; p++) {
-            if (this.hands[p].length > 0) {
-                playersWithCards.push(p);
-            } else if (this.deck.length > 0) {
-                // Still drawing, not out yet
-                return false;
-            }
-        }
-        if (this.deck.length > 0) return false;
-        if (playersWithCards.length <= 1) {
-            this.phase = 'gameOver';
-            this.durakIdx = playersWithCards[0] ?? -1;
-            return true;
-        }
-        return false;
-    }
-
-    // Sort hand
-    sortHand(idx) {
-        this.hands[idx].sort((a, b) => {
-            if (a.suit === b.suit) return a.value - b.value;
-            const aTrump = a.suit === this.trumpSuit ? 1 : 0;
-            const bTrump = b.suit === this.trumpSuit ? 1 : 0;
-            if (aTrump !== bTrump) return bTrump - aTrump;
-            return SUITS.indexOf(a.suit) - SUITS.indexOf(b.suit);
-        });
-    }
-
-    // ========== AI LOGIC ==========
-
-    aiPlay() {
-        if (this.aiThinking) return;
-        this.aiThinking = true;
-
-        const delay = 600 + Math.random() * 400;
-        setTimeout(() => {
-            if (this.phase === 'gameOver') { this.aiThinking = false; return; }
-
-            const currentTurn = this.phase === 'attack' || this.phase === 'addAttack'
-                ? this.currentAttacker
-                : this.currentDefender;
-
-            // If it's human's turn, don't AI
-            if (currentTurn === this.humanIdx && this.phase !== 'addAttackAssist') {
-                this.aiThinking = false;
-                return;
-            }
-
-            if (this.phase === 'attack' || this.phase === 'addAttack' || this.phase === 'addAttackAssist') {
-                this.aiAttack();
-            } else if (this.phase === 'defend') {
-                this.aiDefend();
-            }
-            this.aiThinking = false;
-        }, delay);
-    }
-
-    aiAttack() {
-        const hand = this.hands[this.currentAttacker];
-        const attackerIdx = this.currentAttacker;
-
-        if (this.phase === 'attack' || this.phase === 'addAttack') {
-            // Main attacker
-            if (this.attackCards.length === 0) {
-                // Play lowest non-trump, or lowest trump
-                const nonTrumps = hand.filter(c => c.suit !== this.trumpSuit);
-                const card = nonTrumps.length > 0
-                    ? nonTrumps.reduce((a, b) => a.value < b.value ? a : b)
-                    : hand.reduce((a, b) => a.value < b.value ? a : b);
-                this.playAttack(card, attackerIdx);
-            } else {
-                // Try to add cards
-                const addable = hand.filter(c => this.canAddCard(c));
-                if (addable.length > 0 && this.attackCards.length < this.maxAttacks) {
-                    // Add lowest that matches
-                    const card = addable.reduce((a, b) => a.value < b.value ? a : b);
-                    // Don't add if defender has few cards and we have many
-                    const defCards = this.hands[this.currentDefender].length;
-                    if (addable.length > 0 && this.attackCards.length < defCards) {
-                        this.playAttack(card, attackerIdx);
-                    } else {
-                        this.aiDoneAttacking();
-                    }
-                } else {
-                    this.aiDoneAttacking();
-                }
-            }
-        } else {
-            // addAttackAssist - other players helping
-            const addable = hand.filter(c => this.canAddCard(c));
-            if (addable.length > 0 && this.attackCards.length < this.maxAttacks) {
-                const defCards = this.hands[this.currentDefender].length;
-                if (this.attackCards.length < defCards) {
-                    const card = addable.reduce((a, b) => a.value < b.value ? a : b);
-                    this.playAttack(card, attackerIdx);
-                } else {
-                    this.aiDoneAttacking();
-                }
-            } else {
-                this.aiDoneAttacking();
-            }
-        }
-    }
-
-    aiDefend() {
-        const hand = this.hands[this.currentDefender];
-        const unbeaten = this.getUnbeatenAttacks();
-
-        if (unbeaten.length === 0) {
-            // All beaten? Check if we should take or we're done
-            this.phase = 'attack';
-            this.aiThinking = false;
-            return;
-        }
-
-        const target = unbeaten[0];
-        // Try to beat with lowest possible card
-        const candidates = hand.filter(c => this.canBeat(target.card, c));
-        if (candidates.length === 0) {
-            // Can't beat - take
-            this.defenderTake();
-            return;
-        }
-
-        // Pick lowest value candidate, prefer non-trump
-        const nonTrumpCands = candidates.filter(c => c.suit !== this.trumpSuit);
-        const best = nonTrumpCands.length > 0
-            ? nonTrumpCands.reduce((a, b) => a.value < b.value ? a : b)
-            : candidates.reduce((a, b) => a.value < b.value ? a : b);
-
-        this.playDefend(best, target);
-    }
-
-    aiDoneAttacking() {
-        // All attacks done, move to defend or resolve
-        if (this.getUnbeatenAttacks().length === 0 && this.defendCards.length > 0) {
-            // All beaten, defender wins
-            this.nextBout(true);
-        } else if (this.attackCards.length === 0) {
-            // No attacks at all? Shouldn't happen
-        } else {
-            // Move to defend phase
-            this.phase = 'defend';
-        }
-        this.updateUI();
-        this.scheduleAI();
-    }
-
-    scheduleAI() {
-        if (this.phase === 'gameOver') return;
-        const currentTurn = this.phase === 'attack' || this.phase === 'addAttack'
-            ? this.currentAttacker
-            : this.currentDefender;
-        if (currentTurn !== this.humanIdx || this.phase === 'addAttackAssist') {
-            setTimeout(() => this.aiPlay(), 500);
-        }
-    }
-
-    // ========== PLAYER ACTIONS ==========
-
-    playAttack(card, attackerIdx) {
-        const hand = this.hands[attackerIdx === undefined ? this.currentAttacker : attackerIdx];
-        const idx = hand.indexOf(card);
-        if (idx === -1) return;
-        hand.splice(idx, 1);
-        this.attackCards.push({ card, attackerIdx: attackerIdx ?? this.currentAttacker });
-        this.phase = 'defend';
-        this.updateUI();
-        this.scheduleAI();
-    }
-
-    playDefend(card, targetAttack) {
-        const hand = this.hands[this.currentDefender];
-        const idx = hand.indexOf(card);
-        if (idx === -1) return;
-        hand.splice(idx, 1);
-        const attackIdx = this.attackCards.indexOf(targetAttack);
-        this.defendCards.push({ card, attackIdx });
-        this.updateUI();
-
-        // Check if all beaten
-        const unbeaten = this.getUnbeatenAttacks();
-        if (unbeaten.length === 0) {
-            // Check if attacker can add more
-            setTimeout(() => {
-                if (this.attackCards.length < this.maxAttacks && this.canAddMoreCards()) {
-                    this.phase = 'addAttack';
-                    this.scheduleAI();
-                } else {
-                    // Defender wins this bout
-                    this.nextBout(true);
-                    this.updateUI();
-                    this.scheduleAI();
-                }
-            }, 400);
-        } else {
-            this.scheduleAI();
-        }
-    }
-
-    canAddMoreCards() {
-        const attackerHand = this.hands[this.currentAttacker];
-        return attackerHand.some(c => this.canAddCard(c));
-    }
-
-    defenderTake() {
-        // Defender picks up all cards
-        const allCards = [
-            ...this.attackCards.map(a => a.card),
-            ...this.defendCards.map(d => d.card)
-        ];
-        this.hands[this.currentDefender].push(...allCards);
-        this.attackCards = [];
-        this.defendCards = [];
-        this.currentAttacker = (this.currentDefender + 1) % this.numPlayers;
-        this.checkPlayersOut();
-        if (!this.checkGameOver()) {
-            this.currentDefender = this.findNextActive(this.currentAttacker);
-            this.round++;
-            this.phase = 'attack';
-        }
-        this.drawUp();
-        this.updateUI();
-        this.scheduleAI();
-    }
-
-    attackerPass() {
-        // Attacker decides to stop adding cards
-        if (this.defendCards.length > 0) {
-            // Defender has beaten everything
-            this.nextBout(true);
-        } else if (this.attackCards.length === 0) {
-            // Nothing played yet - shouldn't happen
-        } else {
-            // Unbeaten attacks - defender needs to take
-            // Check if any assists possible
-            this.phase = 'defend';
-            this.updateUI();
-            this.scheduleAI();
-        }
-    }
-
-    // ========== UI ==========
-
-    cardHTML(card, extra = '', playable = false, selected = false) {
-        const colorClass = SUIT_COLORS[card.suit];
-        const trumpClass = card.suit === this.trumpSuit ? 'trump-card' : '';
-        const playableClass = playable ? 'playable' : 'not-playable';
-        const selectedClass = selected ? 'selected' : '';
-        const trumpBadge = card.suit === this.trumpSuit ? '<span class="trump-badge">T</span>' : '';
-        return `<div class="card ${colorClass} ${trumpClass} ${playableClass} ${selectedClass} ${extra}" 
-                     data-rank="${card.rank}" data-suit="${card.suit}">
-            <div class="top">${card.rank}${card.suit}</div>
-            <div class="center">${card.suit}</div>
-            <div class="bottom">${card.rank}${card.suit}</div>
-            ${trumpBadge}
-        </div>`;
-    }
-
-    cardBackHTML() {
-        return '<div class="card-back"></div>';
-    }
-
-    updateUI() {
-        if (this.phase === 'gameOver') {
-            this.showGameOver();
-            return;
-        }
-
-        // Trump display
-        const trumpEl = document.getElementById('trump-display');
-        trumpEl.textContent = this.trumpSuit || '';
-        trumpEl.style.color = SUIT_COLORS[this.trumpSuit] === 'red' ? '#e74c3c' : '#fff';
-        document.getElementById('deck-count').textContent = `Stapel: ${this.deck.length}`;
-        document.getElementById('round-num').textContent = `Runde ${this.round}`;
-
-        // Opponent area
-        const oppArea = document.getElementById('opponent-area');
-        let oppHTML = '';
-        for (let p = 1; p < this.numPlayers; p++) {
-            if (!this.playersIn[p]) continue;
-            const isAttacker = p === this.currentAttacker;
-            const isDefender = p === this.currentDefender;
-            let label = `Spieler ${p + 1}`;
-            if (isAttacker) label += ' ⚔️';
-            if (isDefender) label += ' 🛡️';
-            const handShow = Math.min(this.hands[p].length, 8);
-            oppHTML += `<div class="opponent-area">
-                <div class="opponent-name">${label} (${this.hands[p].length})</div>
-                <div class="opponent-hand">${Array(handShow).fill(this.cardBackHTML()).join('')}</div>
-            </div>`;
-        }
-        oppArea.innerHTML = oppHTML;
-
-        // Attack pairs (table)
-        const pairsEl = document.getElementById('attack-pairs');
-        let pairsHTML = '';
-        for (let i = 0; i < this.attackCards.length; i++) {
-            const atk = this.attackCards[i];
-            const def = this.defendCards.find(d => d.attackIdx === i);
-            pairsHTML += `<div class="pair">
-                ${this.cardHTML(atk.card, 'table-card')}
-                ${def ? this.cardHTML(def.card, 'table-card') : '<div style="height:68px;"></div>'}
-            </div>`;
-        }
-        pairsEl.innerHTML = pairsHTML;
-
-        // Status
-        const statusEl = document.getElementById('status-msg');
-        const isHumanAttacker = this.currentAttacker === this.humanIdx;
-        const isHumanDefender = this.currentDefender === this.humanIdx;
-
-        if (this.phase === 'attack') {
-            if (isHumanAttacker) {
-                statusEl.textContent = '⚔️ Greif an! Wähle eine Karte.';
-            } else {
-                statusEl.textContent = `Spieler ${this.currentAttacker + 1} greift an...`;
-            }
-        } else if (this.phase === 'defend') {
-            if (isHumanDefender) {
-                statusEl.textContent = '🛡️ Verteidige dich! Wähle eine Karte oder nimm auf.';
-            } else {
-                statusEl.textContent = `Spieler ${this.currentDefender + 1} verteidigt...`;
-            }
-        } else if (this.phase === 'addAttack') {
-            if (isHumanAttacker) {
-                statusEl.textContent = '⚔️ Noch eine Karte dazulegen?';
-            } else {
-                statusEl.textContent = 'Warte...';
-            }
-        }
-
-        // Player hand
-        this.sortHand(this.humanIdx);
-        const handEl = document.getElementById('player-hand');
-        let handHTML = '';
-        const unbeaten = this.getUnbeatenAttacks();
-
-        for (const card of this.hands[this.humanIdx]) {
-            let playable = false;
-            if (this.phase === 'attack' && isHumanAttacker) {
-                playable = this.attackCards.length === 0 || this.canAddCard(card);
-            } else if (this.phase === 'defend' && isHumanDefender) {
-                playable = unbeaten.some(atk => this.canBeat(atk.card, card));
-            } else if (this.phase === 'addAttack' && isHumanAttacker) {
-                playable = this.canAddCard(card);
-            }
-            const selected = this.selectedCard === card;
-            const clickAttr = playable ? `onclick="game.humanClickCard('${card.rank}','${card.suit}')"` : '';
-            const colorClass = SUIT_COLORS[card.suit];
-            const trumpClass = card.suit === this.trumpSuit ? 'trump-card' : '';
-            const playableClass = playable ? 'playable' : 'not-playable';
-            const selectedClass = selected ? 'selected' : '';
-            const trumpBadge = card.suit === this.trumpSuit ? '<span class="trump-badge">T</span>' : '';
-            handHTML += `<div class="card ${colorClass} ${trumpClass} ${playableClass} ${selectedClass}"
-                             data-rank="${card.rank}" data-suit="${card.suit}" ${clickAttr}>
-                <div class="top">${card.rank}${card.suit}</div>
-                <div class="center">${card.suit}</div>
-                <div class="bottom">${card.rank}${card.suit}</div>
-                ${trumpBadge}
-            </div>`;
-        }
-        handEl.innerHTML = handHTML;
-
-        // Action buttons
-        const actionsEl = document.getElementById('player-actions');
-        let actionsHTML = '';
-
-        if (this.phase === 'defend' && isHumanDefender) {
-            actionsHTML += `<button class="btn btn-take" onclick="game.humanTake()">🃏 Aufnehmen</button>`;
-        }
-        if ((this.phase === 'addAttack' || (this.phase === 'defend' && isHumanAttacker && this.attackCards.length > 0)) && isHumanAttacker) {
-            actionsHTML += `<button class="btn btn-pass" onclick="game.humanPass()">Pass</button>`;
-        }
-        if (this.phase === 'attack' && isHumanAttacker && this.attackCards.length === 0) {
-            // Must play a card
-        }
-
-        // Transfer button (Perevodnoy)
-        if (this.withTransfer && isHumanDefender && this.phase === 'defend' && this.attackCards.length === 1 && this.defendCards.length === 0) {
-            const atkCard = this.attackCards[0].card;
-            const transferable = this.hands[this.humanIdx].filter(c => c.rank === atkCard.rank);
-            if (transferable.length > 0) {
-                actionsHTML += `<button class="btn btn-defend" onclick="game.humanTransfer()">⏩ Transfer</button>`;
-            }
-        }
-
-        actionsEl.innerHTML = actionsHTML;
-    }
-
-    humanClickCard(rank, suit) {
-        const card = this.hands[this.humanIdx].find(c => c.rank === rank && c.suit === suit);
-        if (!card) return;
-
-        const isHumanAttacker = this.currentAttacker === this.humanIdx;
-        const isHumanDefender = this.currentDefender === this.humanIdx;
-
-        if ((this.phase === 'attack' || this.phase === 'addAttack') && isHumanAttacker) {
-            if (this.attackCards.length > 0 && !this.canAddCard(card)) return;
-            if (this.attackCards.length >= this.maxAttacks) return;
-            this.playAttack(card, this.humanIdx);
-        } else if (this.phase === 'defend' && isHumanDefender) {
-            const unbeaten = this.getUnbeatenAttacks();
-            // Find which attack card this can beat
-            const target = unbeaten.find(atk => this.canBeat(atk.card, card));
-            if (!target) return;
-            this.playDefend(card, target);
-        }
-    }
-
-    humanTake() {
-        if (this.currentDefender !== this.humanIdx) return;
-        this.defenderTake();
-    }
-
-    humanPass() {
-        if (this.currentAttacker !== this.humanIdx) return;
-        // Attacker passes - resolve
-        if (this.defendCards.length > 0) {
-            // All current attacks beaten
-            // Let assists happen, then resolve
-            // For simplicity, just resolve as defender winning
-            this.nextBout(true);
-        }
-        this.updateUI();
-        this.scheduleAI();
-    }
-
-    humanTransfer() {
-        if (!this.withTransfer) return;
-        // Transfer: defender becomes attacker, next player becomes defender
-        // The single attack card stays, defender who transferred is new attacker
-        const oldDefender = this.currentDefender;
-        const nextPlayer = this.findNextActive(oldDefender);
-        // Play a matching rank card as the new "attack"
-        const atkCard = this.attackCards[0].card;
-        const matchingCard = this.hands[this.humanIdx].find(c => c.rank === atkCard.rank);
-        if (!matchingCard) return;
-
-        // Remove from hand
-        const idx = this.hands[this.humanIdx].indexOf(matchingCard);
-        this.hands[this.humanIdx].splice(idx, 1);
-        this.attackCards.push({ card: matchingCard, attackerIdx: this.humanIdx });
-
-        // New attacker is the transferer, new defender is next player
-        this.currentAttacker = this.humanIdx;
-        this.currentDefender = nextPlayer;
-        this.phase = 'defend';
-        this.updateUI();
-        this.scheduleAI();
-    }
-
-    showGameOver() {
-        document.getElementById('game-table').style.display = 'none';
-        const resultEl = document.getElementById('result');
-        resultEl.classList.remove('hidden');
-
-        if (this.durakIdx === this.humanIdx) {
-            document.getElementById('result-emoji').textContent = '😞';
-            document.getElementById('result-title').textContent = 'Du bist der Durak!';
-            document.getElementById('result-sub').textContent = 'Das nächste Mal wird besser...';
-        } else if (this.durakIdx === -1) {
-            document.getElementById('result-emoji').textContent = '🤝';
-            document.getElementById('result-title').textContent = 'Unentschieden!';
-            document.getElementById('result-sub').textContent = 'Alle haben ihre Karten los...';
-        } else {
-            document.getElementById('result-emoji').textContent = '🎉';
-            document.getElementById('result-title').textContent = 'Du hast gewonnen!';
-            document.getElementById('result-sub').textContent = `Spieler ${this.durakIdx + 1} ist der Durak!`;
-        }
+async function pollState() {
+    if (!roomId || !playerId) return;
+    const res = await api('poll', { room_id: roomId, player_id: playerId, seq: state ? state.seq : 0 });
+    if (res.error) return;
+    state = res;
+    if (res.status === 'lobby') {
+        updateLobbyPlayers(res);
+    } else if (res.status === 'playing' || res.status === 'finished') {
+        if ($('game-table').style.display === 'none') startGame();
+        updateGameUI();
     }
 }
 
-// ========== INIT ==========
+// ========== SOLO MODE ==========
 
-document.getElementById('btn-start').addEventListener('click', () => {
-    const numPlayers = parseInt(document.getElementById('opt-players').value);
-    const withTransfer = document.getElementById('opt-transfer').checked;
-    document.getElementById('menu').classList.add('hidden');
-    document.getElementById('game-table').style.display = 'flex';
-    game = new DurakGame(numPlayers, withTransfer);
-});
+function startSolo() {
+    // Local AI game, no server
+    roomId = 'SOLO';
+    playerId = 0;
+    const game = new SoloDurak(2, false);
+    window.soloGame = game;
+    showOnly('game-table');
+    game.updateUI();
+}
 
-document.getElementById('btn-rules').addEventListener('click', () => {
-    document.getElementById('rules').classList.remove('hidden');
-});
-document.getElementById('btn-close-rules').addEventListener('click', () => {
-    document.getElementById('rules').classList.add('hidden');
-});
-document.getElementById('btn-help').addEventListener('click', () => {
-    document.getElementById('rules').classList.remove('hidden');
-});
-document.getElementById('btn-restart').addEventListener('click', () => {
-    document.getElementById('game-table').style.display = 'none';
-    document.getElementById('menu').classList.remove('hidden');
-    document.getElementById('result').classList.add('hidden');
-});
-document.getElementById('btn-again').addEventListener('click', () => {
-    document.getElementById('result').classList.add('hidden');
-    document.getElementById('game-table').style.display = 'none';
-    document.getElementById('menu').classList.remove('hidden');
-});
+// Mini solo engine (same as before, inline)
+class SoloDurak {
+    constructor(numPlayers, withTransfer) {
+        this.numPlayers = numPlayers; this.withTransfer = withTransfer;
+        this.deck = []; this.discardPile = []; this.trumpSuit = null;
+        this.hands = []; this.playersIn = [];
+        this.currentAttacker = 0; this.currentDefender = 1;
+        this.attackCards = []; this.defendCards = [];
+        this.phase = 'attack'; this.round = 1; this.humanIdx = 0;
+        this.aiThinking = false; this.maxAttacks = 6;
+        this.initDeck(); this.deal(); this.findFirstAttacker();
+    }
+    initDeck() {
+        this.deck = [];
+        for (const s of SUITS) for (const r of ['6','7','8','9','10','J','Q','K','A'])
+            this.deck.push({rank:r, suit:s, value:RANK_VALUES[r]});
+        for (let i=this.deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[this.deck[i],this.deck[j]]=[this.deck[j],this.deck[i]];}
+    }
+    deal() {
+        this.hands = Array.from({length:this.numPlayers},()=>[]);
+        for(let r=0;r<6;r++) for(let p=0;p<this.numPlayers;p++) if(this.deck.length) this.hands[p].push(this.deck.pop());
+        this.trumpSuit = this.deck.length ? this.deck[0].suit : SUITS[0];
+    }
+    findFirstAttacker() {
+        let low=null, fa=0;
+        for(let p=0;p<this.numPlayers;p++) for(const c of this.hands[p])
+            if(c.suit===this.trumpSuit&&(!low||c.value<low.value)){low=c;fa=p;}
+        this.currentAttacker=fa; this.currentDefender=(fa+1)%this.numPlayers;
+        this.playersIn=Array(this.numPlayers).fill(true);
+    }
+    isTrump(c){return c.suit===this.trumpSuit;}
+    canBeat(a,d){
+        if(d.suit===a.suit&&d.value>a.value)return true;
+        if(this.isTrump(d)&&!this.isTrump(a))return true;
+        if(this.isTrump(d)&&this.isTrump(a)&&d.value>a.value)return true;
+        return false;
+    }
+    canAddCard(c){
+        if(!this.attackCards.length)return true;
+        const ranks=new Set();
+        for(const a of this.attackCards)ranks.add(a.card.rank);
+        for(const d of this.defendCards)ranks.add(d.card.rank);
+        return ranks.has(c.rank);
+    }
+    getUnbeaten(){
+        const b=new Set(this.defendCards.map(d=>d.attackIdx));
+        return this.attackCards.filter((_,i)=>!b.has(i));
+    }
+    drawUp(){
+        const order=[];
+        for(let i=0;i<this.numPlayers;i++){const idx=(this.currentAttacker+i)%this.numPlayers;if(idx!==this.currentDefender)order.push(idx);}
+        order.push(this.currentDefender);
+        for(const p of order) while(this.hands[p].length<6&&this.deck.length) this.hands[p].push(this.deck.pop());
+    }
+    nextBout(won){
+        if(won){this.discardPile.push(...this.attackCards.map(a=>a.card),...this.defendCards.map(d=>d.card));this.attackCards=[];this.defendCards=[];this.drawUp();this.currentAttacker=this.currentDefender;}
+        else{this.hands[this.currentDefender].push(...this.attackCards.map(a=>a.card),...this.defendCards.map(d=>d.card));this.attackCards=[];this.defendCards=[];this.currentAttacker=(this.currentDefender+1)%this.numPlayers;}
+        this.checkOut();
+        if(this.checkOver())return;
+        this.currentDefender=(this.currentAttacker+1)%this.numPlayers;
+        while(!this.playersIn[this.currentDefender])this.currentDefender=(this.currentDefender+1)%this.numPlayers;
+        this.round++;this.phase='attack';
+    }
+    checkOut(){for(let p=0;p<this.numPlayers;p++)if(!this.hands[p].length&&!this.deck.length)this.playersIn[p]=false;}
+    checkOver(){
+        if(this.deck.length>0)return false;
+        const w=[];for(let p=0;p<this.numPlayers;p++)if(this.hands[p].length>0)w.push(p);
+        if(w.length<=1){this.phase='gameOver';this.durakIdx=w[0]??-1;return true;}return false;
+    }
+    sortH(i){this.hands[i].sort((a,b)=>{if(a.suit===b.suit)return a.value-b.value;const at=a.suit===this.trumpSuit?1:0,bt=b.suit===this.trumpSuit?1:0;if(at!==bt)return bt-at;return SUITS.indexOf(a.suit)-SUITS.indexOf(b.suit);});}
+    playAttack(c,ai){const h=this.hands[ai??this.currentAttacker];const i=h.indexOf(c);if(i===-1)return;h.splice(i,1);this.attackCards.push({card:c,attackerIdx:ai??this.currentAttacker});this.phase='defend';this.updateUI();this.scheduleAI();}
+    playDefend(c,t){const h=this.hands[this.currentDefender];const i=h.indexOf(c);if(i===-1)return;h.splice(i,1);this.defendCards.push({card:c,attackIdx:this.attackCards.indexOf(t)});const u=this.getUnbeaten();if(!u.length){
+        if(this.attackCards.length<this.maxAttacks&&this.hands[this.currentAttacker].some(x=>this.canAddCard(x))){this.phase='addAttack';this.updateUI();this.scheduleAI();}else{this.nextBout(true);this.updateUI();this.scheduleAI();}
+    }else{this.updateUI();this.scheduleAI();}}
+    defenderTake(){this.hands[this.currentDefender].push(...this.attackCards.map(a=>a.card),...this.defendCards.map(d=>d.card));this.attackCards=[];this.defendCards=[];this.currentAttacker=(this.currentDefender+1)%this.numPlayers;this.checkOut();if(!this.checkOver()){this.currentDefender=(this.currentAttacker+1)%this.numPlayers;this.round++;this.phase='attack';}this.drawUp();this.updateUI();this.scheduleAI();}
+    pass(){if(this.defendCards.length>0){this.nextBout(true);this.updateUI();this.scheduleAI();}}
+    aiPlay(){
+        if(this.aiThinking)return;this.aiThinking=true;
+        setTimeout(()=>{
+            if(this.phase==='gameOver'){this.aiThinking=false;return;}
+            const isAtk=(this.phase==='attack'||this.phase==='addAttack')?this.currentAttacker:this.currentDefender;
+            if(isAtk===this.humanIdx&&this.phase!=='addAttackAssist'){this.aiThinking=false;return;}
+            if(this.phase==='attack'||this.phase==='addAttack'||this.phase==='addAttackAssist')this.aiAttack();
+            else if(this.phase==='defend')this.aiDefend();
+            this.aiThinking=false;
+        },500+Math.random()*400);
+    }
+    aiAttack(){
+        const h=this.hands[this.currentAttacker];
+        if(!this.attackCards.length){
+            const nt=h.filter(c=>c.suit!==this.trumpSuit);const c=nt.length?nt.reduce((a,b)=>a.value<b.value?a:b):h.reduce((a,b)=>a.value<b.value?a:b);
+            this.playAttack(c,this.currentAttacker);
+        }else{
+            const ad=h.filter(c=>this.canAddCard(c));
+            if(ad.length&&this.attackCards.length<this.hands[this.currentDefender].length&&this.attackCards.length<this.maxAttacks)
+                this.playAttack(ad.reduce((a,b)=>a.value<b.value?a:b),this.currentAttacker);
+            else this.aiDone();
+        }
+    }
+    aiDefend(){
+        const u=this.getUnbeaten();if(!u.length){this.aiThinking=false;return;}
+        const t=u[0];const can=h=>this.canBeat(t.card,h);
+        const cs=this.hands[this.currentDefender].filter(can);
+        if(!cs.length){this.defenderTake();return;}
+        const nt=cs.filter(c=>c.suit!==this.trumpSuit);
+        this.playDefend(nt.length?nt.reduce((a,b)=>a.value<b.value?a:b):cs.reduce((a,b)=>a.value<b.value?a:b),t);
+    }
+    aiDone(){if(this.defendCards.length>0)this.nextBout(true);else this.phase='defend';this.updateUI();this.scheduleAI();}
+    scheduleAI(){if(this.phase==='gameOver')return;const isAtk=(this.phase==='attack'||this.phase==='addAttack')?this.currentAttacker:this.currentDefender;if(isAtk!==this.humanIdx)setTimeout(()=>this.aiPlay(),400);}
+    humanClick(r,s){
+        const c=this.hands[this.humanIdx].find(x=>x.rank===r&&x.suit===s);if(!c)return;
+        const isA=this.currentAttacker===this.humanIdx, isD=this.currentDefender===this.humanIdx;
+        if((this.phase==='attack'||this.phase==='addAttack')&&isA){
+            if(this.attackCards.length>0&&!this.canAddCard(c))return;
+            if(this.attackCards.length>=this.maxAttacks)return;
+            this.playAttack(c,this.humanIdx);
+        }else if(this.phase==='defend'&&isD){
+            const u=this.getUnbeaten();const t=u.find(a=>this.canBeat(a.card,c));if(!t)return;
+            this.playDefend(c,t);
+        }
+    }
+    humanTake(){if(this.currentDefender===this.humanIdx)this.defenderTake();}
+    humanPass(){if(this.currentAttacker===this.humanIdx&&this.defendCards.length>0){this.nextBout(true);this.updateUI();this.scheduleAI();}}
+    updateUI(){
+        if(this.phase==='gameOver'){this.showOver();return;}
+        const ts=$('trump-display');ts.textContent=this.trumpSuit;
+        ts.style.color=SUIT_COLORS[this.trumpSuit]==='red'?'#e74c3c':'#fff';
+        $('deck-count').textContent='Stapel: '+this.deck.length;
+        $('round-num').textContent='Runde '+this.round;
+        $('room-info').textContent='🎮 Solo';
+        let oh='';for(let p=1;p<this.numPlayers;p++){
+            if(!this.playersIn[p])continue;
+            const isA=p===this.currentAttacker,isD=p===this.currentDefender;
+            oh+=`<div class="opp-box ${isA?'attacker':''} ${isD?'defender':''}"><div class="opp-name">${isA?'⚔️ ':''}${isD?'🛡️ ':''}Bot ${p}</div><div class="opp-cards">${Array(Math.min(this.hands[p].length,8)).fill('<div class="card-back"></div>').join('')}</div><div class="opp-count">${this.hands[p].length} Karten</div></div>`;
+        }
+        $('opponents-row').innerHTML=oh;
+        let ph='';for(let i=0;i<this.attackCards.length;i++){
+            const a=this.attackCards[i];const d=this.defendCards.find(x=>x.attackIdx===i);
+            ph+=`<div class="pair">${cardDiv(a.card,'table-card')}<div class="defend-card-slot">${d?cardDiv(d.card,'table-card'):''}</div></div>`;
+        }
+        $('attack-pairs').innerHTML=ph;
+        const isA=this.currentAttacker===this.humanIdx,isD=this.currentDefender===this.humanIdx;
+        if(this.phase==='attack')$('status-msg').textContent=isA?'⚔️ Greif an!':'Bot greift an...';
+        else if(this.phase==='defend')$('status-msg').textContent=isD?'🛡️ Verteidige dich!':'Bot verteidigt...';
+        else if(this.phase==='addAttack')$('status-msg').textContent=isA?'⚔️ Noch eine Karte?':'Warte...';
+        this.sortH(this.humanIdx);
+        const u=this.getUnbeaten();
+        let hh='';for(const c of this.hands[this.humanIdx]){
+            let pl=false;
+            if((this.phase==='attack'||this.phase==='addAttack')&&isA) pl=this.attackCards.length===0||this.canAddCard(c);
+            else if(this.phase==='defend'&&isD) pl=u.some(a=>this.canBeat(a.card,c));
+            hh+=cardDiv(c,'',pl);
+        }
+        $('player-hand').innerHTML=hh;
+        let ah='';
+        if(this.phase==='defend'&&isD)ah+=`<button class="btn btn-take" onclick="window.soloGame.humanTake()">🃏 Aufnehmen</button>`;
+        if((this.phase==='addAttack'||this.phase==='defend')&&isA&&this.defendCards.length>0)ah+=`<button class="btn btn-pass" onclick="window.soloGame.humanPass()">Pass</button>`;
+        $('player-actions').innerHTML=ah;
+        // Rebind card clicks for solo
+        $('player-hand').querySelectorAll('.card.playable').forEach(el=>{
+            el.onclick=()=>window.soloGame.humanClick(el.dataset.rank,el.dataset.suit);
+        });
+        if(this.phase==='gameOver')this.showOver();
+        this.scheduleAI();
+    }
+    showOver(){
+        $('game-table').style.display='none';
+        show('result');
+        if(this.durakIdx===this.humanIdx){$('result-emoji').textContent='😞';$('result-title').textContent='Du bist der Durak!';}
+        else if(this.durakIdx===-1){$('result-emoji').textContent='🤝';$('result-title').textContent='Unentschieden!';}
+        else{$('result-emoji').textContent='🎉';$('result-title').textContent='Du hast gewonnen!';}
+        $('result-sub').textContent=roomId==='SOLO'?'Solo-Modus':'Multiplayer';
+    }
+}
+
+function cardDiv(c, extra='', playable=false) {
+    const col=SUIT_COLORS[c.suit]; const tr=c.suit===(state?state.trumpSuit:window.soloGame?.trumpSuit)?'trump-card':'';
+    const pl=playable?'playable':'not-playable';
+    const badge=tr?'<span class="trump-badge">T</span>':'';
+    const click=playable?`data-rank="${c.rank}" data-suit="${c.suit}"`:'';
+    return `<div class="card ${col} ${tr} ${pl} ${extra}" ${click}><div class="top">${c.rank}${c.suit}</div><div class="center">${c.suit}</div><div class="bottom">${c.rank}${c.suit}</div>${badge}</div>`;
+}
+
+// ========== MULTIPLAYER GAME ==========
+
+function startGame() {
+    showOnly('game-table');
+    startPoll(1500);
+    updateGameUI();
+}
+
+function updateGameUI() {
+    if (!state || state.status === 'lobby') return;
+
+    const s = state;
+    const isA = s.currentAttacker === s.mySeat;
+    const isD = s.currentDefender === s.mySeat;
+
+    // Trump & deck
+    const ts = $('trump-display');
+    ts.textContent = s.trumpSuit || '';
+    ts.style.color = SUIT_COLORS[s.trumpSuit] === 'red' ? '#e74c3c' : '#fff';
+    $('deck-count').textContent = 'Stapel: ' + (s.deckCount || 0);
+    $('round-num').textContent = 'Runde ' + (s.roundNum || 1);
+    $('room-info').textContent = '🚪 ' + s.roomId;
+
+    // Opponents
+    let oh = '';
+    for (const opp of s.opponents) {
+        const isAtt = opp.seat === s.currentAttacker;
+        const isDef = opp.seat === s.currentDefender;
+        const cards = Array(Math.min(opp.cardCount, 10)).fill('<div class="card-back"></div>').join('');
+        oh += `<div class="opp-box ${isAtt?'attacker':''} ${isDef?'defender':''}">
+            <div class="opp-name">${isAtt?'⚔️ ':''}${isDef?'🛡️ ':''}${opp.name}${opp.isConnected?'':' 🔴'}</div>
+            <div class="opp-cards">${cards}</div>
+            <div class="opp-count">${opp.cardCount} Karten</div>
+        </div>`;
+    }
+    $('opponents-row').innerHTML = oh;
+
+    // Attack pairs
+    let ph = '';
+    for (let i = 0; i < s.attackCards.length; i++) {
+        const a = s.attackCards[i];
+        const d = s.defendCards.find(x => x.attackIdx === i);
+        ph += `<div class="pair">
+            ${cardDiv(a, 'table-card')}
+            <div class="defend-card-slot">${d ? cardDiv(d, 'table-card') : ''}</div>
+        </div>`;
+    }
+    $('attack-pairs').innerHTML = ph;
+
+    // Sort hand
+    s.myHand.sort((a, b) => {
+        if (a.suit === b.suit) return a.value - b.value;
+        const at = a.suit === s.trumpSuit ? 1 : 0;
+        const bt = b.suit === s.trumpSuit ? 1 : 0;
+        if (at !== bt) return bt - at;
+        return SUITS.indexOf(a.suit) - SUITS.indexOf(b.suit);
+    });
+
+    // Status
+    if (s.phase === 'gameOver') {
+        renderGameOver(s);
+        return;
+    } else if (s.phase === 'attack' || s.phase === 'addAttack') {
+        $('status-msg').textContent = isA ? '⚔️ Greif an! Wähle eine Karte.' : `Warte auf Angreifer...`;
+    } else if (s.phase === 'defend') {
+        $('status-msg').textContent = isD ? '🛡️ Verteidige dich!' : `Spieler verteidigt...`;
+    }
+
+    // Player hand
+    const unbeaten = s.attackCards.filter((a, i) => !s.defendCards.some(d => d.attackIdx === i));
+    let hh = '';
+    for (const c of s.myHand) {
+        let pl = false;
+        if ((s.phase === 'attack' || s.phase === 'addAttack') && isA) {
+            pl = s.attackCards.length === 0 || canAddCardMP(c, s);
+        } else if (s.phase === 'defend' && isD) {
+            pl = unbeaten.some(a => canBeatMP(a, c, s.trumpSuit));
+        }
+        hh += cardDiv(c, '', pl);
+    }
+    $('player-hand').innerHTML = hh;
+
+    // Bind clicks
+    $('player-hand').querySelectorAll('.card.playable').forEach(el => {
+        el.onclick = () => humanPlayMP(el.dataset.rank, el.dataset.suit);
+    });
+
+    // Action buttons
+    let ah = '';
+    if (s.phase === 'defend' && isD) {
+        ah += `<button class="btn btn-take" id="mp-take">🃏 Aufnehmen</button>`;
+    }
+    if ((s.phase === 'addAttack') && isA) {
+        ah += `<button class="btn btn-pass" id="mp-pass">Pass</button>`;
+    }
+    if (s.withTransfer && isD && s.phase === 'defend' && s.attackCards.length === 1 && s.defendCards.length === 0) {
+        const atk = s.attackCards[0];
+        if (s.myHand.some(c => c.rank === atk.rank && c.suit !== atk.suit)) {
+            ah += `<button class="btn btn-transfer" id="mp-transfer">⏩ Transfer</button>`;
+        }
+    }
+    $('player-actions').innerHTML = ah;
+    if ($('mp-take')) $('mp-take').onclick = takeMP;
+    if ($('mp-pass')) $('mp-pass').onclick = passMP;
+    if ($('mp-transfer')) $('mp-transfer').onclick = transferMP;
+}
+
+function canBeatMP(atkCard, defCard, trumpSuit) {
+    if (defCard.suit === atkCard.suit && defCard.value > atkCard.value) return true;
+    if (defCard.suit === trumpSuit && atkCard.suit !== trumpSuit) return true;
+    if (defCard.suit === trumpSuit && atkCard.suit === trumpSuit && defCard.value > atkCard.value) return true;
+    return false;
+}
+
+function canAddCardMP(card, s) {
+    if (!s.attackCards.length) return true;
+    const ranks = new Set();
+    for (const a of s.attackCards) ranks.add(a.rank);
+    for (const d of s.defendCards) ranks.add(d.rank);
+    return ranks.has(card.rank);
+}
+
+async function humanPlayMP(rank, suit) {
+    const card = state.myHand.find(c => c.rank === rank && c.suit === suit);
+    if (!card) return;
+
+    const isA = state.currentAttacker === state.mySeat;
+    const isD = state.currentDefender === state.mySeat;
+
+    if ((state.phase === 'attack' || state.phase === 'addAttack') && isA) {
+        if (state.attackCards.length > 0 && !canAddCardMP(card, state)) return;
+        const res = await api('play_attack', { room_id: roomId, player_id: playerId, card: JSON.stringify(card) });
+        if (res.error) { alert(res.error); return; }
+        state = res;
+        updateGameUI();
+    } else if (state.phase === 'defend' && isD) {
+        const unbeaten = state.attackCards.filter((_, i) => !state.defendCards.some(d => d.attackIdx === i));
+        const target = unbeaten.find(a => canBeatMP(a, card, state.trumpSuit));
+        if (!target) return;
+        const attackIdx = state.attackCards.indexOf(target);
+        const res = await api('play_defend', { room_id: roomId, player_id: playerId, card: JSON.stringify(card), attack_idx: attackIdx });
+        if (res.error) { alert(res.error); return; }
+        state = res;
+        updateGameUI();
+    }
+}
+
+async function takeMP() {
+    const res = await api('take', { room_id: roomId, player_id: playerId });
+    if (res.error) { alert(res.error); return; }
+    state = res;
+    updateGameUI();
+}
+
+async function passMP() {
+    const res = await api('pass', { room_id: roomId, player_id: playerId });
+    if (res.error) { alert(res.error); return; }
+    state = res;
+    updateGameUI();
+}
+
+async function transferMP() {
+    const atk = state.attackCards[0];
+    const matching = state.myHand.find(c => c.rank === atk.rank && c.suit !== atk.suit);
+    if (!matching) return;
+    const res = await api('transfer', { room_id: roomId, player_id: playerId, card: JSON.stringify(matching) });
+    if (res.error) { alert(res.error); return; }
+    state = res;
+    updateGameUI();
+}
+
+function renderGameOver(s) {
+    $('game-table').style.display = 'none';
+    show('result');
+    if (s.phase === 'gameOver') {
+        const isDurak = s.mySeat === (s.lastDurakSeat ?? -1);
+        // Check events for game_over
+        const overEvent = s.events ? s.events.find(e => e.type === 'game_over') : null;
+        const durakSeat = overEvent ? overEvent.data.durak : -1;
+
+        if (durakSeat === s.mySeat) {
+            $('result-emoji').textContent = '😞';
+            $('result-title').textContent = 'Du bist der Durak!';
+            $('result-sub').textContent = 'Nächstes Mal wird besser...';
+        } else if (durakSeat === -1) {
+            $('result-emoji').textContent = '🤝';
+            $('result-title').textContent = 'Unentschieden!';
+            $('result-sub').textContent = 'Alle haben ihre Karten los.';
+        } else {
+            $('result-emoji').textContent = '🎉';
+            $('result-title').textContent = 'Du hast gewonnen!';
+            const durakOpp = s.opponents.find(o => o.seat === durakSeat);
+            $('result-sub').textContent = (durakOpp ? durakOpp.name : 'Spieler ' + (durakSeat+1)) + ' ist der Durak!';
+        }
+    }
+    stopPoll();
+}
+
+// ========== NAV ==========
+
+$('btn-again').onclick = () => { hide('result'); showOnly('menu'); roomId=null; playerId=null; };
+$('btn-result-menu').onclick = () => { hide('result'); showOnly('menu'); roomId=null; playerId=null; };
+$('btn-quit').onclick = () => {
+    if (confirm('Spiel verlassen?')) { stopPoll(); showOnly('menu'); roomId=null; playerId=null; }
+};
+
+// ========== AUTO-CLEANUP ==========
+
+if (Math.random() < 0.1) api('cleanup'); // 10% chance per page load
+
+// ========== URL PARAMS ==========
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('room')) {
+    $('join-code').value = urlParams.get('room').toUpperCase();
+    showOnly('join-room');
+    $('join-name').value = localStorage.getItem('durak_name') || '';
+}
 </script>
 </body>
 </html>
