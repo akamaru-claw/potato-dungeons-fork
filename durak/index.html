@@ -74,9 +74,10 @@
         #game-table {
             width: 100vw; height: 100vh;
             background: radial-gradient(ellipse at center, var(--felt) 0%, var(--bg) 100%);
-            position: relative; display: none;
+            position: relative; display: flex;
             flex-direction: column;
         }
+        #game-table.hidden { display: none; }
         .top-bar {
             display: flex; align-items: center; justify-content: space-between;
             padding: 6px 12px; background: rgba(0,0,0,0.3);
@@ -337,7 +338,7 @@
 </div>
 
 <!-- GAME TABLE -->
-<div id="game-table">
+<div id="game-table" class="hidden">
     <div class="top-bar">
         <div>
             <span class="trump-suit" id="trump-display">♠</span>
