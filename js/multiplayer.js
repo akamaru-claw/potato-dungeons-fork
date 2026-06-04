@@ -248,12 +248,19 @@ const Multiplayer = {
       case 'hostDead':
         // Host died — client becomes the active player
         if (!this.isHost) {
-          // Enemies should now target client player only
           this._hostDied = true;
-          // Client keeps playing — enemies now focus on client
+        }
+        break;
+
+      case 'newFloor':
+        // New floor — revive both players
+        if (!this.isHost) {
+          Game.floor = data.floor || Game.floor + 1;
+          // Reset client player to full HP
           if (Game.player) {
-            // Make sure client can still take damage and deal damage
-            // Enemy targeting will use Game.player (client) since host is dead
+            Game.player.hp = Game.player.maxHP;
+            Game.player.alive = true;
+            Game.player.invulFrames = 0;
           }
         }
         break;
