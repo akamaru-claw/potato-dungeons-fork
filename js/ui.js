@@ -1015,21 +1015,78 @@ const UI = {
       }
       Rewards.pickedCount++;
     }
+
+    // Co-op: Wait for both players to confirm before advancing
+    if (Multiplayer.connected) {
+      if (Multiplayer.isHost) {
+        // Host confirmed rewards
+        Multiplayer._hostRewardConfirmed = true;
+        Multiplayer.sendRewardConfirm();
+        if (Multiplayer._clientRewardConfirmed) {
+          // Both confirmed — advance
+          if (!needsReplace) {
+            Multiplayer._advanceAfterRewards();
+          } else {
+            this._waitForCoopReplaceDialog();
+          }
+        } else {
+          // Show waiting indicator
+          this._showCoopWaiting();
+          if (needsReplace) this._waitForCoopReplaceDialog();
+        }
+      } else {
+        // Client: send picks and confirm, then hide reward screen
+        for (const idx of [...this._selectedRewards]) {
+          Multiplayer.sendRewardPick(idx);
+        }
+        Multiplayer.sendRewardConfirm();
+        // Client doesn't control game flow — hide reward screen locally
+        this._hideRewardScreen();
+      }
+      this._selectedRewards = [];
+      this._rewardModes = {};
+      return;
+    }
+
+    // Single player
     this._selectedRewards = [];
     this._rewardModes = {};
     if (!needsReplace) {
       Game.finishReward();
-    }
-    // If needsReplace, finishReward will be called after player picks a slot
-    // (we need to defer it)
-    if (needsReplace) {
-      // Watch for dialog close to then call finishReward
+    } else {
       this._waitForReplaceDialog();
     }
   },
 
+  _showCoopWaiting() {
+    const el = document.getElementById('btn-confirm-rewards');
+    if (el) {
+      el.textContent = '⏳ Warte auf anderen Spieler...';
+      el.disabled = true;
+      el.style.opacity = '0.6';
+    }
+  },
+
+  _hideRewardScreen() {
+    const overlay = document.getElementById('reward-screen');
+    if (overlay) overlay.style.display = 'none';
+  },
+
+  _waitForCoopReplaceDialog() {
+    const check = () => {
+      const dialog = document.getElementById('weapon-replace-dialog');
+      if (!dialog || dialog.style.display === 'none') {
+        if (Multiplayer._clientRewardConfirmed) {
+          Multiplayer._advanceAfterRewards();
+        }
+      } else {
+        setTimeout(check, 200);
+      }
+    };
+    setTimeout(check, 300);
+  },
+
   _waitForReplaceDialog() {
-    // Poll until replace dialog is gone, then finish reward
     const check = () => {
       const dialog = document.getElementById('weapon-replace-dialog');
       if (!dialog || dialog.style.display === 'none') {

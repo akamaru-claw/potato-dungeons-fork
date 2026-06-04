@@ -289,7 +289,26 @@ const Game = {
   },
 
   update(dt) {
-    if (!this.player || !this.player.alive) { this.gameOver(); return; }
+    // In co-op: game over only if BOTH players are dead
+    if (!this.player || !this.player.alive) {
+      if (Multiplayer.connected && Multiplayer.remotePlayer && Multiplayer.remotePlayer.alive) {
+        // Host died but client is still alive — continue game as spectator
+        // Don't trigger game over, let client continue playing
+        if (this.player) {
+          this.player.visible = false;
+          this.player.invulFrames = 999999; // Prevent further processing
+        }
+        // Notify client that host died
+        if (Multiplayer.isHost) {
+          Multiplayer.send({ type: 'hostDead' });
+        }
+        // Fall through to normal update — enemy AI will target remotePlayer (client)
+        // because we set player.alive check in enemy targeting
+      } else {
+        this.gameOver(); 
+        return;
+      }
+    }
     const player = this.player;
     Input.updateWorldMouse(Renderer.getCameraWithShake());
     player.update(dt);

@@ -200,9 +200,60 @@ const Multiplayer = {
         break;
 
       case 'showReward':
-        // Host entered reward screen
+        // Host entered reward screen — show it to client too
         if (!this.isHost) {
           if (this.onShowReward) this.onShowReward(data.choices);
+        }
+        break;
+
+      case 'rewardPick':
+        // Client picked a reward — host tracks it
+        if (this.isHost && data.rewardIdx !== undefined) {
+          this._clientRewardPick = data.rewardIdx;
+          // If host already confirmed, apply both and advance
+          if (this._hostRewardConfirmed) {
+            this._advanceAfterRewards();
+          }
+        }
+        break;
+
+      case 'rewardConfirm':
+        // Other player confirmed reward selection
+        if (!this.isHost) {
+          // Client received host's confirm — now both are ready
+          if (this.onRewardConfirm) this.onRewardConfirm();
+        } else {
+          // Host received client's confirm
+          this._clientRewardConfirmed = true;
+          if (this._hostRewardConfirmed) {
+            this._advanceAfterRewards();
+          }
+        }
+        break;
+
+      case 'clientDead':
+        // Client tells host they died
+        if (this.isHost && this.remotePlayer) {
+          this.remotePlayer.alive = false;
+          this.remotePlayer.hp = 0;
+          // Check if both players are dead now
+          if (!Game.player.alive) {
+            // Both dead — game over
+            setTimeout(() => Game.gameOver(), 500);
+          }
+        }
+        break;
+
+      case 'hostDead':
+        // Host died — client becomes the active player
+        if (!this.isHost) {
+          // Enemies should now target client player only
+          this._hostDied = true;
+          // Client keeps playing — enemies now focus on client
+          if (Game.player) {
+            // Make sure client can still take damage and deal damage
+            // Enemy targeting will use Game.player (client) since host is dead
+          }
         }
         break;
 
@@ -317,6 +368,36 @@ const Multiplayer = {
       doorOpen: Dungeon.doorOpen,
       cleared: Dungeon.cleared
     });
+  },
+
+  // Called when both players have confirmed reward selection
+  _advanceAfterRewards() {
+    // Reset tracking
+    this._hostRewardConfirmed = false;
+    this._clientRewardConfirmed = false;
+    this._clientRewardPick = null;
+    // Advance to next floor (host calls finishReward)
+    if (Game && Game.finishReward) {
+      Game.finishReward();
+    }
+  },
+
+  // Called when the JOINING player picks a reward in reward screen
+  sendRewardPick(rewardIdx) {
+    if (!this.isHost && this.connected) {
+      this.send({ type: 'rewardPick', rewardIdx });
+      // Mark local player as confirmed
+      this._localRewardConfirmed = true;
+      // If host already confirmed, we can advance
+      // Otherwise wait for host's rewardConfirm
+    }
+  },
+
+  // Called when ANY player clicks "Confirm/Done" in reward screen
+  sendRewardConfirm() {
+    if (this.connected) {
+      this.send({ type: 'rewardConfirm' });
+    }
   },
 
   _createRemotePlayer() {
