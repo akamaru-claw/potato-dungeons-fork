@@ -200,9 +200,10 @@ const Multiplayer = {
         break;
 
       case 'showReward':
-        // Host entered reward screen — show it to client too
+        // Host entered reward screen — show it to client too with same numRewards
         if (!this.isHost) {
-          if (this.onShowReward) this.onShowReward(data.choices);
+          if (data.numRewards) this._coopNumRewards = data.numRewards;
+          if (this.onShowReward) this.onShowReward(data.choices, data.numRewards);
         }
         break;
 
