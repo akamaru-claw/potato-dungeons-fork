@@ -197,6 +197,14 @@ const Player = {
           } else {
             this.lastKiller = { name: 'Unbekannt', icon: '💀', type: 'unknown', isBoss: false, isElite: false, color: '#888' };
           }
+          // Co-op: notify other player of death
+          if (Multiplayer.connected) {
+            if (Multiplayer.isHost) {
+              Multiplayer.send({ type: 'hostDead' });
+            } else {
+              Multiplayer.send({ type: 'clientDead' });
+            }
+          }
         }
       },
 

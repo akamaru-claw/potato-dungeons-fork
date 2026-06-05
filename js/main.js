@@ -220,8 +220,19 @@ const Game = {
   nextFloor() {
     const nextFloor = Dungeon.currentFloor + 1;
     const isBoss = nextFloor % CONFIG.TOWER.BOSS_EVERY === 0;
+    // Revive host player (in case they were in spectator/dead mode from co-op)
     this.player.hp = this.player.getMaxHp();
+    this.player.alive = true;
+    this.player.visible = true;
+    this.player.invulFrames = 60;
     this.player.tookDamageThisFloor = false; // Reset für neue Ebene
+    // Revive remote player in co-op
+    if (Multiplayer.connected && Multiplayer.remotePlayer) {
+      Multiplayer.remotePlayer.alive = true;
+      Multiplayer.remotePlayer.hp = Multiplayer.remotePlayer.maxHp;
+      // Send newFloor to client to revive them too
+      Multiplayer.send({ type: 'newFloor', floor: nextFloor });
+    }
     // Devil Bargain: -1 HP per floor
     const charDef = CONFIG.CHARACTERS?.[this.player.skin];
     if (charDef?.ability === 'devil_bargain') {
@@ -291,21 +302,29 @@ const Game = {
   update(dt) {
     // In co-op: game over only if BOTH players are dead
     if (!this.player || !this.player.alive) {
-      if (Multiplayer.connected && Multiplayer.remotePlayer && Multiplayer.remotePlayer.alive) {
-        // Host died but client is still alive — continue game as spectator
-        // Don't trigger game over, let client continue playing
-        if (this.player) {
-          this.player.visible = false;
-          this.player.invulFrames = 999999; // Prevent further processing
+      if (Multiplayer.connected) {
+        const otherAlive = Multiplayer.remotePlayer && Multiplayer.remotePlayer.alive;
+        if (otherAlive) {
+          // One player died but other is alive — continue as spectator (invisible)
+          if (this.player) {
+            this.player.visible = false;
+            this.player.invulFrames = 999999;
+          }
+          // Notify other player of our death
+          if (Multiplayer.isHost) {
+            Multiplayer.send({ type: 'hostDead' });
+          } else {
+            Multiplayer.send({ type: 'clientDead' });
+          }
+          // Fall through — game continues with alive player
+        } else {
+          // Both players dead — game over
+          this.gameOver();
+          return;
         }
-        // Notify client that host died
-        if (Multiplayer.isHost) {
-          Multiplayer.send({ type: 'hostDead' });
-        }
-        // Fall through to normal update — enemy AI will target remotePlayer (client)
-        // because we set player.alive check in enemy targeting
       } else {
-        this.gameOver(); 
+        // Single player death
+        this.gameOver();
         return;
       }
     }
@@ -499,7 +518,23 @@ const Game = {
           FloatingText.add(this.player.x, this.player.y - 40, '✨ FLAWLESS! +1 Wahl', '#ffdd44', 20, 2.5);
         }
         Multiplayer.sendFullSync();
-        Multiplayer.send({ type: 'showReward', choices: this.pendingReward.map(r => ({ type: r.type, name: r.name, icon: r.icon })) });
+        // Send full reward data so client can show weapon choice dialogs
+        Multiplayer.send({ type: 'showReward', choices: this.pendingReward.map(r => {
+          const base = { type: r.type, name: r.name, icon: r.icon };
+          if (r.type === 'weapon') {
+            base.weaponKey = r.weaponKey;
+            base.isUpgrade = r.isUpgrade;
+            base.offerTier = r.offerTier;
+          } else if (r.type === 'stat') {
+            base.stat = r.stat;
+            base.value = r.value;
+            base.percent = r.percent;
+          } else if (r.type === 'relic') {
+            base.relicKey = r.relicKey;
+            base.desc = r.desc;
+          }
+          return base;
+        }), numRewards: Rewards.maxPicks });
       }
     } else {
       // Client: notify host when touching door

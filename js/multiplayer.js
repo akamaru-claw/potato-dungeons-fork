@@ -194,16 +194,50 @@ const Multiplayer = {
       case 'nextFloor':
         // Host tells client to go to next floor
         if (!this.isHost && data.roomData) {
+          // Revive dead client player before going to next floor
+          if (Game.player) {
+            Game.player.hp = Game.player.getMaxHp();
+            Game.player.alive = true;
+            Game.player.invulFrames = 60;
+            Game.player.visible = true;
+            Game.player.flashTimer = 0;
+          }
           // Client receives new room data for next floor
           if (this.onNextFloor) this.onNextFloor(data.roomData);
         }
         break;
 
       case 'showReward':
-        // Host entered reward screen — show it to client too with same numRewards
+        // Host entered reward screen — show it to client too with full choices
         if (!this.isHost) {
-          if (data.numRewards) this._coopNumRewards = data.numRewards;
-          if (this.onShowReward) this.onShowReward(data.choices, data.numRewards);
+          if (data.choices) {
+            // Enrich remote choices into proper reward objects
+            Rewards.currentChoices = data.choices.map(r => {
+              if (r.type === 'weapon') {
+                const existingWeapon = Game.player?.weapons?.find(w => w.defKey === r.weaponKey);
+                const def = CONFIG.WEAPON_DEFS[r.weaponKey];
+                return {
+                  type: 'weapon',
+                  name: r.name,
+                  icon: r.icon,
+                  weaponKey: r.weaponKey,
+                  isUpgrade: !!existingWeapon,
+                  offerTier: existingWeapon ? existingWeapon.tier + 1 : 0
+                };
+              } else if (r.type === 'stat') {
+                return { type: 'stat', name: r.name, icon: r.icon, stat: r.stat, value: r.value, percent: r.percent };
+              } else if (r.type === 'relic') {
+                return { type: 'relic', name: r.name, icon: r.icon, relicKey: r.relicKey, desc: r.desc };
+              }
+              return r;
+            });
+            if (data.numRewards) {
+              Rewards.maxPicks = data.numRewards;
+              Rewards.pickedCount = 0;
+              Rewards.rerollsLeft = 0;
+            }
+            UI.showReward(Rewards.currentChoices);
+          }
         }
         break;
 
@@ -256,11 +290,13 @@ const Multiplayer = {
         // New floor — revive both players
         if (!this.isHost) {
           Game.floor = data.floor || Game.floor + 1;
-          // Reset client player to full HP
+          // Reset client player — revive if dead, full heal
           if (Game.player) {
-            Game.player.hp = Game.player.maxHP;
+            Game.player.hp = Game.player.getMaxHp();
             Game.player.alive = true;
-            Game.player.invulFrames = 0;
+            Game.player.invulFrames = 60; // brief invul after revive
+            Game.player.visible = true;
+            Game.player.flashTimer = 0;
           }
         }
         break;

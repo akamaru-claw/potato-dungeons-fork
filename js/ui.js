@@ -1035,7 +1035,15 @@ const UI = {
           if (needsReplace) this._waitForCoopReplaceDialog();
         }
       } else {
-        // Client: send picks and confirm, then hide reward screen
+        // Client: apply rewards locally, then send picks and confirm
+        for (const idx of [...this._selectedRewards]) {
+          const reward = Rewards.currentChoices[idx];
+          if (reward) {
+            const mode = this._rewardModes?.[idx] || (reward.type === 'weapon' && !reward.isUpgrade ? 'new' : undefined);
+            Rewards.apply(reward, Game.player, mode);
+            Rewards.pickedCount++;
+          }
+        }
         for (const idx of [...this._selectedRewards]) {
           Multiplayer.sendRewardPick(idx);
         }
