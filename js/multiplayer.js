@@ -40,13 +40,20 @@ const Multiplayer = {
           config: {
             iceServers: [
               { urls: 'stun:stun.l.google.com:19302' },
-              { urls: 'stun:stun1.l.google.com:19302' }
+              { urls: 'stun:stun1.l.google.com:19302' },
+              { urls: 'stun:stun2.l.google.com:19302' },
+              { urls: 'stun:stun3.l.google.com:19302' },
+              { urls: 'stun:stun4.l.google.com:19302' },
+              { urls: 'turn:global.relay.metered.ca:80', username: 'e8dd65f92f7db8a1a1f1f170', credential: 'F5kb1k2o5SC8y+g' },
+              { urls: 'turn:global.relay.metered.ca:443', username: 'e8dd65f92f7db8a1a1f1f170', credential: 'F5kb1k2o5SC8y+g' },
+              { urls: 'turn:global.relay.metered.ca:443?transport=tcp', username: 'e8dd65f92f7db8a1a1f1f170', credential: 'F5kb1k2o5SC8y+g' }
             ]
           }
         });
 
         // Timeout: if no open event in 10s, reject
         const timeout = setTimeout(() => {
+          this.peer?.destroy();
           reject(new Error('Verbindungstimeout — PeerJS Server nicht erreichbar'));
         }, 10000);
 
@@ -91,13 +98,20 @@ const Multiplayer = {
           config: {
             iceServers: [
               { urls: 'stun:stun.l.google.com:19302' },
-              { urls: 'stun:stun1.l.google.com:19302' }
+              { urls: 'stun:stun1.l.google.com:19302' },
+              { urls: 'stun:stun2.l.google.com:19302' },
+              { urls: 'stun:stun3.l.google.com:19302' },
+              { urls: 'stun:stun4.l.google.com:19302' },
+              { urls: 'turn:global.relay.metered.ca:80', username: 'e8dd65f92f7db8a1a1f1f170', credential: 'F5kb1k2o5SC8y+g' },
+              { urls: 'turn:global.relay.metered.ca:443', username: 'e8dd65f92f7db8a1a1f1f170', credential: 'F5kb1k2o5SC8y+g' },
+              { urls: 'turn:global.relay.metered.ca:443?transport=tcp', username: 'e8dd65f92f7db8a1a1f1f170', credential: 'F5kb1k2o5SC8y+g' }
             ]
           }
         });
 
         // Timeout: if no connection in 15s, reject
         const timeout = setTimeout(() => {
+          this.peer?.destroy();
           reject(new Error('Verbindungstimeout — Raum nicht gefunden. Code korrekt?'));
         }, 15000);
 
