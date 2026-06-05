@@ -36,7 +36,7 @@ const Multiplayer = {
     return new Promise((resolve, reject) => {
       try {
         this.peer = new Peer('pd-' + this.roomId, {
-          debug: 0,
+          debug: 1,
           config: {
             iceServers: [
               { urls: 'stun:stun.l.google.com:19302' },
@@ -45,7 +45,13 @@ const Multiplayer = {
           }
         });
 
+        // Timeout: if no open event in 10s, reject
+        const timeout = setTimeout(() => {
+          reject(new Error('Verbindungstimeout — PeerJS Server nicht erreichbar'));
+        }, 10000);
+
         this.peer.on('open', (id) => {
+          clearTimeout(timeout);
           console.log('[MP] Room created:', id);
           resolve(this.roomId);
         });
@@ -56,6 +62,7 @@ const Multiplayer = {
         });
 
         this.peer.on('error', (err) => {
+          clearTimeout(timeout);
           console.error('[MP] Peer error:', err);
           if (err.type === 'unavailable-id') {
             // Room ID taken, try another
@@ -80,7 +87,7 @@ const Multiplayer = {
     return new Promise((resolve, reject) => {
       try {
         this.peer = new Peer(undefined, {
-          debug: 0,
+          debug: 1,
           config: {
             iceServers: [
               { urls: 'stun:stun.l.google.com:19302' },
@@ -89,17 +96,29 @@ const Multiplayer = {
           }
         });
 
+        // Timeout: if no connection in 15s, reject
+        const timeout = setTimeout(() => {
+          reject(new Error('Verbindungstimeout — Raum nicht gefunden. Code korrekt?'));
+        }, 15000);
+
         this.peer.on('open', () => {
           console.log('[MP] Connecting to room pd-' + this.roomId);
           const conn = this.peer.connect('pd-' + this.roomId, { reliable: true });
           this._setupConnection(conn);
           conn.on('open', () => {
+            clearTimeout(timeout);
             console.log('[MP] Connected to host!');
             resolve();
+          });
+          conn.on('error', (err) => {
+            clearTimeout(timeout);
+            console.error('[MP] Connection error:', err);
+            reject(new Error('Verbindung fehlgeschlagen — Raum nicht gefunden'));
           });
         });
 
         this.peer.on('error', (err) => {
+          clearTimeout(timeout);
           console.error('[MP] Peer error:', err);
           reject(err);
         });
@@ -134,6 +153,10 @@ const Multiplayer = {
       this.connected = false;
       this.remotePlayer = null;
       this.remoteReady = false;
+      // Show toast if in game
+      if (Game.state === 'PLAYING' || Game.state === 'REWARD') {
+        UI.showToast('⚠️ Verbindung zum Mitspieler getrennt', 'error');
+      }
       if (this.onDisconnect) this.onDisconnect();
     });
 
