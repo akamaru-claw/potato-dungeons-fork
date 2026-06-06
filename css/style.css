@@ -154,6 +154,9 @@ body.boss-announce { animation: bossShake 0.6s ease; }
 .lobby-code { font-size: 48px; font-weight: 900; letter-spacing: 12px; color: var(--gold); text-shadow: 0 0 30px rgba(255,215,0,0.4); }
 .lobby-code-hint { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
 .lobby-back { margin-top: 24px; }
+.lobby-players { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.lobby-player { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; color: #ccc; padding: 6px 14px; border-radius: 8px; background: rgba(255,255,255,0.05); min-width: 180px; }
+.lobby-player-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
 
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes menuFloat { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-12px) rotate(2deg); } }

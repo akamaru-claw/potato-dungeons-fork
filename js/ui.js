@@ -89,6 +89,12 @@ const UI = {
       Multiplayer.disconnect();
       this.showMenu();
     });
+    document.getElementById('btn-lobby-start')?.addEventListener('click', () => {
+      // Host starts the game manually
+      if (Multiplayer.isHost && Multiplayer.clientCount >= 1) {
+        Game.startCoop();
+      }
+    });
   },
 
   async _hostRoom() {
@@ -102,23 +108,61 @@ const UI = {
       document.getElementById('lobby-room-code').style.display = 'flex';
       // Auto-copy room code
       try { await navigator.clipboard.writeText(roomId); } catch(e) {}
-      statusEl.textContent = 'Warte auf Mitspieler... (Code kopiert!)';
+      statusEl.textContent = 'Warte auf weitere Spieler... (Code kopiert!)';
       statusEl.className = 'lobby-status';
 
+      // Show player list and start button
+      this._updateLobbyPlayers();
+
       Multiplayer.onConnect = () => {
-        statusEl.textContent = '🤝 Verbunden! Starte Spiel...';
+        this._updateLobbyPlayers();
+        statusEl.textContent = `🤝 ${Multiplayer.playerCount}/4 Spielern verbunden!`;
         statusEl.className = 'lobby-status success';
-        setTimeout(() => {
-          Game.startCoop();
-        }, 800);
       };
       Multiplayer.onDisconnect = () => {
-        statusEl.textContent = '⚠️ Mitspieler hat die Verbindung getrennt';
-        statusEl.className = 'lobby-status error';
+        this._updateLobbyPlayers();
+        if (Multiplayer.clientCount === 0) {
+          statusEl.textContent = 'Warte auf weitere Spieler...';
+          statusEl.className = 'lobby-status';
+        } else {
+          statusEl.textContent = `⚠️ Spieler hat die Verbindung getrennt (${Multiplayer.playerCount}/4)`;
+          statusEl.className = 'lobby-status error';
+        }
       };
     } catch(e) {
       statusEl.textContent = 'Fehler: ' + e.message;
       statusEl.className = 'lobby-status error';
+    }
+  },
+
+  _updateLobbyPlayers() {
+    const listEl = document.getElementById('lobby-players');
+    if (!listEl) return;
+    
+    // Player 1 (Host)
+    let html = '<div class="lobby-player"><span class="lobby-player-dot" style="background:#e8b84b;"></span> Spieler 1 (Du) 🟢</div>';
+    
+    // Connected clients
+    for (let i = 0; i < Multiplayer.conns.length; i++) {
+      const conn = Multiplayer.conns[i];
+      const playerIdx = conn._playerIndex || (i + 1);
+      const color = Multiplayer.PLAYER_COLORS[playerIdx] || '#6ec6ff';
+      html += `<div class="lobby-player"><span class="lobby-player-dot" style="background:${color};"></span> Spieler ${playerIdx + 1} 🟢</div>`;
+    }
+    
+    // Empty slots
+    const emptySlots = 3 - Multiplayer.conns.length;
+    for (let i = 0; i < emptySlots; i++) {
+      const slotIdx = Multiplayer.conns.length + i + 1;
+      html += '<div class="lobby-player"><span class="lobby-player-dot" style="background:#444;"></span> Spieler ' + (i + 2) + ' ⬜</div>';
+    }
+    
+    listEl.innerHTML = html;
+    
+    // Show/hide start button
+    const startBtn = document.getElementById('btn-lobby-start');
+    if (startBtn) {
+      startBtn.style.display = Multiplayer.clientCount >= 1 ? 'inline-flex' : 'none';
     }
   },
 
@@ -1024,8 +1068,12 @@ const UI = {
         // Host confirmed rewards
         Multiplayer._hostRewardConfirmed = true;
         Multiplayer.sendRewardConfirm();
-        if (Multiplayer._clientRewardConfirmed) {
-          // Both confirmed — advance
+        // Check if ALL clients confirmed
+        const allClientsConfirmed = Multiplayer.conns.every((conn, idx) => {
+          return Multiplayer._clientRewardConfirmed && Multiplayer._clientRewardConfirmed[idx] === true;
+        });
+        if (allClientsConfirmed) {
+          // All confirmed — advance
           if (!needsReplace) {
             Multiplayer._advanceAfterRewards();
           } else {
@@ -1076,7 +1124,8 @@ const UI = {
   _showCoopWaiting() {
     const el = document.getElementById('btn-confirm-rewards');
     if (el) {
-      el.textContent = '⏳ Warte auf anderen Spieler...';
+      const waiting = Multiplayer.clientCount - (Multiplayer._clientRewardConfirmed || []).filter(c => c).length;
+      el.textContent = waiting > 0 ? `⏳ Warte auf ${waiting} Spieler...` : '⏳ Warte auf andere Spieler...';
       el.disabled = true;
       el.style.opacity = '0.6';
     }
@@ -1091,7 +1140,10 @@ const UI = {
     const check = () => {
       const dialog = document.getElementById('weapon-replace-dialog');
       if (!dialog || dialog.style.display === 'none') {
-        if (Multiplayer._clientRewardConfirmed) {
+        const allClientsConfirmed = Multiplayer.conns.every((conn, idx) => {
+          return Multiplayer._clientRewardConfirmed && Multiplayer._clientRewardConfirmed[idx] === true;
+        });
+        if (allClientsConfirmed) {
           Multiplayer._advanceAfterRewards();
         }
       } else {

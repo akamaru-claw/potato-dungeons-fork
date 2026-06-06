@@ -8,7 +8,7 @@
   <meta http-equiv="Expires" content="0">
   <title>🥔 Potato Dungeons</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=027">
+  <link rel="stylesheet" href="css/style.css?v=033">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥔</text></svg>">
 </head>
 <body>
@@ -35,7 +35,7 @@
 
   <!-- PAUSE BUTTON -->
   <button id="btn-pause" class="pause-btn" aria-label="Pause">⏸</button>
-  <div id="version-tag" class="version-tag">v0.32</div>
+  <div id="version-tag" class="version-tag">v0.33</div>
 
   <!-- Joystick Visual (Mobile) -->
   <div id="joystick-container" class="joystick-container" style="display:none;">
@@ -211,7 +211,7 @@
 
         <div class="howto-section">
           <h3>🤝 Co-Op</h3>
-          <p>Spiel mit einem Freund! Einer erstellt einen Raum, teilt den 4-stelligen Code, der andere tritt bei. Gegner und Belohnungen sind synchronisiert.</p>
+          <p>Spiel mit bis zu 3 Freunden! Einer erstellt einen Raum, teilt den 4-stelligen Code, die anderen treten bei. Der Host startet das Spiel, wenn alle da sind. Jeder Spieler hat eine eigene Farbe.</p>
         </div>
 
       </div>
@@ -286,8 +286,10 @@
       <div id="lobby-room-code" class="lobby-room-code" style="display:none;">
         <span class="lobby-code-label">Dein Raum-Code:</span>
         <span id="lobby-code" class="lobby-code"></span>
-        <span class="lobby-code-hint">Teile diesen Code mit deinem Mitspieler</span>
+        <span class="lobby-code-hint">Teile diesen Code mit deinen Mitspielern</span>
       </div>
+      <div id="lobby-players" class="lobby-players"></div>
+      <button id="btn-lobby-start" class="btn btn-primary" style="display:none;">⚔️ Spiel starten</button>
       <button id="btn-lobby-back" class="btn btn-secondary lobby-back">← Zurück</button>
     </div>
   </div>
@@ -391,9 +393,9 @@
   <script src="js/player.js?v=027"></script>
   <script src="js/dungeon.js?v=032"></script>
   <script src="js/rewards.js?v=032"></script>
-  <script src="js/multiplayer.js?v=032"></script>
+  <script src="js/multiplayer.js?v=033"></script>
   <script src="js/renderer.js?v=032"></script>
-  <script src="js/ui.js?v=032"></script>
-  <script src="js/main.js?v=032"></script>
+  <script src="js/ui.js?v=033"></script>
+  <script src="js/main.js?v=033"></script>
 </body>
 </html>
