@@ -154,6 +154,9 @@ const UI = {
       try { await navigator.clipboard.writeText(roomId); } catch(e) {}
 
       this._updateLobbySlots();
+      const waitingStatus = document.getElementById('lobby-waiting-status');
+      waitingStatus.textContent = 'Warte auf Spieler...';
+      waitingStatus.className = 'lobby-status';
 
       Multiplayer.onConnect = () => {
         this._updateLobbySlots();
