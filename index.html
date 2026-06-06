@@ -8,7 +8,7 @@
   <meta http-equiv="Expires" content="0">
   <title>🥔 Potato Dungeons</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=034">
+  <link rel="stylesheet" href="css/style.css?v=035">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥔</text></svg>">
 </head>
 <body>
@@ -35,7 +35,7 @@
 
   <!-- PAUSE BUTTON -->
   <button id="btn-pause" class="pause-btn" aria-label="Pause">⏸</button>
-  <div id="version-tag" class="version-tag">v0.34</div>
+  <div id="version-tag" class="version-tag">v0.35</div>
 
   <!-- Joystick Visual (Mobile) -->
   <div id="joystick-container" class="joystick-container" style="display:none;">
@@ -273,24 +273,92 @@
   <!-- CO-OP LOBBY -->
   <div id="screen-lobby" class="screen">
     <div class="lobby-container">
-      <h2 class="lobby-title">🤝 Co-Op Lobby</h2>
-      <div class="lobby-buttons">
-        <button id="btn-host" class="btn btn-primary">🏠 Raum erstellen</button>
-        <div class="lobby-divider">oder</div>
-        <div class="lobby-join">
-          <input id="input-room" class="lobby-input" type="text" placeholder="Raum-Code" maxlength="4" autocomplete="off" autocapitalize="characters">
-          <button id="btn-join" class="btn btn-secondary">🔗 Beitreten</button>
+      <!-- Phase 1: Create/Join -->
+      <div id="lobby-setup" class="lobby-phase">
+        <h2 class="lobby-title">🤝 Co-Op Lobby</h2>
+        <p class="lobby-subtitle">Spiele mit bis zu 3 Freunden zusammen</p>
+        <div class="lobby-buttons">
+          <button id="btn-host" class="btn btn-primary lobby-btn-big">🏠 Raum erstellen</button>
+          <div class="lobby-divider"><span>oder beitreten</span></div>
+          <div class="lobby-join">
+            <input id="input-room" class="lobby-input" type="text" placeholder="CODE" maxlength="4" autocomplete="off" autocapitalize="characters">
+            <button id="btn-join" class="btn btn-secondary">🔗 Los</button>
+          </div>
+        </div>
+        <div id="lobby-status" class="lobby-status"></div>
+      </div>
+
+      <!-- Phase 2: Waiting Room -->
+      <div id="lobby-waiting" class="lobby-phase" style="display:none;">
+        <h2 class="lobby-title lobby-title-small">⚔️ Bereit?</h2>
+        <div id="lobby-room-code" class="lobby-room-code">
+          <span class="lobby-code-label">Raum-Code</span>
+          <div class="lobby-code-wrap">
+            <span id="lobby-code" class="lobby-code"></span>
+            <button id="btn-copy-code" class="lobby-copy-btn" title="Code kopieren">📋</button>
+          </div>
+          <span class="lobby-code-hint">Teile diesen Code mit deinen Mitspielern</span>
+        </div>
+
+        <div class="lobby-slots">
+          <div id="lobby-slot-0" class="lobby-slot lobby-slot-host">
+            <div class="lobby-slot-avatar">🥔</div>
+            <div class="lobby-slot-info">
+              <span class="lobby-slot-name">Du (Host)</span>
+              <span class="lobby-slot-status lobby-slot-ready">Bereit</span>
+            </div>
+            <div class="lobby-slot-badge host-badge">HOST</div>
+          </div>
+          <div id="lobby-slot-1" class="lobby-slot lobby-slot-empty">
+            <div class="lobby-slot-avatar">🟦</div>
+            <div class="lobby-slot-info">
+              <span class="lobby-slot-name">Warte...</span>
+              <span class="lobby-slot-status">Spieler 2</span>
+            </div>
+          </div>
+          <div id="lobby-slot-2" class="lobby-slot lobby-slot-empty">
+            <div class="lobby-slot-avatar">🟧</div>
+            <div class="lobby-slot-info">
+              <span class="lobby-slot-name">Warte...</span>
+              <span class="lobby-slot-status">Spieler 3</span>
+            </div>
+          </div>
+          <div id="lobby-slot-3" class="lobby-slot lobby-slot-empty">
+            <div class="lobby-slot-avatar">🟪</div>
+            <div class="lobby-slot-info">
+              <span class="lobby-slot-name">Warte...</span>
+              <span class="lobby-slot-status">Spieler 4</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="lobby-waiting-status" class="lobby-status">Warte auf Spieler...</div>
+        <div class="lobby-action-row">
+          <button id="btn-lobby-start" class="btn btn-primary btn-start-game" style="display:none;">
+            <span class="btn-start-icon">⚔️</span> Spiel starten
+            <span id="lobby-player-count" class="lobby-player-count"></span>
+          </button>
+          <button id="btn-lobby-back" class="btn btn-secondary lobby-back">← Zurück</button>
         </div>
       </div>
-      <div id="lobby-status" class="lobby-status"></div>
-      <div id="lobby-room-code" class="lobby-room-code" style="display:none;">
-        <span class="lobby-code-label">Dein Raum-Code:</span>
-        <span id="lobby-code" class="lobby-code"></span>
-        <span class="lobby-code-hint">Teile diesen Code mit deinen Mitspielern</span>
+
+      <!-- Phase 3: Client Waiting -->
+      <div id="lobby-client-waiting" class="lobby-phase" style="display:none;">
+        <h2 class="lobby-title lobby-title-small">🤝 Verbunden!</h2>
+        <div class="lobby-connected-info">
+          <div class="lobby-connected-icon">📡</div>
+          <p>Verbunden mit Raum</p>
+          <p id="lobby-client-room" class="lobby-code lobby-code-sm"></p>
+          <p class="lobby-waiting-host">Warte bis der Host das Spiel startet...</p>
+        </div>
+        <div id="lobby-client-slots" class="lobby-slots"></div>
+        <button id="btn-lobby-back-client" class="btn btn-secondary lobby-back">← Zurück</button>
       </div>
-      <div id="lobby-players" class="lobby-players"></div>
-      <button id="btn-lobby-start" class="btn btn-primary" style="display:none;">⚔️ Spiel starten</button>
-      <button id="btn-lobby-back" class="btn btn-secondary lobby-back">← Zurück</button>
+
+      <!-- Countdown Overlay -->
+      <div id="lobby-countdown" class="lobby-countdown" style="display:none;">
+        <span id="lobby-countdown-text" class="lobby-countdown-text">3</span>
+      </div>
     </div>
   </div>
 
@@ -393,9 +461,9 @@
   <script src="js/player.js?v=027"></script>
   <script src="js/dungeon.js?v=032"></script>
   <script src="js/rewards.js?v=032"></script>
-  <script src="js/multiplayer.js?v=034"></script>
+  <script src="js/multiplayer.js?v=035"></script>
   <script src="js/renderer.js?v=032"></script>
-  <script src="js/ui.js?v=034"></script>
-  <script src="js/main.js?v=034"></script>
+  <script src="js/ui.js?v=035"></script>
+  <script src="js/main.js?v=035"></script>
 </body>
 </html>
