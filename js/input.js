@@ -177,22 +177,19 @@ const Input = {
     const canvas = this._canvas;
     const rect = canvas.getBoundingClientRect();
 
-    // Check weapon slot taps on first touch
-    if (Game.state === 'PLAYING' && Game.player && e.changedTouches.length > 0) {
-      const t0 = e.changedTouches[0];
-      const cssX = t0.clientX - rect.left, cssY = t0.clientY - rect.top;
-      // Check dash button tap first (uses CSS pixels)
-      if (this._checkDashButtonClick(cssX, cssY)) return;
-      // Weapon slots still use logical canvas coordinates
-      const tx = cssX * (canvas.width / rect.width);
-      const ty = cssY * (canvas.height / rect.height);
-      if (this._checkWeaponSlotClick(tx, ty)) return;
-    }
-
     for (let i = 0; i < e.changedTouches.length; i++) {
       const t = e.changedTouches[i];
       const tx = t.clientX - rect.left;
       const ty = t.clientY - rect.top;
+
+      // Check if touch hits a weapon slot or dash button — if so, DON'T register as joystick/aim
+      const hitSlot = this._checkWeaponSlotClick(tx * (canvas.width / rect.width), ty * (canvas.height / rect.height));
+      const hitDash = this._checkDashButtonClick(tx, ty);
+
+      if (hitSlot || hitDash) {
+        // Touch hit a UI element — skip joystick/aim registration
+        continue;
+      }
 
       if (this.touch.touchId === null) {
         this.touch.touchId = t.identifier;

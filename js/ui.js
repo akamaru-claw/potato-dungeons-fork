@@ -1002,22 +1002,24 @@ const UI = {
 
   async _confirmRewards() {
     if (!this._selectedRewards || this._selectedRewards.length === 0) return;
-    let needsReplace = false;
-    for (const idx of [...this._selectedRewards]) {
-      const reward = Rewards.currentChoices[idx];
-      if (!reward) continue;
-      const mode = this._rewardModes?.[idx];
-      if (reward.type === 'weapon') {
-        const result = Rewards.apply(reward, Game.player, mode || 'new');
-        if (result === 'needs_replace') needsReplace = true;
-      } else {
-        Rewards.apply(reward, Game.player);
-      }
-      Rewards.pickedCount++;
-    }
 
-    // Co-op: Wait for both players to confirm before advancing
+    // Co-op: Apply rewards and coordinate with other player
     if (Multiplayer.connected) {
+      let needsReplace = false;
+      // Apply all rewards once
+      for (const idx of [...this._selectedRewards]) {
+        const reward = Rewards.currentChoices[idx];
+        if (!reward) continue;
+        const mode = this._rewardModes?.[idx];
+        if (reward.type === 'weapon') {
+          const result = Rewards.apply(reward, Game.player, mode || 'new');
+          if (result === 'needs_replace') needsReplace = true;
+        } else {
+          Rewards.apply(reward, Game.player);
+        }
+        Rewards.pickedCount++;
+      }
+
       if (Multiplayer.isHost) {
         // Host confirmed rewards
         Multiplayer._hostRewardConfirmed = true;
@@ -1035,15 +1037,7 @@ const UI = {
           if (needsReplace) this._waitForCoopReplaceDialog();
         }
       } else {
-        // Client: apply rewards locally, then send picks and confirm
-        for (const idx of [...this._selectedRewards]) {
-          const reward = Rewards.currentChoices[idx];
-          if (reward) {
-            const mode = this._rewardModes?.[idx] || (reward.type === 'weapon' && !reward.isUpgrade ? 'new' : undefined);
-            Rewards.apply(reward, Game.player, mode);
-            Rewards.pickedCount++;
-          }
-        }
+        // Client: send picks and confirm, then hide reward screen
         for (const idx of [...this._selectedRewards]) {
           Multiplayer.sendRewardPick(idx);
         }
@@ -1057,6 +1051,19 @@ const UI = {
     }
 
     // Single player
+    let needsReplace = false;
+    for (const idx of [...this._selectedRewards]) {
+      const reward = Rewards.currentChoices[idx];
+      if (!reward) continue;
+      const mode = this._rewardModes?.[idx];
+      if (reward.type === 'weapon') {
+        const result = Rewards.apply(reward, Game.player, mode || 'new');
+        if (result === 'needs_replace') needsReplace = true;
+      } else {
+        Rewards.apply(reward, Game.player);
+      }
+      Rewards.pickedCount++;
+    }
     this._selectedRewards = [];
     this._rewardModes = {};
     if (!needsReplace) {
