@@ -151,7 +151,11 @@ const UI = {
       document.getElementById('lobby-setup').style.display = 'none';
       document.getElementById('lobby-waiting').style.display = '';
       document.getElementById('lobby-code').textContent = roomId;
-      try { await navigator.clipboard.writeText(roomId); } catch(e) {}
+      try {
+        await navigator.clipboard.writeText(roomId);
+        const hint = document.getElementById('lobby-code-hint');
+        if (hint) hint.textContent = '✓ Code kopiert!';
+      } catch(e) {}
 
       this._updateLobbySlots();
       const waitingStatus = document.getElementById('lobby-waiting-status');
