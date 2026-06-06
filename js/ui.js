@@ -155,27 +155,20 @@ const UI = {
 
       this._updateLobbySlots();
       const waitingStatus = document.getElementById('lobby-waiting-status');
-      waitingStatus.textContent = 'Warte auf Spieler...';
+      waitingStatus.textContent = 'Warte auf Spieler 2...';
       waitingStatus.className = 'lobby-status';
 
       Multiplayer.onConnect = () => {
         this._updateLobbySlots();
         const statusEl2 = document.getElementById('lobby-waiting-status');
-        if (Multiplayer.clientCount > 0) {
-          statusEl2.textContent = `${Multiplayer.playerCount}/4 Spielern verbunden — Bereit zum Starten!`;
-          statusEl2.className = 'lobby-status success';
-        }
+        statusEl2.textContent = '🤝 Spieler 2 verbunden — Bereit zum Starten!';
+        statusEl2.className = 'lobby-status success';
       };
       Multiplayer.onDisconnect = () => {
         this._updateLobbySlots();
         const statusEl2 = document.getElementById('lobby-waiting-status');
-        if (Multiplayer.clientCount === 0) {
-          statusEl2.textContent = 'Warte auf Spieler...';
-          statusEl2.className = 'lobby-status';
-        } else {
-          statusEl2.textContent = `⚠️ Spieler getrennt (${Multiplayer.playerCount}/4)`;
-          statusEl2.className = 'lobby-status error';
-        }
+        statusEl2.textContent = '⚠️ Spieler 2 getrennt';
+        statusEl2.className = 'lobby-status error';
       };
     } catch(e) {
       statusEl.textContent = 'Fehler: ' + e.message;
@@ -187,8 +180,6 @@ const UI = {
     const SLOT_CONFIG = [
       { avatar: '🥔', label: 'Du (Host)', color: '#e8b84b' },
       { avatar: '🟦', label: 'Spieler 2', color: '#6ec6ff' },
-      { avatar: '🟧', label: 'Spieler 3', color: '#ff9f43' },
-      { avatar: '🟪', label: 'Spieler 4', color: '#a48aff' },
     ];
 
     // Slot 0 = Host (always filled)
@@ -204,40 +195,38 @@ const UI = {
         <div class="lobby-slot-badge host-badge">HOST</div>`;
     }
 
-    // Slots 1-3 = Clients
-    for (let i = 1; i <= 3; i++) {
-      const slot = document.getElementById('lobby-slot-' + i);
-      if (!slot) continue;
-      const conn = Multiplayer.conns[i - 1];
-      if (conn) {
-        const pIdx = conn._playerIndex || i;
-        const color = Multiplayer.PLAYER_COLORS[pIdx] || SLOT_CONFIG[i].color;
-        const pName = SLOT_CONFIG[i].label;
-        slot.className = 'lobby-slot lobby-slot-joined';
-        slot.innerHTML = `
-          <div class="lobby-slot-avatar" style="background:${color}15;">${SLOT_CONFIG[i].avatar}</div>
+    // Slot 1 = Client
+    const slot1 = document.getElementById('lobby-slot-1');
+    if (slot1) {
+      if (Multiplayer.connected && Multiplayer.remotePlayer) {
+        slot1.className = 'lobby-slot lobby-slot-joined';
+        slot1.innerHTML = `
+          <div class="lobby-slot-avatar" style="background:${SLOT_CONFIG[1].color}15;">${SLOT_CONFIG[1].avatar}</div>
           <div class="lobby-slot-info">
-            <span class="lobby-slot-name" style="color:${color};">${pName}</span>
+            <span class="lobby-slot-name" style="color:${SLOT_CONFIG[1].color};">${SLOT_CONFIG[1].label}</span>
             <span class="lobby-slot-status lobby-slot-ready">✓ Verbunden</span>
           </div>`;
       } else {
-        slot.className = 'lobby-slot lobby-slot-empty';
-        slot.innerHTML = `
-          <div class="lobby-slot-avatar">${SLOT_CONFIG[i].avatar}</div>
+        slot1.className = 'lobby-slot lobby-slot-empty';
+        slot1.innerHTML = `
+          <div class="lobby-slot-avatar">${SLOT_CONFIG[1].avatar}</div>
           <div class="lobby-slot-info">
-            <span class="lobby-slot-name">${SLOT_CONFIG[i].label}</span>
+            <span class="lobby-slot-name">${SLOT_CONFIG[1].label}</span>
             <span class="lobby-slot-status">Offen</span>
           </div>`;
       }
     }
 
-    // Start button visibility
+    // Hide slots 2+3 for 2-player mode
+    const slot2 = document.getElementById('lobby-slot-2');
+    const slot3 = document.getElementById('lobby-slot-3');
+    if (slot2) slot2.style.display = 'none';
+    if (slot3) slot3.style.display = 'none';
+
+    // Start button
     const startBtn = document.getElementById('btn-lobby-start');
-    const countEl = document.getElementById('lobby-player-count');
     if (startBtn) {
-      const canStart = Multiplayer.clientCount >= 1;
-      startBtn.style.display = canStart ? 'inline-flex' : 'none';
-      if (countEl) countEl.textContent = canStart ? `(${Multiplayer.playerCount}/4)` : '';
+      startBtn.style.display = Multiplayer.connected ? 'inline-flex' : 'none';
     }
   },
 
@@ -260,16 +249,9 @@ const UI = {
       document.getElementById('lobby-client-waiting').style.display = '';
       document.getElementById('lobby-client-room').textContent = roomId;
 
-      // Build client-side player list
       this._updateClientSlots();
 
-      Multiplayer.onConnect = () => {
-        this._updateClientSlots();
-      };
-      Multiplayer.onDisconnect = () => {
-        this._updateClientSlots();
-      };
-
+      // When host starts the game, show countdown then start
       Multiplayer.onStartGame = (roomData) => {
         document.getElementById('lobby-client-waiting').style.display = 'none';
         const countdownEl = document.getElementById('lobby-countdown');
@@ -344,25 +326,21 @@ const UI = {
   _updateClientSlots() {
     const container = document.getElementById('lobby-client-slots');
     if (!container) return;
-    const SLOT_COLORS = ['#e8b84b', '#6ec6ff', '#ff9f43', '#a48aff'];
-    const SLOT_NAMES = ['Spieler 1 (Host)', 'Spieler 2', 'Spieler 3', 'Spieler 4'];
-    const SLOT_AVATARS = ['🥔', '🟦', '🟧', '🟪'];
     let html = '';
     // Host
     html += `<div class="lobby-slot lobby-slot-host">
-      <div class="lobby-slot-avatar">${SLOT_AVATARS[0]}</div>
+      <div class="lobby-slot-avatar">🥔</div>
       <div class="lobby-slot-info">
-        <span class="lobby-slot-name" style="color:${SLOT_COLORS[0]};">${SLOT_NAMES[0]}</span>
+        <span class="lobby-slot-name" style="color:#e8b84b;">Spieler 1 (Host)</span>
         <span class="lobby-slot-status lobby-slot-ready">✓ Bereit</span>
       </div>
       <div class="lobby-slot-badge host-badge">HOST</div>
     </div>`;
     // You (client)
-    const myIdx = Multiplayer._myPlayerIndex || 1;
     html += `<div class="lobby-slot lobby-slot-joined">
-      <div class="lobby-slot-avatar" style="background:${SLOT_COLORS[myIdx]}15;">${SLOT_AVATARS[myIdx]}</div>
+      <div class="lobby-slot-avatar" style="background:#6ec6ff15;">🟦</div>
       <div class="lobby-slot-info">
-        <span class="lobby-slot-name" style="color:${SLOT_COLORS[myIdx]};">Du (${SLOT_NAMES[myIdx]})</span>
+        <span class="lobby-slot-name" style="color:#6ec6ff;">Du (Spieler 2)</span>
         <span class="lobby-slot-status lobby-slot-ready">✓ Verbunden</span>
       </div>
     </div>`;

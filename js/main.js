@@ -132,9 +132,9 @@ const Game = {
           speed: e.speed, damage: e.damage, xp: e.xp, attackCooldown: e.attackCooldown || 0
         }))
       } : null;
-      Multiplayer.broadcast({ type: 'startGame', roomData: rd });
-      console.log('[COOP] Host sent startGame, enemies:', rd ? rd.enemies.length : 0, 'clients:', Multiplayer.clientCount);
-      this._showDebugBanner('HOST: ' + (rd ? rd.cols + 'x' + rd.rows + ' E:' + rd.enemies.length : 'no room') + ' P:' + Multiplayer.playerCount);
+      Multiplayer.send({ type: 'startGame', roomData: rd });
+      console.log('[COOP] Host sent startGame, enemies:', rd ? rd.enemies.length : 0);
+      this._showDebugBanner('HOST: ' + (rd ? rd.cols + 'x' + rd.rows + ' E:' + rd.enemies.length : 'no room'));
     }
 
     const rw = Dungeon.room?.pixelWidth || CONFIG.ROOM_WIDTH;
@@ -226,14 +226,12 @@ const Game = {
     this.player.visible = true;
     this.player.invulFrames = 60;
     this.player.tookDamageThisFloor = false; // Reset für neue Ebene
-    // Revive all remote players in co-op
-    if (Multiplayer.connected) {
-      for (const rp of Multiplayer.remotePlayers) {
-        rp.alive = true;
-        rp.hp = rp.maxHp;
-      }
-      // Send newFloor to all clients to revive them too
-      Multiplayer.broadcast({ type: 'newFloor', floor: nextFloor });
+    // Revive remote player in co-op
+    if (Multiplayer.connected && Multiplayer.remotePlayer) {
+      Multiplayer.remotePlayer.alive = true;
+      Multiplayer.remotePlayer.hp = Multiplayer.remotePlayer.maxHp;
+      // Send newFloor to client to revive them too
+      Multiplayer.send({ type: 'newFloor', floor: nextFloor });
     }
     // Devil Bargain: -1 HP per floor
     const charDef = CONFIG.CHARACTERS?.[this.player.skin];
@@ -261,7 +259,7 @@ const Game = {
         tileWidth: Dungeon.room.tileWidth, theme: Dungeon.room.theme,
         isBoss: Dungeon.room.isBoss, floorNum: nextFloor, doorPos: Dungeon.doorPos
       } : null;
-      Multiplayer.broadcast({ type: 'nextFloor', roomData: rd });
+      Multiplayer.send({ type: 'nextFloor', roomData: rd });
       setTimeout(() => Multiplayer.sendFullSync(), 200);
     }
   },
@@ -305,22 +303,22 @@ const Game = {
     // In co-op: game over only if BOTH players are dead
     if (!this.player || !this.player.alive) {
       if (Multiplayer.connected) {
-        const anyRemoteAlive = Multiplayer.remotePlayers.some(rp => rp.alive);
-        if (anyRemoteAlive) {
-          // One player died but others are alive — continue as spectator (invisible)
+        const otherAlive = Multiplayer.remotePlayer && Multiplayer.remotePlayer.alive;
+        if (otherAlive) {
+          // One player died but other is alive — continue as spectator (invisible)
           if (this.player) {
             this.player.visible = false;
             this.player.invulFrames = 999999;
           }
-          // Notify all other players of our death
+          // Notify other player of our death
           if (Multiplayer.isHost) {
-            Multiplayer.broadcast({ type: 'hostDead' });
+            Multiplayer.send({ type: 'hostDead' });
           } else {
             Multiplayer.send({ type: 'clientDead' });
           }
-          // Fall through — game continues with alive players
+          // Fall through — game continues with alive player
         } else {
-          // All players dead — game over
+          // Both players dead — game over
           this.gameOver();
           return;
         }
@@ -365,9 +363,9 @@ const Game = {
             const dmgMult = (finalCrit ? 2 : 1) * (1 + (player.stats.damage || 0) / 100) * devilDmgBonus;
             const dmg = Math.round(p.damage * dmgMult);
             e.takeDamage(dmg, dir, p.knockback, finalCrit);
-            // Send damage text to all clients
+            // Send damage text to client
             if (Multiplayer.connected) {
-              Multiplayer.broadcast({ type: 'damageText', x: e.x, y: e.y - e.size, text: (isCrit ? '💥 ' : '') + '-' + dmg, color: isCrit ? CONFIG.COLORS.CRIT_COLOR : '#fff', size: isCrit ? 24 : 16, particle: !e.alive ? 'death' : 'hit', particleColor: e.color });
+              Multiplayer.send({ type: 'damageText', x: e.x, y: e.y - e.size, text: (isCrit ? '💥 ' : '') + '-' + dmg, color: isCrit ? CONFIG.COLORS.CRIT_COLOR : '#fff', size: isCrit ? 24 : 16, particle: !e.alive ? 'death' : 'hit', particleColor: e.color });
             }
             if (player.stats.lifeSteal > 0) player.heal(player.stats.lifeSteal * 0.1);
             if (p.piercing > 0) { p.piercing--; if (p.piercedEnemies) p.piercedEnemies.add(e); }
@@ -506,13 +504,8 @@ const Game = {
       const result = Dungeon.update(dt, player);
       // Check if ANY player reached the door
       let doorTriggered = (result === 'floor_complete');
-      if (!doorTriggered && Multiplayer.remotePlayers.length > 0 && Dungeon.doorOpen && Dungeon.doorPos) {
-        for (const rp of Multiplayer.remotePlayers) {
-          if (rp.alive && Utils.vecDist(rp, Dungeon.doorPos) < 40) {
-            doorTriggered = true;
-            break;
-          }
-        }
+      if (!doorTriggered && Multiplayer.remotePlayer && Multiplayer.remotePlayer.alive && Dungeon.doorOpen && Dungeon.doorPos) {
+        if (Utils.vecDist(Multiplayer.remotePlayer, Dungeon.doorPos) < 40) doorTriggered = true;
       }
       if (this.multiplayerDoorTriggered) { doorTriggered = true; this.multiplayerDoorTriggered = false; }
       if (doorTriggered && this.state !== 'REWARD') {
@@ -526,7 +519,7 @@ const Game = {
         }
         Multiplayer.sendFullSync();
         // Send full reward data so client can show weapon choice dialogs
-        Multiplayer.broadcast({ type: 'showReward', choices: this.pendingReward.map(r => {
+        Multiplayer.send({ type: 'showReward', choices: this.pendingReward.map(r => {
           const base = { type: r.type, name: r.name, icon: r.icon };
           if (r.type === 'weapon') {
             base.weaponKey = r.weaponKey;
@@ -600,7 +593,7 @@ const Game = {
       }
 
       EnemySystem.render(ctx, camera);
-      if (Multiplayer.connected && Multiplayer.remotePlayers.length > 0) {
+      if (Multiplayer.connected && Multiplayer.remotePlayer) {
         Multiplayer.renderRemote(ctx, camera);
       }
       if (this.player) {
@@ -629,7 +622,7 @@ const Game = {
         ctx.fillStyle = '#44ff88';
         ctx.font = "bold 12px 'Outfit', sans-serif";
         ctx.textAlign = 'left';
-        ctx.fillText(`🤝 Co-Op (${Multiplayer.playerCount}/4)`, 55, 28);
+        ctx.fillText('🤝 Co-Op Verbunden', 55, 28);
       }
 
       // Low HP vignette
