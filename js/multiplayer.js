@@ -710,19 +710,24 @@ const Multiplayer = {
     return false;
   },
 
-  // Render ALL remote players
+  // Render ALL remote players (with interpolation)
   renderRemote(ctx, camera) {
     for (const entry of this.remotePlayers) {
       const rp = entry.remotePlayer;
       if (!rp || !rp.alive) continue;
+
+      // Interpolate position towards target
+      if (rp._renderX === undefined) { rp._renderX = rp.x; rp._renderY = rp.y; }
+      rp._renderX += (rp.x - rp._renderX) * 0.3;
+      rp._renderY += (rp.y - rp._renderY) * 0.3;
 
       const color = entry.color || '#6ec6ff';
       const name = PLAYER_NAMES[entry.playerIndex + 1] || 'Co-Op';
 
       const zoom = camera.zoom || 1;
       const w = (ctx.canvas._cssWidth || ctx.canvas.width), h = (ctx.canvas._cssHeight || ctx.canvas.height);
-      const sx = (rp.x - camera.x) * zoom + w / 2;
-      const sy = (rp.y - camera.y) * zoom + h / 2;
+      const sx = (rp._renderX - camera.x) * zoom + w / 2;
+      const sy = (rp._renderY - camera.y) * zoom + h / 2;
       const s = rp.size * zoom;
 
       rp._remoteBob += 0.05;

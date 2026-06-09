@@ -279,9 +279,13 @@ const Game = {
     // Track time
     if (this.player) this.player.timeSurvived = (this.player.timeSurvived || 0) + dt;
 
-    // Multiplayer sync
+    // Multiplayer sync (throttled)
     if (Multiplayer.connected) {
-      Multiplayer.syncPlayer(player);
+      this._mpPlayerSyncTimer2 = (this._mpPlayerSyncTimer2 || 0) + dt;
+      if (this._mpPlayerSyncTimer2 > 0.05) {
+        this._mpPlayerSyncTimer2 = 0;
+        Multiplayer.syncPlayer(player);
+      }
       if (Multiplayer.isHost) {
         this._mpSyncTimer = (this._mpSyncTimer || 0) + dt;
         if (this._mpSyncTimer > 0.05) {
@@ -552,9 +556,13 @@ const Game = {
     FloatingText.update(dt);
     Renderer.updateCamera(player, dt);
 
-    // === Multiplayer sync ===
+    // === Multiplayer sync (throttled) ===
     if (Multiplayer.connected) {
-      Multiplayer.syncPlayer(player);
+      this._mpPlayerSyncTimer = (this._mpPlayerSyncTimer || 0) + dt;
+      if (this._mpPlayerSyncTimer > 0.05) { // 50ms = 20 updates/sec
+        this._mpPlayerSyncTimer = 0;
+        Multiplayer.syncPlayer(player);
+      }
       if (Multiplayer.isHost) {
         this._mpSyncTimer = (this._mpSyncTimer || 0) + dt;
         if (this._mpSyncTimer > 0.05) { // 50ms = 20fps sync

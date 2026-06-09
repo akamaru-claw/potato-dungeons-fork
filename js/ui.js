@@ -262,6 +262,13 @@ const UI = {
         const textEl = document.getElementById('lobby-countdown-text');
         countdownEl.style.display = 'flex';
         textEl.textContent = '⚔️';
+
+      // When host confirms all players are ready for next floor
+      Multiplayer.onRewardConfirm = () => {
+        // Hide reward screen and advance
+        this._hideRewardScreen();
+        if (Game && Game.finishReward) Game.finishReward();
+      };
         setTimeout(() => {
           countdownEl.style.display = 'none';
           Game.startCoop(roomData);
@@ -1187,13 +1194,13 @@ const UI = {
           if (needsReplace) this._waitForCoopReplaceDialog();
         }
       } else {
-        // Client: send picks and confirm, then hide reward screen
+        // Client: send picks and confirm, then WAIT for host to advance
         for (const idx of [...this._selectedRewards]) {
           Multiplayer.sendRewardPick(idx);
         }
         Multiplayer.sendRewardConfirm();
-        // Client doesn't control game flow — hide reward screen locally
-        this._hideRewardScreen();
+        // Show waiting — host will send rewardConfirm when all players are ready
+        this._showCoopWaiting();
       }
       this._selectedRewards = [];
       this._rewardModes = {};
