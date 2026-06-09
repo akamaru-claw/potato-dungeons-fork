@@ -287,7 +287,22 @@ const Multiplayer = {
         if (entry && entry.remotePlayer) {
           Object.assign(entry.remotePlayer, data.state);
         }
-        if (this.onRemoteUpdate) this.onRemoteUpdate(data.state);
+        if (this.onRemoteUpdate) this.onRemoteUpdate(data.state, entry);
+        // Host relays client positions to all OTHER clients
+        if (this.isHost) {
+          this.conns.forEach(c => {
+            if (c !== conn && c.open) {
+              c.send({ ...data, playerIndex: entry ? entry.playerIndex : 0 });
+            }
+          });
+        }
+        // Client: if relayed update with playerIndex, find the right remote player
+        if (!this.isHost && data.playerIndex !== undefined) {
+          const relayEntry = this.remotePlayers.find(rp => rp.playerIndex === data.playerIndex);
+          if (relayEntry && relayEntry.remotePlayer) {
+            Object.assign(relayEntry.remotePlayer, data.state);
+          }
+        }
         break;
       }
 
@@ -371,24 +386,51 @@ const Multiplayer = {
       case 'rewardPick':
         // Client picked a reward — host tracks it
         if (this.isHost && data.rewardIdx !== undefined) {
-          this._clientRewardPick = data.rewardIdx;
-          // If host already confirmed, apply both and advance
-          if (this._hostRewardConfirmed) {
-            this._advanceAfterRewards();
-          }
+          // Relay pick to all other clients so they can show what others picked
+          this.conns.forEach(c => {
+            if (c !== conn && c.open) {
+              c.send({ type: 'remoteRewardPick', rewardIdx: data.rewardIdx, playerIndex: this._findRemotePlayer(conn)?.playerIndex });
+            }
+          });
         }
         break;
 
       case 'rewardConfirm':
-        // Other player confirmed reward selection
-        if (!this.isHost) {
-          // Client received host's confirm — now both are ready
-          if (this.onRewardConfirm) this.onRewardConfirm();
-        } else {
-          // Host received client's confirm
-          this._clientRewardConfirmed = true;
-          if (this._hostRewardConfirmed) {
+        // Client confirmed reward selection
+        if (this.isHost) {
+          // Track which client confirmed
+          this._confirmedPlayers.add(conn);
+          // Broadcast progress to all clients
+          const confirmedCount = this._confirmedPlayers.size;
+          const totalClients = this.conns.length;
+          this.conns.forEach(c => {
+            if (c.open) {
+              c.send({ type: 'rewardProgress', confirmed: confirmedCount, total: totalClients + 1 });
+            }
+          });
+          // Check if ALL connected clients confirmed + host confirmed
+          const allConfirmed = this._hostRewardConfirmed &&
+            this.conns.every(c => this._confirmedPlayers.has(c));
+          if (allConfirmed) {
+            // Tell all clients to advance
+            this.conns.forEach(c => {
+              if (c.open) c.send({ type: 'rewardConfirm' });
+            });
             this._advanceAfterRewards();
+          }
+        } else {
+          // Client received host's confirm — everyone ready, advance
+          if (this.onRewardConfirm) this.onRewardConfirm();
+        }
+        break;
+
+      case 'rewardProgress':
+        // Host tells clients how many players confirmed rewards
+        if (!this.isHost) {
+          const btn = document.getElementById('btn-confirm-rewards');
+          if (btn) {
+            const waiting = data.total - data.confirmed;
+            btn.textContent = waiting > 0 ? `⏳ Warte auf ${waiting} Spieler...` : '⏳ Alle bereit!';
           }
         }
         break;
@@ -559,8 +601,7 @@ const Multiplayer = {
   _advanceAfterRewards() {
     // Reset tracking
     this._hostRewardConfirmed = false;
-    this._clientRewardConfirmed = false;
-    this._clientRewardPick = null;
+    this._confirmedPlayers = new Set(); // track which connections confirmed
     // Advance to next floor (host calls finishReward)
     if (Game && Game.finishReward) {
       Game.finishReward();

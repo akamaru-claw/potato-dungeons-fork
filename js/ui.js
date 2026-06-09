@@ -1170,11 +1170,10 @@ const UI = {
       if (Multiplayer.isHost) {
         // Host confirmed rewards
         Multiplayer._hostRewardConfirmed = true;
+        // Broadcast rewardConfirm to all clients
         Multiplayer.sendRewardConfirm();
         // Check if ALL clients confirmed
-        const allClientsConfirmed = Multiplayer.conns.every((conn, idx) => {
-          return Multiplayer._clientRewardConfirmed && Multiplayer._clientRewardConfirmed[idx] === true;
-        });
+        const allClientsConfirmed = Multiplayer.conns.every(c => Multiplayer._confirmedPlayers.has(c));
         if (allClientsConfirmed) {
           // All confirmed — advance
           if (!needsReplace) {
@@ -1227,7 +1226,9 @@ const UI = {
   _showCoopWaiting() {
     const el = document.getElementById('btn-confirm-rewards');
     if (el) {
-      const waiting = Multiplayer.conns.length - (Multiplayer.remotePlayers || []).filter(rp => rp.ready).length;
+      const confirmed = Multiplayer._confirmedPlayers ? Multiplayer._confirmedPlayers.size : 0;
+      const total = Multiplayer.conns.length;
+      const waiting = total - confirmed;
       el.textContent = waiting > 0 ? `⏳ Warte auf ${waiting} Spieler...` : '⏳ Warte auf andere Spieler...';
       el.disabled = true;
       el.style.opacity = '0.6';
