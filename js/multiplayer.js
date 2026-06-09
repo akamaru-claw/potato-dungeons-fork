@@ -1,29 +1,44 @@
 // ============================================================
 // MULTIPLAYER.JS — Peer-to-Peer co-op via WebRTC (PeerJS)
-// One player hosts (creates room), other joins with code.
+// Up to 4 players (1 host + 3 clients).
 // No backend server needed — PeerJS handles signaling.
 // ============================================================
+
+const PLAYER_COLORS = [
+  '#e8b84b',  // Host  — gold
+  '#6ec6ff',  // P2    — blue
+  '#ff9944',  // P3    — orange
+  '#b388ff'  // P4    — purple
+];
+
+const PLAYER_NAMES = [
+  'Spieler 1', // host (local, not rendered by multiplayer)
+  'Spieler 2',
+  'Spieler 3',
+  'Spieler 4'
+];
+
 const Multiplayer = {
   peer: null,
-  conn: null,         // DataConnection to other player
+  conns: [],          // Array of DataConnection objects
   isHost: false,
   roomId: null,
-  connected: false,
-  remotePlayer: null,  // { x, y, hp, maxHp, size, skin, weapons, alive, facingAngle }
-  remoteReady: false,
+  remotePlayers: [],  // Array of remote player state objects { playerIndex, color, conn, remotePlayer, ready }
   onConnect: null,
   onDisconnect: null,
   onRemoteUpdate: null,
   onRemoteSelectReward: null,
 
+  get connected() {
+    return this.conns.length > 0;
+  },
+
   init() {
     this.peer = null;
-    this.conn = null;
+    this.conns = [];
     this.isHost = false;
     this.roomId = null;
-    this.connected = false;
-    this.remotePlayer = null;
-    this.remoteReady = false;
+    this.remotePlayers = [];
   },
 
   // Create a room — this player is the host
@@ -118,16 +133,43 @@ const Multiplayer = {
         this.peer.on('open', () => {
           console.log('[MP] Connecting to room pd-' + this.roomId);
           const conn = this.peer.connect('pd-' + this.roomId, { reliable: true });
-          this._setupConnection(conn);
+
+          // Track if resolved/rejected to avoid double calls
+          let settled = false;
+
           conn.on('open', () => {
             clearTimeout(timeout);
             console.log('[MP] Connected to host!');
-            resolve();
+            // Client: we are player index assigned by host (will be set via 'assignPlayer' message)
+            // Create a placeholder remote player entry — host will assign our index
+            const clientEntry = {
+              playerIndex: -1, // will be assigned by host
+              color: '#6ec6ff', // placeholder
+              conn: conn,
+              remotePlayer: this._createRemotePlayer(),
+              ready: false
+            };
+            this.conns.push(conn);
+            this.remotePlayers.push(clientEntry);
+            if (this.onConnect) this.onConnect();
+            this.send({ type: 'hello' });
+            if (!settled) { settled = true; resolve(); }
           });
+
           conn.on('error', (err) => {
             clearTimeout(timeout);
             console.error('[MP] Connection error:', err);
-            reject(new Error('Verbindung fehlgeschlagen — Raum nicht gefunden'));
+            if (!settled) { settled = true; reject(new Error('Verbindung fehlgeschlagen — Raum nicht gefunden')); }
+          });
+
+          conn.on('close', () => {
+            console.log('[MP] Connection closed');
+            this._removeConnection(conn);
+            if (this.onDisconnect) this.onDisconnect();
+          });
+
+          conn.on('data', (data) => {
+            this._handleMessage(data, conn);
           });
         });
 
@@ -143,15 +185,34 @@ const Multiplayer = {
     });
   },
 
+  // Host sets up an incoming connection
   _setupConnection(conn) {
-    this.conn = conn;
+    // Max 3 clients
+    if (this.conns.length >= 3) {
+      console.log('[MP] Rejecting connection — room full');
+      try { conn.close(); } catch(e) {}
+      return;
+    }
+
+    const playerIndex = this.conns.length; // 0-based: first client = 0 (Spieler 2)
+    const color = PLAYER_COLORS[playerIndex + 1]; // +1 because index 0 is host color
+
+    const entry = {
+      playerIndex: playerIndex,
+      color: color,
+      conn: conn,
+      remotePlayer: this._createRemotePlayer(),
+      ready: false
+    };
+
+    this.conns.push(conn);
+    this.remotePlayers.push(entry);
 
     conn.on('open', () => {
-      this.connected = true;
-      this.remotePlayer = this._createRemotePlayer();
+      console.log('[MP] Client connected — assigning playerIndex', playerIndex);
+      // Tell the client their player index
+      conn.send({ type: 'assignPlayer', playerIndex: playerIndex, color: color });
       if (this.onConnect) this.onConnect();
-      // Send initial hello
-      this.send({ type: 'hello' });
       // If host and game is running, send full enemy sync immediately
       if (this.isHost && Game.state === 'PLAYING') {
         setTimeout(() => this.sendFullSync(), 300);
@@ -159,17 +220,15 @@ const Multiplayer = {
     });
 
     conn.on('data', (data) => {
-      this._handleMessage(data);
+      this._handleMessage(data, conn);
     });
 
     conn.on('close', () => {
-      console.log('[MP] Connection closed');
-      this.connected = false;
-      this.remotePlayer = null;
-      this.remoteReady = false;
+      console.log('[MP] Client disconnected — playerIndex', playerIndex);
+      this._removeConnection(conn);
       // Show toast if in game
       if (Game.state === 'PLAYING' || Game.state === 'REWARD') {
-        UI.showToast('⚠️ Verbindung zum Mitspieler getrennt', 'error');
+        UI.showToast('⚠️ ' + PLAYER_NAMES[playerIndex + 1] + ' hat die Verbindung getrennt', 'error');
       }
       if (this.onDisconnect) this.onDisconnect();
     });
@@ -179,13 +238,42 @@ const Multiplayer = {
     });
   },
 
-  _handleMessage(data) {
+  // Remove a connection and its remote player entry
+  _removeConnection(conn) {
+    const peerId = conn.peer;
+    this.conns = this.conns.filter(c => c !== conn);
+    this.remotePlayers = this.remotePlayers.filter(rp => rp.conn !== conn);
+    try { conn.close(); } catch(e) {}
+  },
+
+  // Find the remote player entry for a given connection
+  _findRemotePlayer(conn) {
+    return this.remotePlayers.find(rp => rp.conn === conn);
+  },
+
+  _handleMessage(data, conn) {
     if (!data || !data.type) return;
 
     switch(data.type) {
-      case 'hello':
-        this.remoteReady = true;
+      case 'assignPlayer': {
+        // Client receives player assignment from host
+        if (!this.isHost) {
+          const entry = this._findRemotePlayer(conn);
+          if (entry) {
+            entry.playerIndex = data.playerIndex;
+            entry.color = data.color;
+          }
+        }
         break;
+      }
+
+      case 'hello': {
+        const entry = this._findRemotePlayer(conn);
+        if (entry) {
+          entry.ready = true;
+        }
+        break;
+      }
 
       case 'startGame':
         // Host told client to start — includes room data
@@ -194,12 +282,14 @@ const Multiplayer = {
         }
         break;
 
-      case 'playerUpdate':
-        if (this.remotePlayer) {
-          Object.assign(this.remotePlayer, data.state);
+      case 'playerUpdate': {
+        const entry = this._findRemotePlayer(conn);
+        if (entry && entry.remotePlayer) {
+          Object.assign(entry.remotePlayer, data.state);
         }
         if (this.onRemoteUpdate) this.onRemoteUpdate(data.state);
         break;
+      }
 
       case 'gameState':
         // Host sends full game state (enemies, door, etc.)
@@ -305,12 +395,16 @@ const Multiplayer = {
 
       case 'clientDead':
         // Client tells host they died
-        if (this.isHost && this.remotePlayer) {
-          this.remotePlayer.alive = false;
-          this.remotePlayer.hp = 0;
-          // Check if both players are dead now
-          if (!Game.player.alive) {
-            // Both dead — game over
+        if (this.isHost) {
+          const entry = this._findRemotePlayer(conn);
+          if (entry && entry.remotePlayer) {
+            entry.remotePlayer.alive = false;
+            entry.remotePlayer.hp = 0;
+          }
+          // Check if all players are dead now
+          const allRemoteDead = this.remotePlayers.every(rp => !rp.remotePlayer || !rp.remotePlayer.alive);
+          if (!Game.player.alive && allRemoteDead) {
+            // All dead — game over
             setTimeout(() => Game.gameOver(), 500);
           }
         }
@@ -324,7 +418,7 @@ const Multiplayer = {
         break;
 
       case 'newFloor':
-        // New floor — revive both players
+        // New floor — revive all players
         if (!this.isHost) {
           Game.floor = data.floor || Game.floor + 1;
           // Reset client player — revive if dead, full heal
@@ -389,13 +483,23 @@ const Multiplayer = {
     }
   },
 
-  // Send data to the other player
-  send(data) {
-    if (this.conn && this.connected) {
+  // Send data — broadcast to all connections, or send to a specific one
+  send(data, specificConn) {
+    if (specificConn) {
+      // Send to specific connection only
       try {
-        this.conn.send(data);
+        specificConn.send(data);
       } catch(e) {
-        console.error('[MP] Send error:', e);
+        console.error('[MP] Send error (specific):', e);
+      }
+      return;
+    }
+    // Broadcast to all connections
+    for (const conn of this.conns) {
+      try {
+        conn.send(data);
+      } catch(e) {
+        console.error('[MP] Send error (broadcast):', e);
       }
     }
   },
@@ -500,19 +604,18 @@ const Multiplayer = {
   },
 
   disconnect() {
-    if (this.conn) {
-      try { this.conn.close(); } catch(e) {}
-      this.conn = null;
+    // Close all connections
+    for (const conn of this.conns) {
+      try { conn.close(); } catch(e) {}
     }
+    this.conns = [];
+    this.remotePlayers = [];
     if (this.peer) {
       try { this.peer.destroy(); } catch(e) {}
       this.peer = null;
     }
-    this.connected = false;
     this.roomId = null;
     this.isHost = false;
-    this.remotePlayer = null;
-    this.remoteReady = false;
   },
 
   _generateRoomId() {
@@ -556,97 +659,113 @@ const Multiplayer = {
       const dist = Utils.vecDist(Game.player, doorPos);
       if (dist < 40) return true;
     }
-    // Check remote player
-    if (this.remotePlayer && this.remotePlayer.alive) {
-      const dist = Utils.vecDist(this.remotePlayer, doorPos);
-      if (dist < 40) return true;
+    // Check all remote players
+    for (const entry of this.remotePlayers) {
+      if (entry.remotePlayer && entry.remotePlayer.alive) {
+        const dist = Utils.vecDist(entry.remotePlayer, doorPos);
+        if (dist < 40) return true;
+      }
     }
     return false;
   },
 
-  // Render the remote player
+  // Render ALL remote players
   renderRemote(ctx, camera) {
-    const rp = this.remotePlayer;
-    if (!rp || !rp.alive) return;
+    for (const entry of this.remotePlayers) {
+      const rp = entry.remotePlayer;
+      if (!rp || !rp.alive) continue;
 
-    const zoom = camera.zoom || 1;
-    const w = (ctx.canvas._cssWidth || ctx.canvas.width), h = (ctx.canvas._cssHeight || ctx.canvas.height);
-    const sx = (rp.x - camera.x) * zoom + w / 2;
-    const sy = (rp.y - camera.y) * zoom + h / 2;
-    const s = rp.size * zoom;
+      const color = entry.color || '#6ec6ff';
+      const name = PLAYER_NAMES[entry.playerIndex + 1] || 'Co-Op';
 
-    rp._remoteBob += 0.05;
-    const bob = Math.sin(rp._remoteBob) * 2 * zoom;
+      const zoom = camera.zoom || 1;
+      const w = (ctx.canvas._cssWidth || ctx.canvas.width), h = (ctx.canvas._cssHeight || ctx.canvas.height);
+      const sx = (rp.x - camera.x) * zoom + w / 2;
+      const sy = (rp.y - camera.y) * zoom + h / 2;
+      const s = rp.size * zoom;
 
-    // Shadow
-    ctx.fillStyle = `rgba(0,0,0,${CONFIG.VISUAL.SHADOW_ALPHA})`;
-    ctx.beginPath();
-    ctx.ellipse(sx, sy + s * 0.7, s * 0.8, s * 0.3, 0, 0, Math.PI * 2);
-    ctx.fill();
+      rp._remoteBob += 0.05;
+      const bob = Math.sin(rp._remoteBob) * 2 * zoom;
 
-    if (rp.flashTimer > 0) ctx.globalAlpha = 0.5 + Math.sin(Date.now() / 30) * 0.5;
+      // Shadow
+      ctx.fillStyle = `rgba(0,0,0,${CONFIG.VISUAL.SHADOW_ALPHA})`;
+      ctx.beginPath();
+      ctx.ellipse(sx, sy + s * 0.7, s * 0.8, s * 0.3, 0, 0, Math.PI * 2);
+      ctx.fill();
 
-    // Body — different color to distinguish
-    ctx.fillStyle = '#6ec6ff';
-    ctx.strokeStyle = '#4a9fd4';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(sx, sy + bob, s, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
+      if (rp.flashTimer > 0) ctx.globalAlpha = 0.5 + Math.sin(Date.now() / 30) * 0.5;
 
-    // Eyes
-    const eyeSize = s * 0.2;
-    const eyeOff = s * 0.3;
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.arc(sx - eyeOff, sy + bob - eyeSize, eyeSize, 0, Math.PI * 2);
-    ctx.arc(sx + eyeOff, sy + bob - eyeSize, eyeSize, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#111';
-    ctx.beginPath();
-    ctx.arc(sx - eyeOff, sy + bob - eyeSize, eyeSize * 0.5, 0, Math.PI * 2);
-    ctx.arc(sx + eyeOff, sy + bob - eyeSize, eyeSize * 0.5, 0, Math.PI * 2);
-    ctx.fill();
+      // Body — use assigned color
+      ctx.fillStyle = color;
+      ctx.strokeStyle = this._darkenColor(color, 0.7);
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(sx, sy + bob, s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
 
-    ctx.globalAlpha = 1;
+      // Eyes
+      const eyeSize = s * 0.2;
+      const eyeOff = s * 0.3;
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(sx - eyeOff, sy + bob - eyeSize, eyeSize, 0, Math.PI * 2);
+      ctx.arc(sx + eyeOff, sy + bob - eyeSize, eyeSize, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#111';
+      ctx.beginPath();
+      ctx.arc(sx - eyeOff, sy + bob - eyeSize, eyeSize * 0.5, 0, Math.PI * 2);
+      ctx.arc(sx + eyeOff, sy + bob - eyeSize, eyeSize * 0.5, 0, Math.PI * 2);
+      ctx.fill();
 
-    // Weapons
-    if (rp.weapons && rp.weapons.length > 0) {
-      const baseAngle = rp.facingAngle || 0;
-      for (let i = 0; i < rp.weapons.length; i++) {
-        const w = rp.weapons[i];
-        let weaponAngle;
-        if (rp.weapons.length === 1) {
-          weaponAngle = baseAngle;
-        } else {
-          const spread = Math.PI + (i - 1) * (Math.PI * 0.6 / (rp.weapons.length - 1)) - Math.PI * 0.3;
-          weaponAngle = baseAngle + spread;
+      ctx.globalAlpha = 1;
+
+      // Weapons
+      if (rp.weapons && rp.weapons.length > 0) {
+        const baseAngle = rp.facingAngle || 0;
+        for (let i = 0; i < rp.weapons.length; i++) {
+          const rw = rp.weapons[i];
+          let weaponAngle;
+          if (rp.weapons.length === 1) {
+            weaponAngle = baseAngle;
+          } else {
+            const spread = Math.PI + (i - 1) * (Math.PI * 0.6 / (rp.weapons.length - 1)) - Math.PI * 0.3;
+            weaponAngle = baseAngle + spread;
+          }
+          const wX = sx + Math.cos(weaponAngle) * (s + (6 + (i > 0 ? 3 : 0)) * zoom);
+          const wY = sy + bob + Math.sin(weaponAngle) * (s + (6 + (i > 0 ? 3 : 0)) * zoom);
+
+          ctx.save();
+          ctx.translate(wX, wY);
+          ctx.rotate(weaponAngle + Math.PI / 2);
+          Player._drawWeaponShape(ctx, { def: rw.def || CONFIG.WEAPON_DEFS[rw.defKey] || CONFIG.WEAPON_DEFS.knife, tier: rw.tier || 0 }, {});
+          ctx.restore();
         }
-        const wX = sx + Math.cos(weaponAngle) * (s + (6 + (i > 0 ? 3 : 0)) * zoom);
-        const wY = sy + bob + Math.sin(weaponAngle) * (s + (6 + (i > 0 ? 3 : 0)) * zoom);
-
-        ctx.save();
-        ctx.translate(wX, wY);
-        ctx.rotate(weaponAngle + Math.PI / 2);
-        Player._drawWeaponShape(ctx, { def: w.def || CONFIG.WEAPON_DEFS[w.defKey] || CONFIG.WEAPON_DEFS.knife, tier: w.tier || 0 }, {});
-        ctx.restore();
       }
+
+      // Name tag
+      ctx.fillStyle = color;
+      ctx.font = `bold ${11 * zoom}px 'Outfit', sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText('🤝 ' + name, sx, sy - s - (rp.weapons && rp.weapons.length > 0 ? 18 : 12) * zoom);
+
+      // HP bar
+      const barW = s * 2, barH = 3 * zoom;
+      const barX = sx - barW / 2, barY = sy - s - 6 * zoom;
+      const hpPct = rp.hp / rp.maxHp;
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.fillRect(barX - 1, barY - 1, barW + 2, barH + 2);
+      ctx.fillStyle = hpPct > 0.5 ? '#44dd66' : hpPct > 0.25 ? '#ddaa00' : '#ff4466';
+      ctx.fillRect(barX, barY, barW * hpPct, barH);
     }
+  },
 
-    // Name tag
-    ctx.fillStyle = '#6ec6ff';
-    ctx.font = `bold ${11 * zoom}px 'Outfit', sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.fillText('🤝 Co-Op', sx, sy - s - (rp.weapons && rp.weapons.length > 0 ? 18 : 12) * zoom);
-
-    // HP bar
-    const barW = s * 2, barH = 3 * zoom;
-    const barX = sx - barW / 2, barY = sy - s - 6 * zoom;
-    const hpPct = rp.hp / rp.maxHp;
-    ctx.fillStyle = 'rgba(0,0,0,0.5)';
-    ctx.fillRect(barX - 1, barY - 1, barW + 2, barH + 2);
-    ctx.fillStyle = hpPct > 0.5 ? '#44dd66' : hpPct > 0.25 ? '#ddaa00' : '#ff4466';
-    ctx.fillRect(barX, barY, barW * hpPct, barH);
+  // Utility: darken a hex color by a factor (0-1)
+  _darkenColor(hex, factor) {
+    const num = parseInt(hex.replace('#', ''), 16);
+    const r = Math.floor(((num >> 16) & 0xFF) * factor);
+    const g = Math.floor(((num >> 8) & 0xFF) * factor);
+    const b = Math.floor((num & 0xFF) * factor);
+    return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
   }
 };
