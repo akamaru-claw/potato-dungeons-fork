@@ -296,6 +296,8 @@ const Multiplayer = {
         const entry = this._findRemotePlayer(conn);
         if (entry && entry.remotePlayer) {
           Object.assign(entry.remotePlayer, data.state);
+        } else {
+          console.warn('[MP] playerUpdate from unknown conn, conns:', this.conns.length, 'remotePlayers:', this.remotePlayers.length);
         }
         if (this.onRemoteUpdate) this.onRemoteUpdate(data.state, entry);
         // Host relays client positions to all OTHER clients
