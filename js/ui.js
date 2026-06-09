@@ -100,7 +100,7 @@ const UI = {
       this.showMenu();
     });
     document.getElementById('btn-lobby-start')?.addEventListener('click', () => {
-      if (Multiplayer.isHost && Multiplayer.clientCount >= 1) {
+      if (Multiplayer.isHost && Multiplayer.conns.length >= 1) {
         this._startCountdown();
       }
     });
@@ -1227,7 +1227,7 @@ const UI = {
   _showCoopWaiting() {
     const el = document.getElementById('btn-confirm-rewards');
     if (el) {
-      const waiting = Multiplayer.clientCount - (Multiplayer._clientRewardConfirmed || []).filter(c => c).length;
+      const waiting = Multiplayer.conns.length - (Multiplayer.remotePlayers || []).filter(rp => rp.ready).length;
       el.textContent = waiting > 0 ? `⏳ Warte auf ${waiting} Spieler...` : '⏳ Warte auf andere Spieler...';
       el.disabled = true;
       el.style.opacity = '0.6';
