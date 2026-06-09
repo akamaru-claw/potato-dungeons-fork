@@ -202,7 +202,7 @@ const UI = {
     // Slot 1 = Client
     const slot1 = document.getElementById('lobby-slot-1');
     if (slot1) {
-      if (Multiplayer.connected && Multiplayer.remotePlayer) {
+      if (Multiplayer.connected) {
         slot1.className = 'lobby-slot lobby-slot-joined';
         slot1.innerHTML = `
           <div class="lobby-slot-avatar" style="background:${SLOT_CONFIG[1].color}15;">${SLOT_CONFIG[1].avatar}</div>

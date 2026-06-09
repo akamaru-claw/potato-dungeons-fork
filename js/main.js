@@ -227,9 +227,11 @@ const Game = {
     this.player.invulFrames = 60;
     this.player.tookDamageThisFloor = false; // Reset für neue Ebene
     // Revive remote player in co-op
-    if (Multiplayer.connected && Multiplayer.remotePlayer) {
-      Multiplayer.remotePlayer.alive = true;
-      Multiplayer.remotePlayer.hp = Multiplayer.remotePlayer.maxHp;
+    if (Multiplayer.connected) {
+      Multiplayer.remotePlayers.forEach(rp => {
+        rp.remotePlayer.alive = true;
+        rp.remotePlayer.hp = rp.remotePlayer.maxHp;
+      });
       // Send newFloor to client to revive them too
       Multiplayer.send({ type: 'newFloor', floor: nextFloor });
     }
@@ -303,7 +305,7 @@ const Game = {
     // In co-op: game over only if BOTH players are dead
     if (!this.player || !this.player.alive) {
       if (Multiplayer.connected) {
-        const otherAlive = Multiplayer.remotePlayer && Multiplayer.remotePlayer.alive;
+        const otherAlive = Multiplayer.remotePlayers.some(rp => rp.remotePlayer && rp.remotePlayer.alive);
         if (otherAlive) {
           // One player died but other is alive — continue as spectator (invisible)
           if (this.player) {
@@ -504,8 +506,8 @@ const Game = {
       const result = Dungeon.update(dt, player);
       // Check if ANY player reached the door
       let doorTriggered = (result === 'floor_complete');
-      if (!doorTriggered && Multiplayer.remotePlayer && Multiplayer.remotePlayer.alive && Dungeon.doorOpen && Dungeon.doorPos) {
-        if (Utils.vecDist(Multiplayer.remotePlayer, Dungeon.doorPos) < 40) doorTriggered = true;
+      if (!doorTriggered && Multiplayer.remotePlayers.some(rp => rp.remotePlayer && rp.remotePlayer.alive) && Dungeon.doorOpen && Dungeon.doorPos) {
+        if (Multiplayer.remotePlayers.some(rp => Utils.vecDist(rp.remotePlayer, Dungeon.doorPos) < 40)) doorTriggered = true;
       }
       if (this.multiplayerDoorTriggered) { doorTriggered = true; this.multiplayerDoorTriggered = false; }
       if (doorTriggered && this.state !== 'REWARD') {
@@ -593,7 +595,7 @@ const Game = {
       }
 
       EnemySystem.render(ctx, camera);
-      if (Multiplayer.connected && Multiplayer.remotePlayer) {
+      if (Multiplayer.connected) {
         Multiplayer.renderRemote(ctx, camera);
       }
       if (this.player) {

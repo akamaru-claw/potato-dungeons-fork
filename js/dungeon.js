@@ -325,8 +325,14 @@ const Dungeon = {
     if (this.doorOpen && this.doorPos) {
       const localDist = Utils.vecDist(player, this.doorPos);
       if (localDist < 55) return 'floor_complete';
-      if (Multiplayer.remotePlayer && Multiplayer.remotePlayer.alive) {
-        const remoteDist = Utils.vecDist(Multiplayer.remotePlayer, this.doorPos);
+      if (Multiplayer.remotePlayers.some(rp => rp.remotePlayer && rp.remotePlayer.alive)) {
+        const closestRemote = Multiplayer.remotePlayers
+          .filter(rp => rp.remotePlayer && rp.remotePlayer.alive)
+          .reduce((best, rp) => {
+            const d = Utils.vecDist(rp.remotePlayer, this.doorPos);
+            return (!best || d < best.d) ? { d, rp } : best;
+          }, null);
+        const remoteDist = closestRemote ? closestRemote.d : Infinity;
         if (remoteDist < 55) return 'floor_complete';
       }
     }

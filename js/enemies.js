@@ -54,8 +54,10 @@ const EnemySystem = {
 
     // Build target list: host player + remote co-op player
     const targets = [player];
-    if (Multiplayer.connected && Multiplayer.remotePlayer && Multiplayer.remotePlayer.alive) {
-      targets.push(Multiplayer.remotePlayer);
+    if (Multiplayer.connected) {
+      Multiplayer.remotePlayers.forEach(rp => {
+        if (rp.remotePlayer && rp.remotePlayer.alive) targets.push(rp.remotePlayer);
+      });
     }
 
     for (let i = this.enemies.length - 1; i >= 0; i--) {
