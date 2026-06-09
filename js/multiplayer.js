@@ -219,6 +219,16 @@ const Multiplayer = {
       }
     });
 
+    // If connection is already open (PeerJS sometimes fires 'open' before we attach the listener)
+    if (conn.open) {
+      console.log('[MP] Connection already open — assigning playerIndex', playerIndex);
+      conn.send({ type: 'assignPlayer', playerIndex: playerIndex, color: color });
+      if (this.onConnect) this.onConnect();
+      if (this.isHost && Game.state === 'PLAYING') {
+        setTimeout(() => this.sendFullSync(), 300);
+      }
+    }
+
     conn.on('data', (data) => {
       this._handleMessage(data, conn);
     });
