@@ -177,6 +177,7 @@ const Multiplayer = {
           });
 
           conn.on('data', (data) => {
+            console.log('[MP-DATA-CLIENT] Received:', data.type, 'connOpen:', conn.open);
             this._handleMessage(data, conn);
           });
         });
@@ -238,6 +239,7 @@ const Multiplayer = {
     }
 
     conn.on('data', (data) => {
+      console.log('[MP-DATA] Received:', data.type, 'isHost:', this.isHost, 'connOpen:', conn.open, 'conns:', this.conns.length);
       this._handleMessage(data, conn);
     });
 
@@ -303,6 +305,19 @@ const Multiplayer = {
         break;
       }
 
+      case 'ping': {
+        // Respond with pong
+        try { conn.send({ type: 'pong', ts: data.ts }); } catch(e) {}
+        break;
+      }
+
+      case 'pong': {
+        // Measure latency
+        const latency = Date.now() - (data.ts || 0);
+        console.log('[MP] Pong from', this.isHost ? 'client' : 'host', '- latency:', latency, 'ms');
+        break;
+      }
+
       case 'startGame':
         // Host told client to start — includes room data
         if (!this.isHost) {
@@ -312,6 +327,7 @@ const Multiplayer = {
 
       case 'playerUpdate': {
         const entry = this._findRemotePlayer(conn);
+        console.log('[MP] playerUpdate received, isHost:', this.isHost, 'entryFound:', !!entry, 'entryPlayerIndex:', entry?.playerIndex, 'alive:', data.state?.alive, 'pos:', Math.round(data.state?.x), Math.round(data.state?.y));
         if (entry && entry.remotePlayer) {
           Object.assign(entry.remotePlayer, data.state);
         } else {
@@ -566,6 +582,10 @@ const Multiplayer = {
     if (specificConn) {
       // Send to specific connection only
       try {
+        if (!specificConn.open) {
+          console.warn('[MP] Send to closed conn (specific), type:', data.type);
+          return;
+        }
         specificConn.send(data);
       } catch(e) {
         console.error('[MP] Send error (specific):', e);
@@ -575,6 +595,10 @@ const Multiplayer = {
     // Broadcast to all connections
     for (const conn of this.conns) {
       try {
+        if (!conn.open) {
+          console.warn('[MP] Skip closed conn, type:', data.type);
+          continue;
+        }
         conn.send(data);
       } catch(e) {
         console.error('[MP] Send error (broadcast):', e);
@@ -585,6 +609,11 @@ const Multiplayer = {
   // Broadcast player state (called every frame)
   syncPlayer(player) {
     if (!this.connected) return;
+    if (!this._syncDebugTimer) this._syncDebugTimer = 0;
+    this._syncDebugTimer++;
+    if (this._syncDebugTimer % 120 === 1) {
+      console.log('[MP-SYNC] Sending playerUpdate, isHost:', this.isHost, 'conns:', this.conns.length, 'alive:', player.alive, 'pos:', Math.round(player.x), Math.round(player.y));
+    }
     this.send({
       type: 'playerUpdate',
       state: {
@@ -754,6 +783,14 @@ const Multiplayer = {
 
   // Render ALL remote players (with interpolation)
   renderRemote(ctx, camera) {
+    // Debug: log remotePlayers state periodically
+    if (!this._renderDebugTimer) this._renderDebugTimer = 0;
+    this._renderDebugTimer++;
+    if (this._renderDebugTimer % 120 === 1) {
+      console.log('[MP-RENDER] remotePlayers:', this.remotePlayers.length, this.remotePlayers.map(e => ({
+        playerIndex: e.playerIndex, alive: e.remotePlayer?.alive, x: Math.round(e.remotePlayer?.x || 0), y: Math.round(e.remotePlayer?.y || 0), ready: e.ready
+      })), 'isHost:', this.isHost, 'conns:', this.conns.length);
+    }
     for (const entry of this.remotePlayers) {
       const rp = entry.remotePlayer;
       if (!rp || !rp.alive) continue;

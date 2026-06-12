@@ -293,6 +293,12 @@ const Game = {
           Multiplayer.syncGameState();
         }
       }
+      // Ping/pong latency check every 5 seconds
+      this._mpPingTimer = (this._mpPingTimer || 0) + dt;
+      if (this._mpPingTimer > 5) {
+        this._mpPingTimer = 0;
+        Multiplayer.send({ type: 'ping', ts: Date.now() });
+      }
     }
   },
 
@@ -670,15 +676,21 @@ const Game = {
 
       // Always-on co-op state debug (top right)
       if (Multiplayer.connected) {
-        const info = `S:${this.state} R:${Dungeon.room ? '✓' : '✗'} Z:${Renderer.camera.zoom?.toFixed(2)} P:${this.player ? Math.round(this.player.x)+','+Math.round(this.player.y) : '?'}`;
-        ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        const lines = [];
+        lines.push(`[MP] Host:${Multiplayer.isHost} Conns:${Multiplayer.conns.length}`);
+        lines.push(`State:${this.state} Room:${Dungeon.room ? 'Y' : 'N'}`);
+        lines.push(`Me:${this.player ? Math.round(this.player.x)+','+Math.round(this.player.y) : '?'} alive:${this.player?.alive}`);
+        for (const e of Multiplayer.remotePlayers) {
+          lines.push(`RP${e.playerIndex}: alive=${e.remotePlayer?.alive} ${Math.round(e.remotePlayer?.x||0)},${Math.round(e.remotePlayer?.y||0)} ready=${e.ready} connOpen=${e.conn?.open}`);
+        }
+        ctx.fillStyle = 'rgba(0,0,0,0.75)';
         ctx.font = "10px monospace";
-        const tw = ctx.measureText(info).width;
-        ctx.fillRect((ctx.canvas._cssWidth || ctx.canvas.width) - tw - 16, 2, tw + 12, 16);
-        ctx.fillStyle = '#aaa';
-        ctx.textAlign = 'right';
-        ctx.fillText(info, (ctx.canvas._cssWidth || ctx.canvas.width) - 10, 13);
+        const maxW = Math.max(...lines.map(l => ctx.measureText(l).width));
+        const x0 = (ctx.canvas._cssWidth || ctx.canvas.width) - maxW - 16;
+        ctx.fillRect(x0, 2, maxW + 12, lines.length * 14 + 6);
+        ctx.fillStyle = '#0f0';
         ctx.textAlign = 'left';
+        lines.forEach((l, i) => ctx.fillText(l, x0 + 4, 14 + i * 14));
       }
 
       if (Input.isMobile() || Input.touch.active) Input.renderJoystick(ctx);
