@@ -693,11 +693,20 @@ const Game = {
         document.body.appendChild(debugEl);
       }
       const lines = [];
-      lines.push(`Host:${Multiplayer.isHost} Conns:${Multiplayer.conns.length} RP:${Multiplayer.remotePlayers.length}`);
-      lines.push(`${this.state} Room:${Dungeon.room ? 'Y' : 'N'}`);
-      lines.push(`Me:${this.player ? Math.round(this.player.x)+','+Math.round(this.player.y) : '?'} hp:${this.player?.hp||0}/${this.player?.getMaxHp?.()||0} alive:${!!this.player?.alive}`);
+      lines.push(`<span style="color:#ff0">Host:${Multiplayer.isHost}</span> Conns:${Multiplayer.conns.length} RP:${Multiplayer.remotePlayers.length}`);
+      lines.push(`State:${this.state} Room:${Dungeon.room ? Dungeon.room.pixelWidth+'x'+Dungeon.room.pixelHeight : 'N'}`);
+      lines.push(`Me:${this.player ? Math.round(this.player.x)+','+Math.round(this.player.y) : '?'} hp:${this.player?.hp||0}/${this.player?.getMaxHp?.()||0}`);
       for (const e of Multiplayer.remotePlayers) {
-        lines.push(`RP${e.playerIndex}: a=${e.remotePlayer?.alive?1:0} ${Math.round(e.remotePlayer?.x||0)},${Math.round(e.remotePlayer?.y||0)} hp:${e.remotePlayer?.hp||0} open=${e.conn?.open?1:0}`);
+        const rp = e.remotePlayer;
+        const aliveColor = rp?.alive ? '#0f0' : '#f44';
+        lines.push(`<span style="color:${aliveColor}">RP${e.playerIndex}: alive=${rp?.alive?1:0} pos=${Math.round(rp?.x||0)},${Math.round(rp?.y||0)} hp=${rp?.hp||0}/${rp?.maxHp||0} size=${rp?.size||0} open=${e.conn?.open?1:0}</span>`);
+      }
+      // Show last MP log messages
+      if (this._mpLogMessages?.length) {
+        lines.push('<span style="color:#888">---</span>');
+        for (const msg of this._mpLogMessages.slice(-3)) {
+          lines.push(`<span style="color:#888">${msg}</span>`);
+        }
       }
       debugEl.innerHTML = lines.join('<br>');
     } else {

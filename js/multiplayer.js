@@ -274,6 +274,13 @@ const Multiplayer = {
   _handleMessage(data, conn) {
     if (!data || !data.type) return;
 
+    // Capture log messages for on-screen debug
+    if (typeof Game !== 'undefined' && Game) {
+      if (!Game._mpLogMessages) Game._mpLogMessages = [];
+      Game._mpLogMessages.push(new Date().toLocaleTimeString().slice(3,8) + ' <-' + data.type);
+      if (Game._mpLogMessages.length > 20) Game._mpLogMessages.shift();
+    }
+
     switch(data.type) {
       case 'assignPlayer': {
         // Client receives player assignment from host
@@ -579,6 +586,12 @@ const Multiplayer = {
 
   // Send data — broadcast to all connections, or send to a specific one
   send(data, specificConn) {
+    // Capture log messages for on-screen debug
+    if (typeof Game !== 'undefined' && Game && data?.type !== 'playerUpdate' && data?.type !== 'gameState' && data?.type !== 'ping') {
+      if (!Game._mpLogMessages) Game._mpLogMessages = [];
+      Game._mpLogMessages.push(new Date().toLocaleTimeString().slice(3,8) + ' ->' + data.type);
+      if (Game._mpLogMessages.length > 20) Game._mpLogMessages.shift();
+    }
     if (specificConn) {
       // Send to specific connection only
       try {
