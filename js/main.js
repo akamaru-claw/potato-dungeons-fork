@@ -309,6 +309,8 @@ const Game = {
     if (this.state === 'PLAYING') this.update(dt);
     else if (this.state === 'REWARD') this.updateReward(dt);
     this.render();
+    // Always update MP debug overlay (even outside PLAYING/REWARD states)
+    this._updateMpDebug();
   },
 
   update(dt) {
@@ -674,26 +676,33 @@ const Game = {
         if (this._debugBannerTimer <= 0) this._debugBanner = null;
       }
 
-      // Always-on co-op state debug (top right)
-      if (Multiplayer.connected) {
-        const lines = [];
-        lines.push(`[MP] Host:${Multiplayer.isHost} Conns:${Multiplayer.conns.length}`);
-        lines.push(`State:${this.state} Room:${Dungeon.room ? 'Y' : 'N'}`);
-        lines.push(`Me:${this.player ? Math.round(this.player.x)+','+Math.round(this.player.y) : '?'} alive:${this.player?.alive}`);
-        for (const e of Multiplayer.remotePlayers) {
-          lines.push(`RP${e.playerIndex}: alive=${e.remotePlayer?.alive} ${Math.round(e.remotePlayer?.x||0)},${Math.round(e.remotePlayer?.y||0)} ready=${e.ready} connOpen=${e.conn?.open}`);
-        }
-        ctx.fillStyle = 'rgba(0,0,0,0.75)';
-        ctx.font = "10px monospace";
-        const maxW = Math.max(...lines.map(l => ctx.measureText(l).width));
-        const x0 = (ctx.canvas._cssWidth || ctx.canvas.width) - maxW - 16;
-        ctx.fillRect(x0, 2, maxW + 12, lines.length * 14 + 6);
-        ctx.fillStyle = '#0f0';
-        ctx.textAlign = 'left';
-        lines.forEach((l, i) => ctx.fillText(l, x0 + 4, 14 + i * 14));
-      }
+      // Always-on co-op state debug moved to _updateMpDebug()
 
       if (Input.isMobile() || Input.touch.active) Input.renderJoystick(ctx);
+    }
+  },
+
+  _updateMpDebug() {
+    // Always-on co-op state debug (HTML overlay, works in ALL states)
+    if (Multiplayer.connected || Multiplayer.remotePlayers?.length > 0) {
+      let debugEl = document.getElementById('mp-debug-overlay');
+      if (!debugEl) {
+        debugEl = document.createElement('div');
+        debugEl.id = 'mp-debug-overlay';
+        debugEl.style.cssText = 'position:fixed;top:4px;right:4px;background:rgba(0,0,0,0.85);color:#0f0;font:bold 11px/1.5 monospace;padding:6px 8px;border-radius:6px;z-index:99999;pointer-events:none;max-width:95vw;';
+        document.body.appendChild(debugEl);
+      }
+      const lines = [];
+      lines.push(`Host:${Multiplayer.isHost} Conns:${Multiplayer.conns.length} RP:${Multiplayer.remotePlayers.length}`);
+      lines.push(`${this.state} Room:${Dungeon.room ? 'Y' : 'N'}`);
+      lines.push(`Me:${this.player ? Math.round(this.player.x)+','+Math.round(this.player.y) : '?'} hp:${this.player?.hp||0}/${this.player?.getMaxHp?.()||0} alive:${!!this.player?.alive}`);
+      for (const e of Multiplayer.remotePlayers) {
+        lines.push(`RP${e.playerIndex}: a=${e.remotePlayer?.alive?1:0} ${Math.round(e.remotePlayer?.x||0)},${Math.round(e.remotePlayer?.y||0)} hp:${e.remotePlayer?.hp||0} open=${e.conn?.open?1:0}`);
+      }
+      debugEl.innerHTML = lines.join('<br>');
+    } else {
+      const debugEl = document.getElementById('mp-debug-overlay');
+      if (debugEl) debugEl.remove();
     }
   }
 };
