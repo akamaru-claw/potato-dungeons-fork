@@ -1177,11 +1177,22 @@ const UI = {
       if (Multiplayer.isHost) {
         // Host confirmed rewards
         Multiplayer._hostRewardConfirmed = true;
-        // Don't broadcast rewardConfirm yet — wait for ALL clients
+        // Ensure _confirmedPlayers is initialized
+        if (!Multiplayer._confirmedPlayers) Multiplayer._confirmedPlayers = new Set();
+        // Broadcast progress to all clients immediately (host just confirmed)
+        const hostConfirmed = 1;
+        const clientConfirmed = Multiplayer._confirmedPlayers.size;
+        const totalPlayers = Multiplayer.conns.length + 1;
+        Multiplayer.conns.forEach(c => {
+          if (c.open) {
+            c.send({ type: 'rewardProgress', confirmed: hostConfirmed + clientConfirmed, total: totalPlayers });
+          }
+        });
         // Show waiting indicator
         this._showCoopWaiting();
         // Check if all clients already confirmed
         const allClientsConfirmed = Multiplayer.conns.length === 0 || Multiplayer.conns.every(c => Multiplayer._confirmedPlayers.has(c));
+        console.log('[UI] Host confirmed. All clients confirmed?', allClientsConfirmed, 'clients:', Multiplayer._confirmedPlayers.size, '/', Multiplayer.conns.length);
         if (allClientsConfirmed) {
           // All confirmed — tell clients to advance
           Multiplayer.conns.forEach(c => {
@@ -1233,12 +1244,15 @@ const UI = {
   _showCoopWaiting() {
     const el = document.getElementById('btn-confirm-rewards');
     if (el) {
-      const confirmed = Multiplayer.isHost
-        ? (Multiplayer._confirmedPlayers ? Multiplayer._confirmedPlayers.size : 0) + (Multiplayer._hostRewardConfirmed ? 1 : 0)
-        : 0; // clients don't track this
-      const total = Multiplayer.isHost ? Multiplayer.conns.length + 1 : 0;
-      const waiting = total > 0 ? total - confirmed : 0;
-      el.textContent = waiting > 0 ? `⏳ Warte auf ${waiting} Spieler... (${confirmed}/${total})` : '⏳ Warte auf andere Spieler...';
+      if (Multiplayer.isHost) {
+        const confirmed = (Multiplayer._confirmedPlayers ? Multiplayer._confirmedPlayers.size : 0) + (Multiplayer._hostRewardConfirmed ? 1 : 0);
+        const total = Multiplayer.conns.length + 1;
+        const waiting = total - confirmed;
+        el.textContent = waiting > 0 ? `⏳ Warte auf ${waiting} Spieler... (${confirmed}/${total})` : '⏳ Alle bereit!';
+      } else {
+        // Client doesn't know the exact count until host sends rewardProgress
+        el.textContent = '⏳ Warte auf andere Spieler...';
+      }
       el.disabled = true;
       el.style.opacity = '0.6';
     }

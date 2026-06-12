@@ -24,6 +24,10 @@ const Multiplayer = {
   isHost: false,
   roomId: null,
   remotePlayers: [],  // Array of remote player state objects { playerIndex, color, conn, remotePlayer, ready }
+  _hostRewardConfirmed: false,
+  _confirmedPlayers: null,  // initialized in init()
+  _localRewardConfirmed: false,
+  _hostDied: false,
   onConnect: null,
   onDisconnect: null,
   onRemoteUpdate: null,
@@ -39,6 +43,10 @@ const Multiplayer = {
     this.isHost = false;
     this.roomId = null;
     this.remotePlayers = [];
+    this._hostRewardConfirmed = false;
+    this._confirmedPlayers = new Set();
+    this._localRewardConfirmed = false;
+    this._hostDied = false;
   },
 
   // Create a room — this player is the host
@@ -268,11 +276,18 @@ const Multiplayer = {
       case 'assignPlayer': {
         // Client receives player assignment from host
         if (!this.isHost) {
-          const entry = this._findRemotePlayer(conn);
-          if (entry) {
-            entry.playerIndex = data.playerIndex;
-            entry.color = data.color;
+          // This tells the CLIENT what their own player index is
+          // Store it locally but DON'T overwrite the host entry in remotePlayers
+          this._myPlayerIndex = data.playerIndex;
+          this._myColor = data.color;
+          // The host entry in remotePlayers should keep representing the host
+          const hostEntry = this._findRemotePlayer(conn);
+          if (hostEntry) {
+            // Keep host's playerIndex as 0 (host is always player 0)
+            hostEntry.playerIndex = 0;
+            hostEntry.color = PLAYER_COLORS[0]; // gold for host
           }
+          console.log('[MP] Client assigned playerIndex', data.playerIndex, 'color', data.color);
         }
         break;
       }
@@ -281,6 +296,9 @@ const Multiplayer = {
         const entry = this._findRemotePlayer(conn);
         if (entry) {
           entry.ready = true;
+          console.log('[MP] Client hello received, playerIndex:', entry.playerIndex, 'ready:', entry.ready);
+        } else {
+          console.warn('[MP] hello from unknown conn, conns:', this.conns.length, 'remotePlayers:', this.remotePlayers.length);
         }
         break;
       }
@@ -410,19 +428,24 @@ const Multiplayer = {
       case 'rewardConfirm':
         // Client confirmed reward selection
         if (this.isHost) {
+          // Ensure _confirmedPlayers is initialized
+          if (!this._confirmedPlayers) this._confirmedPlayers = new Set();
           // Track which client confirmed
           this._confirmedPlayers.add(conn);
+          console.log('[MP] Client confirmed rewards. Confirmed:', this._confirmedPlayers.size, 'of', this.conns.length, 'clients. Host confirmed:', this._hostRewardConfirmed);
           // Broadcast progress to all clients
           const confirmedCount = this._confirmedPlayers.size;
           const totalClients = this.conns.length;
+          const totalPlayers = totalClients + 1; // +1 for host
           this.conns.forEach(c => {
             if (c.open) {
-              c.send({ type: 'rewardProgress', confirmed: confirmedCount, total: totalClients + 1 });
+              c.send({ type: 'rewardProgress', confirmed: confirmedCount + (this._hostRewardConfirmed ? 1 : 0), total: totalPlayers });
             }
           });
           // Check if ALL connected clients confirmed + host confirmed
           const allConfirmed = this._hostRewardConfirmed &&
             this.conns.every(c => this._confirmedPlayers.has(c));
+          console.log('[MP] All confirmed?', allConfirmed, 'hostConfirmed:', this._hostRewardConfirmed, 'clientsConfirmed:', [...this._confirmedPlayers].length, 'totalClients:', this.conns.length);
           if (allConfirmed) {
             // Tell all clients to advance
             this.conns.forEach(c => {
@@ -432,6 +455,7 @@ const Multiplayer = {
           }
         } else {
           // Client received host's confirm — everyone ready, advance
+          console.log('[MP] Client received rewardConfirm from host — advancing!');
           if (this.onRewardConfirm) this.onRewardConfirm();
         }
         break;
@@ -614,6 +638,8 @@ const Multiplayer = {
     // Reset tracking
     this._hostRewardConfirmed = false;
     this._confirmedPlayers = new Set(); // track which connections confirmed
+    this._localRewardConfirmed = false;
+    console.log('[MP] Advancing after rewards — all players confirmed');
     // Advance to next floor (host calls finishReward)
     if (Game && Game.finishReward) {
       Game.finishReward();
@@ -663,6 +689,10 @@ const Multiplayer = {
     }
     this.conns = [];
     this.remotePlayers = [];
+    this._hostRewardConfirmed = false;
+    this._confirmedPlayers = new Set();
+    this._localRewardConfirmed = false;
+    this._hostDied = false;
     if (this.peer) {
       try { this.peer.destroy(); } catch(e) {}
       this.peer = null;
