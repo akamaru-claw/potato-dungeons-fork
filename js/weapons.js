@@ -81,7 +81,7 @@ const WeaponSystem = {
   },
 
   _meleeHit(player, weapon, enemies) {
-    const dmgMult = 1 + (player.stats.damagePercent || 0) / 100;
+    const dmgMult = 1 + (player.stats.damage || 0) / 100;
     const flatDmg = player.stats.meleeDamage || 0;
     let baseDmg = (weapon.def.baseDamage + weapon.def.baseDamage * weapon.tier * 0.5 + flatDmg) * dmgMult;
     let isCrit = false;

@@ -37,7 +37,7 @@ const Account = {
 
   init() {
     // Try to restore session from localStorage
-    const saved = localStorage.getItem('pd_account');
+    const saved = Utils.storageGet('pd_account');
     if (saved) {
       try {
         const data = JSON.parse(saved);
@@ -54,13 +54,13 @@ const Account = {
         // Sync with server in background
         this._syncFromServer();
       } catch(e) {
-        localStorage.removeItem('pd_account');
+        Utils.storageRemove('pd_account');
       }
     }
   },
 
   _save() {
-    localStorage.setItem('pd_account', JSON.stringify({
+    Utils.storageSet('pd_account', JSON.stringify({
       username: this.username,
       gold: this.gold,
       skin: this.skin,
@@ -160,7 +160,7 @@ const Account = {
     this.loggedIn = false;
     this.totalKills = 0;
     this.bestFloor = 0;
-    localStorage.removeItem('pd_account');
+    Utils.storageRemove('pd_account');
   },
 
   // Called after game over — update gold and stats

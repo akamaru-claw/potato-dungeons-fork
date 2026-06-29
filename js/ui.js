@@ -68,7 +68,7 @@ const UI = {
     document.getElementById('btn-hs-back')?.addEventListener('click', () => {
       this.showMenu();
     });
-    const savedName = localStorage.getItem('pd_playername');
+    const savedName = Utils.storageGet('pd_playername');
     if (savedName) {
       const ni = document.getElementById('input-playername');
       if (ni) ni.value = savedName;
@@ -262,17 +262,17 @@ const UI = {
         const textEl = document.getElementById('lobby-countdown-text');
         countdownEl.style.display = 'flex';
         textEl.textContent = '⚔️';
+        setTimeout(() => {
+          countdownEl.style.display = 'none';
+          Game.startCoop(roomData);
+        }, 600);
+      };
 
       // When host confirms all players are ready for next floor
       Multiplayer.onRewardConfirm = () => {
         // Hide reward screen and advance
         this._hideRewardScreen();
         if (Game && Game.finishReward) Game.finishReward();
-      };
-        setTimeout(() => {
-          countdownEl.style.display = 'none';
-          Game.startCoop(roomData);
-        }, 600);
       };
 
       // When host goes to next floor, client follows
@@ -413,28 +413,32 @@ const UI = {
       bobTimer: 0,
     };
 
-    // Keyboard input for menu
+    // Keyboard/touch input for menu — bind listeners only once (showMenu() calls
+    // startMenuCanvas() repeatedly, would otherwise leak a listener set per visit)
     this._menuKeys = {};
-    window.addEventListener('keydown', (e) => { this._menuKeys[e.code] = true; });
-    window.addEventListener('keyup', (e) => { this._menuKeys[e.code] = false; });
+    if (!this._menuListenersBound) {
+      this._menuListenersBound = true;
+      window.addEventListener('keydown', (e) => { this._menuKeys[e.code] = true; });
+      window.addEventListener('keyup', (e) => { this._menuKeys[e.code] = false; });
 
-    // Touch/joystick for menu
-    let touchStart = null;
-    canvas.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      const t = e.touches[0];
-      touchStart = { x: t.clientX, y: t.clientY };
-    }, { passive: false });
-    canvas.addEventListener('touchmove', (e) => {
-      e.preventDefault();
-      if (!touchStart) return;
-      const t = e.touches[0];
-      const dx = t.clientX - touchStart.x;
-      const dy = t.clientY - touchStart.y;
-      this._menuChar.vx = Math.max(-1, Math.min(1, dx / 40));
-      this._menuChar.vy = Math.max(-1, Math.min(1, dy / 40));
-    }, { passive: false });
-    canvas.addEventListener('touchend', () => { this._menuChar.vx = 0; this._menuChar.vy = 0; touchStart = null; });
+      // Touch/joystick for menu
+      let touchStart = null;
+      canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        const t = e.touches[0];
+        touchStart = { x: t.clientX, y: t.clientY };
+      }, { passive: false });
+      canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        if (!touchStart) return;
+        const t = e.touches[0];
+        const dx = t.clientX - touchStart.x;
+        const dy = t.clientY - touchStart.y;
+        this._menuChar.vx = Math.max(-1, Math.min(1, dx / 40));
+        this._menuChar.vy = Math.max(-1, Math.min(1, dy / 40));
+      }, { passive: false });
+      canvas.addEventListener('touchend', () => { this._menuChar.vx = 0; this._menuChar.vy = 0; touchStart = null; });
+    }
 
     if (this._menuAnimId) cancelAnimationFrame(this._menuAnimId);
     this._menuLoop();
@@ -667,7 +671,7 @@ const UI = {
     // Pre-fill player name in death screen (editable)
     const nameInput = document.getElementById('input-playername');
     if (nameInput) {
-      const prefill = (Account.loggedIn && Account.username) ? Account.username : (localStorage.getItem('pd_playername') || '');
+      const prefill = (Account.loggedIn && Account.username) ? Account.username : (Utils.storageGet('pd_playername') || '');
       nameInput.value = prefill;
     }
   },
@@ -684,7 +688,7 @@ const UI = {
       return;
     }
 
-    localStorage.setItem('pd_playername', name);
+    Utils.storageSet('pd_playername', name);
     const btn = document.getElementById('btn-submit-score');
     if (btn) btn.textContent = '⏳...';
 
@@ -1259,17 +1263,16 @@ const UI = {
   },
 
   _hideRewardScreen() {
-    const overlay = document.getElementById('reward-screen');
-    if (overlay) overlay.style.display = 'none';
+    const overlay = document.getElementById('screen-reward');
+    if (overlay) overlay.classList.remove('active');
   },
 
   _waitForCoopReplaceDialog() {
     const check = () => {
       const dialog = document.getElementById('weapon-replace-dialog');
       if (!dialog || dialog.style.display === 'none') {
-        const allClientsConfirmed = Multiplayer.conns.every((conn, idx) => {
-          return Multiplayer._clientRewardConfirmed && Multiplayer._clientRewardConfirmed[idx] === true;
-        });
+        const allClientsConfirmed = Multiplayer.conns.length === 0 ||
+          Multiplayer.conns.every(c => Multiplayer._confirmedPlayers && Multiplayer._confirmedPlayers.has(c));
         if (allClientsConfirmed) {
           Multiplayer._advanceAfterRewards();
         }

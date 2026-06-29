@@ -130,6 +130,17 @@ const Utils = {
   },
   formatNumber(n) { return n >= 1000 ? (n / 1000).toFixed(1) + 'k' : Math.round(n).toString(); },
 
+  // --- Safe localStorage (private/incognito modes can throw on access) ---
+  storageGet(key) {
+    try { return localStorage.getItem(key); } catch (e) { return null; }
+  },
+  storageSet(key, value) {
+    try { localStorage.setItem(key, value); return true; } catch (e) { return false; }
+  },
+  storageRemove(key) {
+    try { localStorage.removeItem(key); } catch (e) {}
+  },
+
   // --- Spatial Hash Grid ---
   createSpatialGrid(cellSize) {
     return { cellSize, cells: new Map(), clear() { this.cells.clear(); },
