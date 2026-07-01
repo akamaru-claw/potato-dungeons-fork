@@ -113,6 +113,10 @@ const CONFIG = {
     sniper:      { icon: '🎯', name: 'Sniper',    type: 'ranged', baseDamage: 20, attackSpeed: 1.2, range: 450, projectileSpeed: 600, pierce: 1, tier: 2, projectileColor: '#f88', projectileSize: 4, spread: 0.02, tags: ['ranged'] },
     shuriken:    { icon: '⭐', name: 'Shuriken',  type: 'ranged', baseDamage: 4,  attackSpeed: 0.15, range: 180, projectileSpeed: 300, pierce: 2, tier: 2, projectileColor: '#af4', projectileSize: 4, spinning: true, spread: 0.2, tags: ['blade', 'nature'] },
     crossbow:    { icon: '🏹', name: 'Armbrust',  type: 'ranged', baseDamage: 14, attackSpeed: 0.9, range: 300, projectileSpeed: 450, pierce: 1, tier: 2, projectileColor: '#faf', projectileSize: 3, spread: 0.05, tags: ['ranged'] },
+    wand:        { icon: '🔮', name: 'Zauberstab', type: 'ranged', baseDamage: 8, attackSpeed: 0.45, range: 220, projectileSpeed: 320, pierce: 2, tier: 2, projectileColor: '#d8b4fe', projectileSize: 5, homing: true, spread: 0.1, tags: ['ranged', 'nature'] },
+    flameburst:  { icon: '🌋', name: 'Flammenstoß', type: 'ranged', baseDamage: 6, attackSpeed: 0.25, range: 160, projectileSpeed: 260, pierce: 0, tier: 2, pellets: 2, projectileColor: '#ff7a33', projectileSize: 4, spread: 0.25, tags: ['fire'] },
+    scythe:      { icon: '🌙', name: 'Sense',     type: 'melee',  baseDamage: 10, attackSpeed: 0.55, range: 95,  arc: 1.4,  knockback: 3, tier: 2, projectileColor: '#c4b5fd', projectileSize: 4, spinning: true, spread: 0.12, tags: ['blade', 'heavy'] },
+    lightning:   { icon: '⚡', name: 'Blitzstab', type: 'ranged', baseDamage: 12, attackSpeed: 0.65, range: 240, projectileSpeed: 500, pierce: 3, tier: 3, projectileColor: '#67e8f9', projectileSize: 4, chain: true, spread: 0.08, tags: ['ranged'] },
   },
 
   // Reward definitions
@@ -153,6 +157,9 @@ const CONFIG = {
     clover:      { icon: '🍀', name: 'Glücksklee', desc: '+1 Reroll pro Ebene', tag: 'reroll' },
     rabbit_foot: { icon: '🐇', name: 'Hasenfuß', desc: '<30% HP: +30% Dodge', tag: 'dodge' },
     hot_potato:  { icon: '🔥', name: 'Heiße Kartoffel', desc: '+15% ATK Speed pro Relikt', tag: 'speed' },
+    magnet_core: { icon: '🧲', name: 'Magnetkern', desc: 'XP/Gold Sog-Bereich +60%', tag: 'magnet' },
+    spud_crown:  { icon: '👑', name: 'Kartoffelkrone', desc: 'Start jeder Ebene mit +2 HP', tag: 'regen' },
+    dice_shard:  { icon: '🎲', name: 'Würfelscherbe', desc: '+1 Reward-Auswahl', tag: 'extra_pick' },
   },
 
   // Synergy tag definitions

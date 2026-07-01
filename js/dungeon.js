@@ -29,6 +29,21 @@ const Dungeon = {
     player.x = CONFIG.ROOM_WIDTH / 2;
     player.y = CONFIG.ROOM_HEIGHT - CONFIG.WALL_THICKNESS - player.size - 10;
 
+    // Spud Crown: +2 HP at start of each floor
+    if (player.relics && player.relics.some(r => r.key === 'spud_crown')) {
+      player.hp = Math.min(player.hp + 2, player.getMaxHp());
+      FloatingText.add(player.x, player.y - 30, '+2 HP Krone', '#44ff88', 14, 1.0);
+      ParticleSystem.heal(player.x, player.y);
+    }
+
+    // Devil Bargain: -1 HP per floor
+    const charDef = CONFIG.CHARACTERS?.[player.skin];
+    if (charDef?.ability === 'devil_bargain') {
+      player.maxHpBonus = (player.maxHpBonus || 0) - 1;
+      player.hp = Math.min(player.hp, player.getMaxHp());
+      FloatingText.add(player.x, player.y - 45, '-1 HP Deal', '#ff4466', 13, 1.0);
+    }
+
     // Place door at top center
     this.doorPos = {
       x: CONFIG.ROOM_WIDTH / 2,

@@ -32,6 +32,10 @@ const ProjectileSystem = {
         life: 0,
         maxLife: (weaponDef.range || 300) / weaponDef.projectileSpeed,
         spinning: weaponDef.spinning || false,
+        homing: weaponDef.homing || false,
+        chain: weaponDef.chain || false,
+        chainHits: 0,
+        chainRange: 140,
         rotation: 0,
         isCrit,
         trail: []
@@ -61,6 +65,27 @@ const ProjectileSystem = {
   _updateList(list, dt) {
     for (let i = list.length - 1; i >= 0; i--) {
       const p = list[i];
+      // Homing: slowly steer towards nearest enemy
+      if (p.homing && EnemySystem.enemies && EnemySystem.enemies.length > 0) {
+        let nearest = null, best = Infinity;
+        for (const e of EnemySystem.enemies) {
+          if (!e.alive) continue;
+          const dx = e.x - p.x, dy = e.y - p.y, d = dx * dx + dy * dy;
+          if (d < best) { best = d; nearest = e; }
+        }
+        if (nearest && best < 250000) {
+          const angle = Math.atan2(nearest.y - p.y, nearest.x - p.x);
+          const cur = Math.atan2(p.vy, p.vx);
+          const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+          let diff = angle - cur;
+          while (diff > Math.PI) diff -= Math.PI * 2;
+          while (diff < -Math.PI) diff += Math.PI * 2;
+          const steer = Math.max(-2.2 * dt, Math.min(2.2 * dt, diff));
+          const newAngle = cur + steer;
+          p.vx = Math.cos(newAngle) * speed;
+          p.vy = Math.sin(newAngle) * speed;
+        }
+      }
       p.x += p.vx * dt;
       p.y += p.vy * dt;
       p.life += dt;

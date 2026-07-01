@@ -1666,7 +1666,12 @@ const UI = {
         if (!unlocked && !Account.loggedIn) continue;
         const btn = document.createElement('div');
         btn.className = `char-btn ${selected ? 'active' : ''} ${!unlocked ? 'locked' : ''}`;
-        btn.innerHTML = `<span class="char-icon">${char.icon}</span><span class="char-name">${char.name}</span>`;
+        btn.innerHTML = `<span class="char-icon">${char.icon}</span><span class="char-name">${char.name}</span>
+          <div class="char-tooltip">
+            <div class="char-tooltip-title">${char.name}</div>
+            <div class="char-tooltip-desc">${char.desc}</div>
+            <div class="char-tooltip-ability">${char.abilityDesc}</div>
+          </div>`;
         if (unlocked) {
           btn.addEventListener('click', () => {
             Account.selectedCharacter = key;

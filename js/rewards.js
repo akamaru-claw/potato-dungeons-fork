@@ -11,7 +11,8 @@ const Rewards = {
   generate(floorNum, flawless) {
     this.floorNum = floorNum;
     this.pickedCount = 0;
-    this.maxPicks = flawless ? 3 : 2;
+    const hasDice = Game.player?.relics?.some(r => r.key === 'dice_shard');
+    this.maxPicks = (flawless ? 3 : 2) + (hasDice ? 1 : 0);
     this.rerollsLeft = 1;
     this.currentChoices = this._generatePool(floorNum);
     return this.currentChoices;

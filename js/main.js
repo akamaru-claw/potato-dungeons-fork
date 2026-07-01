@@ -376,7 +376,7 @@ const Game = {
             if (charDef2?.ability === 'devil_bargain') devilDmgBonus += player.weapons.length * 0.05;
             const dmgMult = (finalCrit ? 2 : 1) * (1 + (player.stats.damage || 0) / 100) * devilDmgBonus;
             const dmg = Math.round(p.damage * dmgMult);
-            e.takeDamage(dmg, dir, p.knockback, finalCrit);
+            e.takeDamage(dmg, dir, p.knockback, finalCrit, p);
             // Send damage text to client
             if (Multiplayer.connected) {
               Multiplayer.send({ type: 'damageText', x: e.x, y: e.y - e.size, text: (isCrit ? '💥 ' : '') + '-' + dmg, color: isCrit ? CONFIG.COLORS.CRIT_COLOR : '#fff', size: isCrit ? 24 : 16, particle: !e.alive ? 'death' : 'hit', particleColor: e.color });
@@ -482,8 +482,9 @@ const Game = {
 
     // === HOST ONLY: XP + Dungeon logic ===
     if (isHost) {
-      const magnetRange = this._magnetUnlimited ? Infinity : 140;
-      const magnetSpeed = this._magnetUnlimited ? 800 : 350;
+      const hasMagnet = player.relics && player.relics.some(r => r.key === 'magnet_core');
+      const magnetRange = this._magnetUnlimited ? Infinity : (hasMagnet ? 225 : 140);
+      const magnetSpeed = this._magnetUnlimited ? 800 : (hasMagnet ? 500 : 350);
       for (let i = this.xpOrbs.length - 1; i >= 0; i--) {
         const orb = this.xpOrbs[i];
         const dist = Utils.vecDist(orb, player);

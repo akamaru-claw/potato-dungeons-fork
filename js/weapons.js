@@ -97,7 +97,7 @@ const WeaponSystem = {
         const dir = Utils.vecNormalize(Utils.vecSub(e, player));
         if (isHost) {
           // Host applies damage directly
-          e.takeDamage(baseDmg, dir, weapon.def.knockback, isCrit);
+          e.takeDamage(baseDmg, dir, weapon.def.knockback, isCrit, { chain: false });
           // Send damage text to client
           if (Multiplayer.connected) {
             Multiplayer.send({ type: 'damageText', x: e.x, y: e.y - e.size, text: (isCrit ? '💥 ' : '') + '-' + Math.round(baseDmg), color: isCrit ? CONFIG.COLORS.CRIT_COLOR : '#fff', size: isCrit ? 24 : 16, particle: !e.alive ? 'death' : 'hit', particleColor: e.color });

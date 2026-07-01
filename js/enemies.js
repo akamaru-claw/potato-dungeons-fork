@@ -23,7 +23,7 @@ const EnemySystem = {
       chargeCooldown: def.chargeCooldown || 0, chargeTimer: 0, charging: false, chargeDir: { x: 0, y: 0 },
       alive: true, spawnAnim: 0.4, hitAnim: 0, pulsePhase: Utils.rand(0, Math.PI * 2),
 
-      takeDamage(amount, dir, knockback, isCrit) {
+      takeDamage(amount, dir, knockback, isCrit, projectile) {
         if (!this.alive) return;
         this.hp -= amount;
         this.flashTimer = 0.1;
@@ -35,6 +35,20 @@ const EnemySystem = {
         const size = isCrit ? 24 : 16;
         const prefix = isCrit ? '💥 ' : '';
         FloatingText.add(this.x + Utils.rand(-8, 8), this.y - this.size, prefix + Math.round(amount), color, size);
+        // Chain lightning
+        if (projectile && projectile.chain && projectile.chainHits < 2) {
+          let nearest = null, best = Infinity;
+          for (const other of EnemySystem.enemies) {
+            if (!other.alive || other === this) continue;
+            const dx = other.x - this.x, dy = other.y - this.y, d2 = dx * dx + dy * dy;
+            if (d2 < best && d2 < projectile.chainRange * projectile.chainRange) { best = d2; nearest = other; }
+          }
+          if (nearest) {
+            nearest.takeDamage(amount * 0.55, { x: 0, y: 0 }, 0, false, { chain: false });
+            ParticleSystem.lightning(this.x, this.y, nearest.x, nearest.y);
+            projectile.chainHits++;
+          }
+        }
         if (this.hp <= 0) this.die();
       },
 

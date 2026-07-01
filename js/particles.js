@@ -184,6 +184,13 @@ const ParticleSystem = {
   // NEW: Dodge effect
   dodge(x, y) {
     this.emit(x, y, { count: 6, color: '#88aaff', speedMin: 40, speedMax: 100, size: 2, sizeEnd: 0, lifeMin: 0.15, lifeMax: 0.3, alpha: 0.6, friction: 0.9 });
+  },
+
+  // NEW: Chain lightning effect
+  lightning(x1, y1, x2, y2) {
+    const midX = (x1 + x2) / 2, midY = (y1 + y2) / 2;
+    this.emit(midX, midY, { count: 8, color: '#67e8f9', size: 2, sizeEnd: 0, speedMin: 40, speedMax: 100, lifeMin: 0.15, lifeMax: 0.35, glow: true, type: 'spark' });
+    this.emit(x2, y2, { count: 5, color: '#a5f3fc', size: 3, sizeEnd: 0, speedMin: 30, speedMax: 80, lifeMin: 0.2, lifeMax: 0.4, glow: true });
   }
 };
 
