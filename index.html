@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TR-Trade UG — Premium Elektrozubehör & Batterien, europaweit (v6-C)</title>
+<meta name="description" content="TR-Trade UG (haftungsbeschränkt): Handel mit Smartphone-Zubehör, Akkus, Batterien, Ladegeräten, Hüllen, Audio & Wearables. B2B & B2C, europaweiter Versand. TR-Trade v6-C Premium Dark Luxury.">
+<link rel="canonical" href="https://op-return.de/TR-Trade-v6-C/">
+<meta name="theme-color" content="#0a0a0a">
+<style>
+:root{
+ --bg:#0a0a0a;
+ --bg-2:#111111;
+ --bg-3:#161616;
+ --line:#1f1f1f;
+ --line-light:#2a2a2a;
+ --text:#f5f3ef;
+ --text-soft:#b0ada5;
+ --muted:#7a776f;
+ --gold:#c9a472;
+ --gold-bright:#d4af37;
+ --gold-dim:rgba(201,164,114,.10);
+ --gold-glow:rgba(201,164,114,.18);
+ --emerald:#1b4d3e;
+ --emerald-bright:#2d7a61;
+ --font-display:Georgia,"Times New Roman",Times,serif;
+ --font-body:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+ --font-mono:"SF Mono",Monaco,"Cascadia Code",monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased;letter-spacing:.01em}
+a{color:inherit;text-decoration:none}
+::selection{background:var(--gold);color:#0a0a0a}
+:focus-visible{outline:1px solid var(--gold);outline-offset:4px}
+
+.wrap{max-width:1200px;margin:0 auto;padding:0 40px}
+@media(max-width:760px){.wrap{padding:0 22px}}
+
+/* Header */
+header{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(10,10,10,.82);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}
+.header-in{display:flex;align-items:center;justify-content:space-between;height:84px}
+.logo{display:flex;align-items:center;gap:14px}
+.logo svg{display:block;width:42px;height:42px}
+.logo-word{font-family:var(--font-display);font-weight:400;font-size:18px;letter-spacing:.14em;text-transform:uppercase}
+.logo-word em{font-style:normal;color:var(--gold)}
+.logo-tag{display:block;font-family:var(--font-mono);font-size:8.5px;letter-spacing:.32em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+nav{display:flex;align-items:center;gap:36px}
+nav a.navlink{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-soft);transition:color .3s}
+nav a.navlink:hover{color:var(--gold)}
+nav a.cta-top{display:inline-flex;align-items:center;font-family:var(--font-body);font-weight:500;font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:11px 20px;border:1px solid var(--gold);color:var(--gold);background:transparent;transition:all .3s}
+nav a.cta-top:hover{background:var(--gold);color:#0a0a0a}
+.mobile-menu{display:none}
+.lang{display:flex;gap:4px;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--bg-2)}
+.lang button{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;color:var(--text-soft);background:none;border:none;border-radius:999px;padding:6px 12px;cursor:pointer;transition:all .3s}
+.lang button:hover{color:var(--text);background:rgba(255,255,255,.04)}
+.lang button.active{background:var(--gold);color:#0a0a0a;font-weight:600}
+@media(max-width:960px){
+ nav a.navlink{display:none}
+ .mobile-menu{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid var(--line);background:none;color:var(--text);cursor:pointer}
+}
+
+/* Hero */
+.hero{position:relative;min-height:100svh;display:flex;align-items:center;overflow:hidden;border-bottom:1px solid var(--line)}
+.hero::before{content:"";position:absolute;inset:0;background:
+ radial-gradient(circle at 80% 25%,rgba(201,164,114,.10),transparent 32%),
+ radial-gradient(circle at 20% 75%,rgba(27,77,62,.14),transparent 30%);pointer-events:none;z-index:1}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,var(--bg) 0%,transparent 18%),linear-gradient(90deg,var(--bg) 0%,rgba(10,10,10,.35) 55%,transparent 80%);pointer-events:none;z-index:1}
+#globe{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.hero-in{position:relative;z-index:2;padding-top:140px;padding-bottom:120px;max-width:720px}
+.eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:14px;margin-bottom:28px}
+.eyebrow::before{content:"";width:34px;height:1px;background:var(--gold)}
+h1{font-family:var(--font-display);font-weight:400;font-size:clamp(46px,6.2vw,78px);line-height:1.05;letter-spacing:-.02em}
+h1 .line2{color:var(--gold-bright);font-style:italic}
+.hero-sub{margin-top:30px;font-size:18px;color:var(--text-soft);max-width:52ch;line-height:1.75}
+.hero-cta{display:flex;flex-wrap:wrap;gap:16px;margin-top:44px}
+.btn{display:inline-flex;align-items:center;gap:10px;font-family:var(--font-body);font-weight:500;font-size:13px;letter-spacing:.12em;text-transform:uppercase;padding:16px 30px;transition:all .3s;cursor:pointer;border:1px solid transparent;background:none}
+.btn-primary{border-color:var(--gold);color:var(--gold)}
+.btn-primary:hover{background:var(--gold);color:#0a0a0a}
+.btn-ghost{border-color:var(--line);color:var(--text-soft)}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.hero-facts{display:flex;flex-wrap:wrap;gap:14px 36px;margin-top:64px;padding-top:32px;border-top:1px solid var(--line)}
+.fact{font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.fact::before{content:"/";color:var(--gold);margin-right:8px}
+
+/* Section rhythm */
+section{padding:130px 0}
+@media(max-width:760px){section{padding:88px 0}}
+.sec-head{max-width:640px;margin-bottom:72px}
+.sec-head.center{margin-left:auto;margin-right:auto;text-align:center}
+.sec-head .eyebrow{margin-bottom:18px}
+h2{font-family:var(--font-display);font-weight:400;font-size:clamp(34px,4.2vw,50px);letter-spacing:-.02em;line-height:1.12}
+h2 .accent{color:var(--gold-bright);font-style:italic}
+.sec-head p{margin-top:18px;color:var(--text-soft);font-size:17px;line-height:1.7}
+
+/* Marquee */
+.band{background:var(--bg-2);border-bottom:1px solid var(--line);overflow:hidden;padding:28px 0}
+.marquee{display:flex;width:max-content;animation:scroll 48s linear infinite}
+.marquee-set{display:flex;align-items:center;white-space:nowrap}
+.marquee-set span{font-family:var(--font-display);font-size:15px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);padding:0 24px}
+.marquee-set i{font-style:normal;color:var(--gold);padding:0 20px;font-size:10px}
+@keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media(prefers-reduced-motion:reduce){.marquee{animation:none;flex-wrap:wrap;width:100%;justify-content:center}.marquee-set:last-child{display:none}}
+
+/* Range cards */
+.range-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+@media(max-width:980px){.range-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.range-grid{grid-template-columns:1fr}}
+.range-card{background:var(--bg-2);border:1px solid var(--line);position:relative;transition:border-color .35s,transform .35s;display:flex;flex-direction:column}
+.range-card::before{content:"";position:absolute;inset:0;border:1px solid transparent;pointer-events:none;transition:border-color .35s}
+.range-card:hover{border-color:var(--gold);transform:translateY(-4px)}
+.range-card:hover::before{border-color:rgba(201,164,114,.25)}
+.range-top{aspect-ratio:16/9;display:grid;place-items:center;position:relative;background:
+ radial-gradient(circle at 50% 40%,var(--gold-dim),transparent 55%),
+ linear-gradient(180deg,var(--bg-3),var(--bg-2));border-bottom:1px solid var(--line)}
+.range-top svg{stroke:#5c5a54;width:66px;height:66px;transition:all .35s}
+.range-card:hover .range-top svg{stroke:var(--gold-bright);filter:drop-shadow(0 6px 18px var(--gold-glow));transform:scale(1.05)}
+.range-top .accent{stroke:var(--gold-bright);fill:rgba(201,164,114,.10);transition:all .35s}
+.range-card:hover .range-top .accent{fill:rgba(201,164,114,.22)}
+.range-body{padding:30px;flex:1;display:flex;flex-direction:column}
+.range-body span{display:block;font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+.range-body h3{font-family:var(--font-display);font-weight:400;font-size:21px;margin-bottom:10px}
+.range-body p{font-size:15px;color:var(--text-soft);line-height:1.6}
+
+/* Brands */
+.brands{background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.brand-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+@media(max-width:980px){.brand-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.brand-grid{grid-template-columns:repeat(2,1fr)}}
+.brand-cell{background:var(--bg);border:1px solid var(--line);height:86px;display:grid;place-items:center;font-family:var(--font-display);font-size:15px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);transition:border-color .35s,color .35s}
+.brand-cell:hover{border-color:var(--gold);color:var(--gold)}
+
+/* B2B / B2C */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media(max-width:860px){.split{grid-template-columns:1fr}}
+.panel{background:var(--bg-2);border:1px solid var(--line);padding:48px 44px;position:relative;overflow:hidden;transition:border-color .35s}
+.panel::before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.6}
+.panel:hover{border-color:var(--line-light)}
+.panel .eyebrow{margin-bottom:16px}
+.panel h3{font-family:var(--font-display);font-weight:400;font-size:28px;margin-bottom:16px}
+.panel p{color:var(--text-soft);font-size:16px;line-height:1.7}
+.panel ul{list-style:none;margin:28px 0 34px;display:grid;gap:14px}
+.panel li{display:flex;gap:14px;font-size:15px;color:var(--text)}
+.panel li::before{content:"—";color:var(--gold);font-family:var(--font-mono);flex:none}
+
+/* Europe */
+.eu{text-align:center;padding:130px 0}
+.eu-map{max-width:860px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+@media(max-width:860px){.eu-map{grid-template-columns:repeat(2,1fr)}}
+.eu-map .stat{background:var(--bg-2);border:1px solid var(--line);padding:34px 20px;transition:border-color .35s}
+.eu-map .stat:hover{border-color:var(--gold)}
+.eu-map .stat b{display:block;font-family:var(--font-display);font-weight:400;font-size:34px;color:var(--gold-bright);margin-bottom:8px}
+.eu-map .stat span{font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+
+/* Contact */
+#contact{background:var(--bg-2);border-top:1px solid var(--line)}
+.contact-grid{display:grid;grid-template-columns:1fr 1.12fr;gap:64px;align-items:start}
+@media(max-width:900px){.contact-grid{grid-template-columns:1fr}}
+.contact-list{border:1px solid var(--line);background:var(--bg);overflow:hidden}
+.crow{display:grid;grid-template-columns:110px 1fr;gap:18px;padding:22px 26px;border-bottom:1px solid var(--line);font-size:15px;align-items:baseline}
+.crow:last-child{border-bottom:none}
+.crow b{font-family:var(--font-mono);font-weight:400;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.crow a{color:var(--gold-bright);border-bottom:1px solid transparent;transition:border-color .3s}
+.crow a:hover{border-color:var(--gold-bright)}
+.form-wrap{background:var(--bg);border:1px solid var(--line);padding:40px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:560px){.form-grid{grid-template-columns:1fr}}
+.form-wrap label{display:block;font-family:var(--font-mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.form-wrap input,.form-wrap select,.form-wrap textarea{width:100%;background:var(--bg-2);border:1px solid var(--line);padding:14px 16px;color:var(--text);font-family:var(--font-body);font-size:15px;transition:border-color .3s,border-color .3s}
+.form-wrap input:focus,.form-wrap select:focus,.form-wrap textarea:focus{border-color:var(--gold);outline:none}
+.form-wrap textarea{min-height:140px;resize:vertical}
+.form-wrap .full{grid-column:1/-1}
+.form-wrap button[type=submit]{margin-top:10px}
+.form-status{margin-top:16px;font-size:14px;min-height:24px}
+.form-status.ok{color:#8cc9a8}
+.form-status.err{color:#d48a8a}
+.honeypot{position:absolute;left:-9999px}
+
+/* Footer */
+footer{border-top:1px solid var(--line);padding:80px 0 44px;font-size:14px;color:var(--text-soft)}
+.foot-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:56px}
+@media(max-width:860px){.foot-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.foot-grid{grid-template-columns:1fr}}
+.foot-grid h4{font-family:var(--font-display);font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:20px;font-weight:400}
+.foot-grid p{margin-bottom:10px;line-height:1.7;color:var(--text-soft)}
+.foot-grid a{color:var(--text-soft);transition:color .3s}
+.foot-grid a:hover{color:var(--gold)}
+.foot-logo{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.foot-logo svg{width:40px;height:40px}
+.foot-logo span{font-family:var(--font-display);font-size:18px;letter-spacing:.12em;text-transform:uppercase;color:var(--text)}
+.tm{margin-top:44px;padding-top:28px;border-top:1px solid var(--line);font-size:13px;color:var(--muted);max-width:80ch;line-height:1.7}
+.copy{margin-top:30px;font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;color:var(--muted);display:flex;flex-wrap:wrap;gap:10px 28px;justify-content:space-between}
+
+/* Reduced motion */
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+
+<header>
+ <div class="wrap header-in">
+ <a href="#" class="logo" aria-label="TR-Trade — Startseite">
+ <!-- TR-Trade Logo (SVG) -->
+ <svg width="42" height="42" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="TR-Trade Logo">
+  <circle cx="32" cy="32" r="28" stroke="#c9a472" stroke-width="1.6"/>
+  <ellipse cx="32" cy="32" rx="28" ry="11" transform="rotate(-18 32 32)" stroke="#7a776f" stroke-width="1" opacity=".45"/>
+  <path d="M18 24 H33 M25.5 24 V44" stroke="#f5f3ef" stroke-width="4.2" stroke-linecap="square"/>
+  <path d="M39 44 V24 H45.5 A6.4 6.4 0 0 1 45.5 36.8 H39" stroke="#f5f3ef" stroke-width="4.2" stroke-linecap="square" fill="none"/>
+  <path d="M44 37 L50 44" stroke="#f5f3ef" stroke-width="4.2" stroke-linecap="square"/>
+  <circle cx="53.5" cy="14.5" r="2.8" fill="#c9a472"/>
+ </svg>
+ <span>
+  <span class="logo-word">TR<em>–</em>TRADE</span>
+  <span class="logo-tag">Premium Elektrozubehör · EU</span>
+ </span>
+ </a>
+ <nav>
+  <a class="navlink" href="#range">Sortiment</a>
+  <a class="navlink" href="#b2b">B2B</a>
+  <a class="navlink" href="#contact">Kontakt</a>
+  <a class="cta-top" href="mailto:info@tr-trade.de?subject=B2B-Anfrage%20TR-Trade">B2B Anfrage</a>
+  <div class="lang" role="group" aria-label="Sprache wählen">
+   <button data-lang="de" class="active">DE</button>
+   <button data-lang="en">EN</button>
+   <button data-lang="fr">FR</button>
+   <button data-lang="es">ES</button>
+   <button data-lang="it">IT</button>
+  </div>
+  <button class="mobile-menu" aria-label="Menü öffnen">
+   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+  </button>
+ </nav>
+ </div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+ <canvas id="globe" aria-hidden="true"></canvas>
+ <div class="wrap" style="position:relative;z-index:2">
+  <div class="hero-in">
+   <div class="eyebrow">Handel mit Elektrozubehör — B2B & B2C</div>
+   <h1><span>Elektrozubehör.</span><br><span class="line2">Europaweit geliefert.</span></h1>
+   <p class="hero-sub">TR-Trade UG aus Augustdorf handelt mit Elektrozubehör für Samsung, Apple, Huawei, Xiaomi und Motorola sowie mit Batterien von Varta, Duracell und Energizer – für Geschäfts- und Privatkunden in ganz Europa.</p>
+   <div class="hero-cta">
+    <a class="btn btn-primary" href="mailto:info@tr-trade.de?subject=B2B-Anfrage%20TR-Trade">B2B-Anfrage senden</a>
+    <a class="btn btn-ghost" href="#range">Sortiment ansehen</a>
+   </div>
+   <div class="hero-facts">
+    <div class="fact">Versand in ganz Europa</div>
+    <div class="fact">Groß- und Einzelhandel</div>
+    <div class="fact">Standort: Augustdorf, Deutschland</div>
+   </div>
+  </div>
+ </div>
+</div>
+
+<!-- BRAND BAND -->
+<div class="band" aria-label="Marken im Sortiment">
+ <div class="marquee">
+  <div class="marquee-set">
+   <span>SAMSUNG</span><i>◆</i><span>APPLE</span><i>◆</i><span>HUAWEI</span><i>◆</i><span>XIAOMI</span><i>◆</i><span>MOTOROLA</span><i>◆</i><span>VARTA</span><i>◆</i><span>DURACELL</span><i>◆</i><span>ENERGIZER</span><i>◆</i>
+  </div>
+  <div class="marquee-set" aria-hidden="true">
+   <span>SAMSUNG</span><i>◆</i><span>APPLE</span><i>◆</i><span>HUAWEI</span><i>◆</i><span>XIAOMI</span><i>◆</i><span>MOTOROLA</span><i>◆</i><span>VARTA</span><i>◆</i><span>DURACELL</span><i>◆</i><span>ENERGIZER</span><i>◆</i>
+  </div>
+ </div>
+</div>
+
+<!-- RANGE -->
+<section id="range">
+ <div class="wrap">
+  <div class="sec-head">
+   <div class="eyebrow">Produktbereiche</div>
+   <h2>Von Akkus bis <span class="accent">Wearables.</span></h2>
+   <p>Unser Sortiment deckt die wichtigsten Bedürfnisse im Elektro-Handel ab – mit Fokus auf Qualität, Verfügbarkeit und faire Konditionen.</p>
+  </div>
+  <div class="range-grid">
+   <div class="range-card">
+    <div class="range-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="10" height="18" rx="2"/><path d="M5 6h4M5 18h4"/><g transform="rotate(-45 19 19)"><rect x="17.5" y="16" width="3" height="6" rx="1" class="accent"/><line x1="19" y1="16" x2="19" y2="11" class="accent"/><path d="M18 11h2l-1-2z" class="accent"/></g></svg></div>
+    <div class="range-body">
+     <span>Kategorie 01</span>
+     <h3>Smartphone-Zubehör</h3>
+     <p>Display, Lade-ICs, Kameras, Flexkabel und Ersatzteile für gängige Markenmodelle.</p>
+    </div>
+   </div>
+   <div class="range-card">
+    <div class="range-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="6" width="10" height="14" rx="1.5"/><path d="M10 6V4.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5V6"/><path d="M7 9h10M7 17h10"/><path d="M12.5 9.5l-2.5 4h2l-.5 3 3-4h-2.5z" class="accent"/></svg></div>
+    <div class="range-body">
+     <span>Kategorie 02</span>
+     <h3>Akkus & Batterien</h3>
+     <p>Alkaline, Lithium, NiMH und Spezialbatterien von Varta, Duracell, Energizer, Rayovac und Rio.</p>
+    </div>
+   </div>
+   <div class="range-card">
+    <div class="range-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5H2M4 13.5H2"/><rect x="4" y="8" width="6" height="8" rx="1.5"/><path d="M8 8v8"/><circle cx="6.5" cy="12" r="1" class="accent"/><rect x="18" y="7" width="4" height="5" rx="0.5"/><rect x="18.5" y="4" width="3" height="3" rx="0.5" class="accent"/><path d="M10 12c3 0 4 4 7 4 2 0 3-1.5 3-4"/></svg></div>
+    <div class="range-body">
+     <span>Kategorie 03</span>
+     <h3>Ladegeräte & Kabel</h3>
+     <p>Original- und kompatible Ladeadapter, USB-Kabel, Docking-Stationen und Netzteile.</p>
+    </div>
+   </div>
+   <div class="range-card">
+    <div class="range-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="6" width="11" height="18" rx="2"/><rect x="10.5" y="7.5" width="8" height="15" rx="1"/><rect x="4" y="2" width="10" height="17" rx="1.5" class="accent"/><path d="M8 4h2M8 17h2" class="accent"/></svg></div>
+    <div class="range-body">
+     <span>Kategorie 04</span>
+     <h3>Handyhüllen & Schutzglas</h3>
+     <p>Schutzhüllen, Flip-Cases, Displayschutzfolien und Panzerglas für zahlreiche Modelle.</p>
+    </div>
+   </div>
+   <div class="range-card">
+    <div class="range-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13V9a7 7 0 0 1 14 0v4"/><path d="M5 11a7 7 0 0 1 14 0"/><rect x="3" y="12" width="4" height="8" rx="2"/><rect x="17" y="12" width="4" height="8" rx="2"/><path d="M7 13.5h1.5a1.5 1.5 0 0 1 1.5 1.5v2a1.5 1.5 0 0 1-1.5 1.5H7z" class="accent"/><path d="M17 13.5h-1.5a1.5 1.5 0 0 0-1.5 1.5v2a1.5 1.5 0 0 0 1.5 1.5H17z" class="accent"/></svg></div>
+    <div class="range-body">
+     <span>Kategorie 05</span>
+     <h3>Audio-Zubehör</h3>
+     <p>Kopfhörer, Earbuds, Lautsprecher, Kabel und Adapter für mobiles Audio-Erlebnis.</p>
+    </div>
+   </div>
+   <div class="range-card">
+    <div class="range-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/><path d="M9 18v3a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-3"/><path d="M11 4h2M11 20h2"/><rect x="7" y="6" width="10" height="12" rx="3"/><path d="M17 10h1v4h-1"/><rect x="8.5" y="7.5" width="7" height="9" rx="1.5" class="accent"/><circle cx="12" cy="12" r="2" class="accent"/></svg></div>
+    <div class="range-body">
+     <span>Kategorie 06</span>
+     <h3>Wearables</h3>
+     <p>Smartwatches, Fitness-Tracker, Armbänder, Ladeschalen und passendes Zubehör.</p>
+    </div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- BRANDS -->
+<section class="brands">
+ <div class="wrap">
+  <div class="sec-head center">
+   <div class="eyebrow" style="justify-content:center">Bekannte Marken</div>
+   <h2>Marken, denen Ihre Kunden <span class="accent">vertrauen.</span></h2>
+   <p>Wir führen Produkte und kompatibles Zubehör für die Marken, die im Elektro-Handel gefragt sind.</p>
+  </div>
+  <div class="brand-grid">
+   <div class="brand-cell">Samsung</div>
+   <div class="brand-cell">Huawei</div>
+   <div class="brand-cell">Motorola</div>
+   <div class="brand-cell">Xiaomi</div>
+   <div class="brand-cell">Apple</div>
+   <div class="brand-cell">Varta</div>
+   <div class="brand-cell">Duracell</div>
+   <div class="brand-cell">Energizer</div>
+   <div class="brand-cell">Rayovac</div>
+   <div class="brand-cell">Rio</div>
+  </div>
+ </div>
+</section>
+
+<!-- B2B / B2C -->
+<section id="b2b">
+ <div class="wrap">
+  <div class="sec-head">
+   <div class="eyebrow">Geschäftsmodelle</div>
+   <h2>Für jeden Bedarf die <span class="accent">richtige Lösung.</span></h2>
+   <p>Ob Wiederverkäufer oder Endkunde — wir beliefern beide Kanäle mit dem gleichen Anspruch an Qualität und Zuverlässigkeit.</p>
+  </div>
+  <div class="split">
+   <div class="panel b2b">
+    <div class="eyebrow">Für Händler & Wiederverkäufer</div>
+    <h3>B2B-Handel</h3>
+    <p>Großhandelskonditionen, Mengenrabatte, regelmäßige Verfügbarkeit und zuverlässige Lieferung für Ihr Geschäftsmodell.</p>
+    <ul>
+     <li>Mengenrabatte und Staffelpreise</li>
+     <li>Wiederkehrende Verfügbarkeit gängiger Artikel</li>
+     <li>Lieferung innerhalb der EU</li>
+     <li>Persönlicher Ansprechpartner</li>
+    </ul>
+    <a class="btn btn-primary" href="mailto:info@tr-trade.de?subject=B2B-Anfrage%20TR-Trade">B2B-Anfrage senden</a>
+   </div>
+   <div class="panel b2c">
+    <div class="eyebrow">Für Endkunden</div>
+    <h3>B2C-Versand</h3>
+    <p>Einzelbestellungen, aktuelles Zubehör und fairer Service — direkt an Ihre Haustür in ganz Europa.</p>
+    <ul>
+     <li>Einzelkäufe ohne Mindestbestellwert</li>
+     <li>Aktuelle Artikel für gängige Geräte</li>
+     <li>Sicherer Versand & faire Konditionen</li>
+     <li>Schnelle Bearbeitung der Anfragen</li>
+    </ul>
+    <a class="btn btn-ghost" href="#contact">Anfrage stellen</a>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- EUROPE -->
+<section class="eu">
+ <div class="wrap">
+  <div class="sec-head center">
+   <div class="eyebrow" style="justify-content:center">Europaweit vernetzt</div>
+   <h2>Zuverlässig in der <span class="accent">ganzen EU.</span></h2>
+   <p>TR-Trade liefert in EU-Länder — mit dem Fokus auf zuverlässigen Versand, klare Abwicklung und faire Konditionen.</p>
+  </div>
+  <div class="eu-map">
+   <div class="stat"><b>EU-weit</b><span>Versand in alle Mitgliedstaaten</span></div>
+   <div class="stat"><b>B2B & B2C</b><span>Für Händler und Endkunden</span></div>
+   <div class="stat"><b>Schnell</b><span>Kurze Bearbeitungszeiten</span></div>
+   <div class="stat"><b>Fair</b><span>Transparente Konditionen</span></div>
+  </div>
+ </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+ <div class="wrap">
+  <div class="sec-head">
+   <div class="eyebrow">Kontakt</div>
+   <h2>Bereit für eine <span class="accent">Zusammenarbeit?</span></h2>
+   <p>Schreiben Sie uns — wir melden uns schnellstmöglich zurück.</p>
+  </div>
+  <div class="contact-grid">
+   <div class="contact-list">
+    <div class="crow"><b>Firma</b><span>TR-Trade UG (haftungsbeschränkt)</span></div>
+    <div class="crow"><b>Adresse</b><span>Nelkenstraße 12<br>32832 Augustdorf<br>Deutschland</span></div>
+    <div class="crow"><b>E-Mail</b><a href="mailto:info@tr-trade.de">info@tr-trade.de</a></div>
+    <div class="crow"><b>Web</b><a href="https://op-return.de/TR-Trade-v6-C/">op-return.de/TR-Trade-v6-C</a></div>
+   </div>
+   <div class="form-wrap">
+    <form id="contactForm" action="contact.php" method="post">
+     <div class="form-grid">
+      <div>
+       <label for="name">Name</label>
+       <input type="text" id="name" name="name" required placeholder="Ihr Name">
+      </div>
+      <div>
+       <label for="email">E-Mail</label>
+       <input type="email" id="email" name="email" required placeholder="ihre@email.de">
+      </div>
+      <div>
+       <label for="type">Anfrage-Typ</label>
+       <select id="type" name="type">
+        <option value="B2B">B2B / Händler</option>
+        <option value="B2C">B2C / Endkunde</option>
+        <option value="Sonstiges">Sonstiges</option>
+       </select>
+      </div>
+      <div>
+       <label for="subject">Betreff</label>
+       <input type="text" id="subject" name="subject" required placeholder="Betreff">
+      </div>
+      <div class="full">
+       <label for="message">Nachricht</label>
+       <textarea id="message" name="message" required placeholder="Wie können wir Ihnen helfen?"></textarea>
+      </div>
+     </div>
+     <input type="text" name="website" class="honeypot" tabindex="-1" autocomplete="off">
+     <button type="submit" class="btn btn-primary">Nachricht senden</button>
+     <div class="form-status" id="formStatus" aria-live="polite"></div>
+    </form>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+ <div class="wrap">
+  <div class="foot-grid">
+   <div>
+    <div class="foot-logo">
+     <svg width="40" height="40" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="TR-Trade Logo">
+      <circle cx="32" cy="32" r="28" stroke="#c9a472" stroke-width="1.6"/>
+      <ellipse cx="32" cy="32" rx="28" ry="11" transform="rotate(-18 32 32)" stroke="#7a776f" stroke-width="1" opacity=".45"/>
+      <path d="M18 24 H33 M25.5 24 V44" stroke="#f5f3ef" stroke-width="4.2" stroke-linecap="square"/>
+      <path d="M39 44 V24 H45.5 A6.4 6.4 0 0 1 45.5 36.8 H39" stroke="#f5f3ef" stroke-width="4.2" stroke-linecap="square" fill="none"/>
+      <path d="M44 37 L50 44" stroke="#f5f3ef" stroke-width="4.2" stroke-linecap="square"/>
+      <circle cx="53.5" cy="14.5" r="2.8" fill="#c9a472"/>
+     </svg>
+     <span>TR-Trade UG</span>
+    </div>
+    <p>Handel mit Elektrozubehör, Akkus, Batterien und Smartphone-Zubehör.<br>B2B & B2C, europaweiter Versand.</p>
+    <p style="margin-top:14px">Nelkenstraße 12<br>32832 Augustdorf<br>Deutschland</p>
+   </div>
+   <div>
+    <h4>Navigation</h4>
+    <p><a href="#range">Sortiment</a></p>
+    <p><a href="#b2b">B2B / B2C</a></p>
+    <p><a href="#contact">Kontakt</a></p>
+    <p><a href="impressum.html">Impressum</a></p>
+   </div>
+   <div>
+    <h4>Rechtliches</h4>
+    <p><a href="impressum.html">Impressum</a></p>
+    <p><a href="datenschutz.html">Datenschutz</a></p>
+    <p><a href="agb.html">AGB</a></p>
+   </div>
+  </div>
+  <p class="tm">Hinweis: Markennamen wie Samsung, Apple, Huawei, Xiaomi, Motorola, Varta, Duracell, Energizer, Rayovac und Rio sind eingetragene Marken ihrer jeweiligen Eigentümer. Sie dienen hier ausschließlich zur Produktidentifikation. TR-Trade ist ein unabhängiger Händler und steht nicht in direkter Verbindung zu diesen Markeninhabern.</p>
+  <div class="copy">
+   <span>© 2026 TR-Trade UG (haftungsbeschränkt)</span>
+   <span><a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a> · <a href="agb.html">AGB</a></span>
+  </div>
+ </div>
+</footer>
+
+<script>
+const form=document.getElementById('contactForm');
+const statusEl=document.getElementById('formStatus');
+form.addEventListener('submit',async(e)=>{
+ e.preventDefault();
+ statusEl.textContent='Wird gesendet …';
+ statusEl.className='form-status';
+ try{
+  const r=await fetch(form.action,{method:'POST',body:new FormData(form)});
+  const t=await r.text();
+  if(r.ok && t.trim()==='success'){
+   statusEl.textContent='Vielen Dank! Ihre Nachricht wurde versendet.';
+   statusEl.className='form-status ok';
+   form.reset();
+  }else if(t.startsWith('error')){
+   statusEl.textContent=t.replace('error\n','').replace(/\n/g,' ');
+   statusEl.className='form-status err';
+  }else{
+   statusEl.textContent='Fehler beim Senden. Bitte versuchen Sie es später erneut.';
+   statusEl.className='form-status err';
+  }
+ }catch(err){
+  statusEl.textContent='Netzwerkfehler. Bitte versuchen Sie es später erneut.';
+  statusEl.className='form-status err';
+ }
+});
+</script>
+
+<script>
+(function(){
+ const canvas=document.getElementById("globe");
+ if(!canvas) return;
+ const ctx=canvas.getContext("2d");
+ const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+ let W=0,H=0;
+
+ function resize(){
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  W=canvas.clientWidth;H=canvas.clientHeight;
+  canvas.width=W*dpr;canvas.height=H*dpr;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+ }
+ window.addEventListener("resize",()=>{resize();if(reduce)draw(FIXED);});
+
+ const N=900,GA=Math.PI*(3-Math.sqrt(5)),base=[];
+ for(let i=0;i<N;i++){
+  const y=1-(i/(N-1))*2,r=Math.sqrt(1-y*y),t=GA*i;
+  base.push([Math.cos(t)*r,y,Math.sin(t)*r]);
+ }
+
+ const ll=(lat,lon)=>{const p=lat*Math.PI/180,q=lon*Math.PI/180;
+  return [Math.cos(p)*Math.sin(q),Math.sin(p),Math.cos(p)*Math.cos(q)];};
+ const HOME=ll(51.9,8.7);
+ const HUBS=[ll(48.85,2.35),ll(40.4,-3.7),ll(41.9,12.5),ll(52.2,21.0),ll(59.3,18.1),
+  ll(51.5,-0.12),ll(38.7,-9.14),ll(48.2,16.37),ll(37.98,23.73),ll(50.85,4.35)];
+
+ const GRID=[];
+ [-52,-26,0,26,52].forEach(lat=>{for(let i=0;i<120;i++)GRID.push(ll(lat,i*3));});
+ for(let lon=0;lon<360;lon+=30){for(let i=1;i<60;i++)GRID.push(ll(-90+i*3,lon));}
+
+ function slerp(a,b,t){
+  let d=a[0]*b[0]+a[1]*b[1]+a[2]*b[2];d=Math.min(1,Math.max(-1,d));
+  const th=Math.acos(d),s=Math.sin(th);
+  if(s<1e-5)return a.slice();
+  const w1=Math.sin((1-t)*th)/s,w2=Math.sin(t*th)/s;
+  return [a[0]*w1+b[0]*w2,a[1]*w1+b[1]*w2,a[2]*w1+b[2]*w2];
+ }
+ const ARCS=HUBS.map(h=>{
+  const seg=[];
+  for(let i=0;i<=30;i++){
+   const t=i/30,p=slerp(HOME,h,t),lift=1+0.16*Math.sin(Math.PI*t);
+   seg.push([p[0]*lift,p[1]*lift,p[2]*lift]);
+  }
+  return seg;
+ });
+
+ const TILT=0.42;
+ function project(p,th){
+  const x=p[0]*Math.cos(th)+p[2]*Math.sin(th);
+  let z=-p[0]*Math.sin(th)+p[2]*Math.cos(th);
+  let y=p[1];
+  const y2=y*Math.cos(TILT)-z*Math.sin(TILT);
+  const z2=y*Math.sin(TILT)+z*Math.cos(TILT);
+  return [x,y2,z2];
+ }
+
+ function draw(th){
+  ctx.clearRect(0,0,W,H);
+  const small=W<820;
+  const cx=small?W*0.5:W*0.68;
+  const cy=small?H*0.62:H*0.53;
+  const R=small?Math.min(W,H)*0.44:Math.min(H*0.44,W*0.32);
+
+  const glow=ctx.createRadialGradient(cx,cy,R*0.2,cx,cy,R*1.45);
+  glow.addColorStop(0,"rgba(201,164,114,.10)");
+  glow.addColorStop(.7,"rgba(201,164,114,.04)");
+  glow.addColorStop(1,"rgba(201,164,114,0)");
+  ctx.beginPath();ctx.arc(cx,cy,R*1.45,0,Math.PI*2);ctx.fillStyle=glow;ctx.fill();
+
+  ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);
+  ctx.strokeStyle="rgba(201,164,114,.32)";ctx.lineWidth=1;ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,R*1.14,0,Math.PI*2);
+  ctx.strokeStyle="rgba(122,119,111,.10)";ctx.lineWidth=1;ctx.stroke();
+
+  for(const p of GRID){
+   const[q0,q1,q2]=project(p,th);
+   if(q2<0)continue;
+   ctx.beginPath();
+   ctx.arc(cx+q0*R,cy-q1*R,1,0,Math.PI*2);
+   ctx.fillStyle=`rgba(138,135,126,${0.07+0.18*q2})`;
+   ctx.fill();
+  }
+
+  for(const p of base){
+   const[q0,q1,q2]=project(p,th);
+   if(q2<-0.25)continue;
+   const a=q2>0?0.14+0.42*q2:0.06;
+   ctx.beginPath();
+   ctx.arc(cx+q0*R,cy-q1*R,q2>0?1.5:0.9,0,Math.PI*2);
+   ctx.fillStyle=`rgba(176,173,165,${a})`;
+   ctx.fill();
+  }
+
+  for(const seg of ARCS){
+   ctx.beginPath();let started=false;
+   for(const p of seg){
+    const[q0,q1,q2]=project(p,th);
+    if(q2>0.02){
+     const X=cx+q0*R,Y=cy-q1*R;
+     started?ctx.lineTo(X,Y):(ctx.moveTo(X,Y),started=true);
+    }else started=false;
+   }
+   ctx.strokeStyle="rgba(201,164,114,.55)";ctx.lineWidth=1.2;ctx.stroke();
+  }
+
+  const drawHub=(v,big)=>{
+   const[q0,q1,q2]=project(v,th);
+   if(q2<=0.02)return;
+   const X=cx+q0*R,Y=cy-q1*R;
+   ctx.beginPath();ctx.arc(X,Y,big?3.2:2.2,0,Math.PI*2);
+   ctx.fillStyle=big?"#c9a472":"rgba(201,164,114,.85)";ctx.fill();
+   ctx.beginPath();ctx.arc(X,Y,(big?3.2:2.2)+4,0,Math.PI*2);
+   ctx.strokeStyle=`rgba(201,164,114,${0.18+0.25*q2})`;ctx.lineWidth=1;ctx.stroke();
+  };
+  drawHub(HOME,true);
+  HUBS.forEach(h=>drawHub(h,false));
+ }
+
+ let FIXED=0;
+ resize();
+ if(reduce){draw(FIXED);return;}
+ let t0=performance.now();
+ function loop(now){
+  const th=(now-t0)*0.00018;
+  draw(th);
+  requestAnimationFrame(loop);
+ }
+ requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

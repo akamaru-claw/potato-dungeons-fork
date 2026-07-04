@@ -1,0 +1,18 @@
+# TR-Trade UG
+
+TR-Trade UG (haftungsbeschränkt) ist ein Handelsunternehmen für Elektrozubehör, Smartphone-Zubehör, Akkus, Batterien, Ladegeräte, Kabel, Handyhüllen, Schutzglas, Audio-Zubehör und Wearables.
+
+Sitz: Nelkenstraße 12, 32832 Augustdorf, Deutschland
+E-Mail: info@tr-trade.de
+Web: https://tr-trade.de/
+
+Zielgruppen: B2B (Händler, Wiederverkäufer) und B2C (Endkunden), europaweiter Versand.
+
+Hauptmarken im Sortiment: Samsung, Huawei, Motorola, Xiaomi, Apple, Varta, Duracell, Energizer, Rayovac, Rio.
+
+Wichtige Seiten:
+- Startseite: index.html
+- Impressum: impressum.html
+- Datenschutz: datenschutz.html
+- AGB: agb.html
+- Kontaktformular: contact.php (PHPMailer)
