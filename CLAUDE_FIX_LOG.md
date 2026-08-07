@@ -78,3 +78,35 @@ Setup: `php -S 127.0.0.1:8791` im Projektroot (volle Parität mit Produktions-PH
 
 - `v0.49-dev` → `v0.50`
 - Cache-Busting `?v=039` → `?v=050` für `css/style.css` und alle 18 `js/*.js`-Script-Tags
+
+---
+
+# Nachtrag — Qualitätsaufarbeitung v2.0 → v2.1
+
+Datum: 2026-08-07
+Durchgeführt von: Akamaru im Auftrag von Kiba
+
+### 1. Doppelter Menu-Aufruf beim Start (js/main.js)
+`Game.init()` rief `UI.showMenu()` direkt auf **und** erneut im `Assets.loadAll`-Callback. Das führte zu doppelter Initialisierung des Menü-Canvas und potenziell doppelten Event-Listenern.
+**Fix:** Direkter Aufruf entfernt; Menü erscheint jetzt genau einmal nach dem Asset-Load.
+
+### 2. Reward-Dialog: zwei inkonsistente Mechanismen (js/main.js + js/ui.js)
+Es gab parallele State-Maschinen: `Game._pendingWeaponChoice` + `Game.chooseWeaponUpgrade/New()` einerseits und `UI._pendingWeaponPickIndex` + `UI._chooseWeaponUpgrade/New()` andererseits. Die Buttons im HTML waren mit beiden Mechanismen verkabelt, sodass je nach Code-Pfad ein Reward sofort angewendet oder nur vorgemerkt wurde.
+**Fix:** Logik komplett in `UI` konsolidiert. `Game.selectReward()` delegiert an `UI._toggleRewardPick()`. `Game.chooseWeaponUpgrade/New()` sind jetzt schlanke Wrapper auf `UI`. Buttons rufen wieder `UI._chooseWeaponUpgrade/New()` auf. Damit stimmen Auswahl, Bestätigung (`_confirmRewards`) und Waffen-Ersetzen-Dialog zusammen.
+
+### 3. SQL-Injection in auth_api.php (Login)
+`$db->exec("UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = {$row['id']}");` war unsicher, auch wenn `$row['id']` aus der DB stammte.
+**Fix:** Parameterisiertes Prepared Statement verwendet.
+
+### 4. Fehlende Null-Checks in `UI._hideAll()` (js/ui.js)
+Direkter Zugriff auf `weapon-bar`, `hud` und `hud-dash` ohne `?`-Guard konnte in Randfällen (z.B. fehlende DOM-Elemente, Tests) zu harten Fehlern führen.
+**Fix:** Alle drei Elemente mit optional chaining / null-Check abgesichert.
+
+### 5. Versionsnummer & Cache-Busting (index.html)
+`v2.0` → `v2.1`, alle `?v=200` → `?v=210` (CSS + 18 JS-Dateien).
+
+## Offen / zur nächsten Runde vorgemerkt
+
+- `js/*.v10.js` und `js_backup/` sind ungenutzte Altlasten. Löschen reduziert Verwirrung und Repo-Größe, aber ist ein separater Aufräum-Commit.
+- Relikt-Stacking-Logik bleibt unverändert (siehe v0.50-Doku): Balance-Entscheidung, kein reiner Bugfix.
+- Live-Co-Op-Smoke-Test zwischen zwei echten Browsern wurde nicht durchgeführt.

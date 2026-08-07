@@ -378,9 +378,12 @@ const UI = {
   _hideAll() {
     document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
     document.getElementById('btn-pause')?.classList.remove('visible');
-    document.getElementById('weapon-bar').style.display = 'none';
-    document.getElementById('hud').style.display = 'none';
-    document.getElementById('hud-dash').style.display = 'none';
+    const weaponBar = document.getElementById('weapon-bar');
+    if (weaponBar) weaponBar.style.display = 'none';
+    const hud = document.getElementById('hud');
+    if (hud) hud.style.display = 'none';
+    const hudDash = document.getElementById('hud-dash');
+    if (hudDash) hudDash.style.display = 'none';
     // Hide mobile dash button outside gameplay
     const dashBtn = document.getElementById('mobile-dash-btn');
     if (dashBtn) dashBtn.style.display = 'none';

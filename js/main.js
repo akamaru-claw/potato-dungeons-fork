@@ -20,7 +20,7 @@ const Game = {
     EnemySystem.init();
     UI.init();
     Account.init();
-    UI.showMenu();
+    // Show menu once assets are loaded; show a loading state until then.
     Assets.loadAll(() => { UI.showMenu(); });
     this.loop(0);
   },
@@ -173,39 +173,16 @@ const Game = {
   selectReward(index, mode) {
     if (!Rewards.currentChoices || !Rewards.currentChoices[index]) return;
     if (Rewards.pickedCount >= Rewards.maxPicks) return;
-    const reward = Rewards.currentChoices[index];
-
-    // If weapon and player already has it, show choice dialog
-    if (reward.type === 'weapon' && reward.isUpgrade && !mode) {
-      this._pendingWeaponChoice = { index, reward };
-      UI.showWeaponChoiceDialog(reward);
-      return;
-    }
-
-    this._applyReward(index, reward, mode);
+    UI._toggleRewardPick(index);
   },
 
+  chooseWeaponUpgrade() { UI._chooseWeaponUpgrade(); },
+  chooseWeaponNew() { UI._chooseWeaponNew(); },
   _applyReward(index, reward, mode) {
     Rewards.apply(reward, this.player, mode || (reward.type === 'weapon' && !reward.isUpgrade ? 'new' : undefined));
     Rewards.pickedCount++;
     UI._markCardPicked(index);
     UI._updateRewardInfo();
-  },
-
-  chooseWeaponUpgrade() {
-    if (!this._pendingWeaponChoice) return;
-    const { index, reward } = this._pendingWeaponChoice;
-    this._applyReward(index, reward, 'upgrade');
-    this._pendingWeaponChoice = null;
-    UI.hideWeaponChoiceDialog();
-  },
-
-  chooseWeaponNew() {
-    if (!this._pendingWeaponChoice) return;
-    const { index, reward } = this._pendingWeaponChoice;
-    this._applyReward(index, reward, 'new');
-    this._pendingWeaponChoice = null;
-    UI.hideWeaponChoiceDialog();
   },
 
   rerollReward() {
