@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#12100c">
+<meta name="description" content="Potato Dungeons — Wellen-Roguelike für Handys. Brotato trifft Minecraft Dungeons, als Kartoffel.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Potato Dungeons</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥔</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&display=swap">
+<link rel="stylesheet" href="css/style.css?v=300">
+</head>
+<body>
+
+<canvas id="game" aria-label="Spielfeld"></canvas>
+
+<!-- ======================= HUD ======================= -->
+<div id="hud" class="hud" hidden>
+  <div class="hud-top">
+    <div class="hud-left">
+      <div class="bar bar-hp">
+        <div class="bar-fill" id="hp-fill"></div>
+        <div class="bar-ghost" id="hp-ghost"></div>
+        <span class="bar-text" id="hp-text">70 / 70</span>
+      </div>
+      <div class="bar bar-xp">
+        <div class="bar-fill" id="xp-fill"></div>
+        <span class="bar-text bar-text-sm" id="xp-text">Stufe 1</span>
+      </div>
+      <div class="classbar" id="classbar"></div>
+    </div>
+
+    <div class="hud-center">
+      <div class="wave-chip">
+        <span class="wave-num" id="wave-num">Welle 1</span>
+        <span class="wave-timer" id="wave-timer">0:30</span>
+      </div>
+      <div class="wave-progress"><div id="wave-progress-fill"></div></div>
+    </div>
+
+    <div class="hud-right">
+      <button class="icon-btn" id="btn-pause" aria-label="Pause">❚❚</button>
+      <div class="knollen" id="knollen"><span class="k-icon">🥔</span><span id="knollen-num">0</span></div>
+      <div class="ench-points" id="ench-points" hidden><span>✦</span><span id="ench-num">0</span></div>
+    </div>
+  </div>
+
+  <div class="boss-bar" id="boss-bar" hidden>
+    <div class="boss-name" id="boss-name">Boss</div>
+    <div class="boss-track"><div class="boss-fill" id="boss-fill"></div></div>
+    <div class="boss-phases" id="boss-phases"></div>
+  </div>
+
+  <div class="buffrow" id="buffrow"></div>
+  <div class="weaponrow" id="weaponrow"></div>
+  <div class="toasts" id="toasts"></div>
+</div>
+
+<!-- ======================= Overlays ======================= -->
+<div id="overlay" class="overlay" hidden></div>
+
+<div id="boot" class="boot">
+  <div class="boot-inner">
+    <div class="boot-potato">🥔</div>
+    <div class="boot-title">Potato Dungeons</div>
+    <div class="boot-sub">lädt…</div>
+  </div>
+</div>
+
+<noscript>
+  <div style="color:#f0e6d2;font-family:sans-serif;padding:2rem;text-align:center">
+    Potato Dungeons braucht JavaScript.
+  </div>
+</noscript>
+
+<script type="module" src="src/main.js?v=300"></script>
+</body>
+</html>

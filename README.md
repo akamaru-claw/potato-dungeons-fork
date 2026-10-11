@@ -1,6 +1,28 @@
-# 🥔 Potato Dungeons Fork
+# 🥔 Potato Dungeons
 
-Enhanced fork of Potato Dungeons — a roguelike dungeon crawler built with vanilla JS & HTML5 Canvas.
+Roguelike-Dungeon-Crawler mit Vanilla JS und HTML5 Canvas.
+
+## v3 — die aktuelle Fassung
+
+**[→ v3 spielen](https://ml-bets.com/potato-dungeons-fork/v3/)** · [Quellen und Doku](v3/README.md)
+
+Komplette Neuentwicklung vom 11.10.2026: Brotato-Wellen kombiniert mit den
+Ausrüstungs- und Verzauberungssystemen aus Minecraft Dungeons, optimiert für
+Handys. Kein Build, keine Abhängigkeiten, keine Asset-Dateien — alle Grafiken
+und Geräusche entstehen zur Laufzeit.
+
+108 Waffen · 30 Verzauberungen · 12 Artefakte · 54 Gegenstände ·
+14 Gegnertypen · 5 Bosse · 5 Biome · 10 Figuren
+
+## v2 — Vorgängerfassung
+
+Bleibt unter [/v2/](https://ml-bets.com/potato-dungeons-fork/v2/) erreichbar.
+Der Stand ist eingefroren; Weiterentwicklung findet nur noch in `v3/` statt.
+
+---
+
+<details>
+<summary>Ältere v2-Dokumentation</summary>
 
 ## Features (v0.9)
 
@@ -55,3 +77,5 @@ Based on [Potato Dungeons](https://ml-bets.com/potato-dungeons/) with bug fixes 
 ## License
 
 MIT
+
+</details>
