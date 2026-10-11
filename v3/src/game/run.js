@@ -59,6 +59,7 @@ export const rt = {
   fpsT: 0,
   slowFrames: 0,
   errors: 0,
+  downgraded: false,       // Auflösung wurde bereits einmal abgesenkt
   quality: 1,              // wird automatisch gesenkt, wenn es ruckelt
   onPhaseChange: null,
   onWaveEnd: null,
@@ -1707,7 +1708,10 @@ function frame(now) {
   if (dt > 1 / 32) rt.slowFrames++;
   if (rt.fpsT >= 1) {
     rt.fps = rt.frames / rt.fpsT;
-    if (rt.slowFrames > 22 && rt.quality > 0.7) {
+    // Nur einmal absenken. Ohne das Merker-Feld greift die Bedingung jede
+    // Sekunde erneut und löst endlos Resizes aus.
+    if (rt.slowFrames > 22 && !rt.downgraded) {
+      rt.downgraded = true;
       rt.quality = 0.72;
       resizeRuntime();
       console.info('[perf] Auflösung reduziert, um flüssig zu bleiben.');

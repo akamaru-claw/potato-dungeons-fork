@@ -2,7 +2,7 @@
 // Strategie: beim Installieren alles holen, danach Cache zuerst und im
 // Hintergrund aktualisieren. Bei jedem Release CACHE hochzählen.
 
-const CACHE = 'potato-dungeons-v3.0.0';
+const CACHE = 'potato-dungeons-v3.0.1';
 
 const ASSETS = [
   './',

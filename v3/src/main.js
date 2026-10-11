@@ -117,11 +117,13 @@ function boot() {
   // ständig alten Code ausliefern.
   const isLocal = /^(127\.|localhost$|\[::1\]$|192\.168\.)/.test(location.hostname);
   if ('serviceWorker' in navigator && !isLocal && location.protocol !== 'file:') {
-    window.addEventListener('load', () => {
+    // Nicht an `load` hängen: wenn eine externe Schrift hängt, feuert das
+    // Ereignis nie und der Offline-Cache würde sich nie einrichten.
+    setTimeout(() => {
       navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
         .then((reg) => reg.update())
         .catch(() => { /* offline ist Bonus, kein Muss */ });
-    });
+    }, 1500);
   }
 
   // Für die Konsole, wenn Kiba etwas nachschauen will.
